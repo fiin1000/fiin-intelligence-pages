@@ -377,6 +377,136 @@ tr:hover td { background: var(--mist); }
   .stats { grid-template-columns: 1fr 1fr; }
   .page  { padding: 16px 16px 40px; }
 }
+
+/* ── SUPPLY CHAIN MAP ──────────────────────────────────────────── */
+.sc-section { margin-top: 18px; }
+.sc-title { font-size: 12px; font-weight: 600; margin-bottom: 3px; }
+.sc-sub { font-size: 10px; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
+
+.sc-map {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
+  padding: 14px 0 6px;
+  overflow-x: auto;
+}
+
+.sc-node-wrap {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.sc-node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  cursor: default;
+}
+
+.sc-box {
+  width: 90px;
+  min-height: 52px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ink);
+  padding: 6px 5px;
+  line-height: 1.3;
+  transition: all .15s;
+  position: relative;
+}
+
+.sc-box:hover { border-color: var(--pine); }
+.sc-box.has-alerts { border-color: transparent; }
+
+.sc-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  font-size: 9px;
+  font-weight: 700;
+  font-family: 'DM Mono', monospace;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 1.5px solid white;
+  color: white;
+}
+
+.sc-badge-r  { background: #8B2020; }
+.sc-badge-a  { background: #D4820A; }
+.sc-badge-g  { background: #2D6B2D; }
+
+.sc-arrow {
+  width: 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--border);
+  font-size: 14px;
+  margin: 0 1px;
+  padding-bottom: 14px;
+}
+
+.sc-legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--muted);
+}
+.sc-leg-item { display: flex; align-items: center; gap: 5px; }
+.sc-leg-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* Tooltip */
+.sc-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: white;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 10px;
+  width: 200px;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s;
+  line-height: 1.5;
+}
+.sc-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--ink);
+}
+.sc-node:hover .sc-tooltip { opacity: 1; }
+.sc-tooltip-title { font-weight: 600; margin-bottom: 4px; color: var(--lime); }
+.sc-tooltip-item { padding: 2px 0; border-bottom: 0.5px solid rgba(255,255,255,.1); }
+.sc-tooltip-item:last-child { border-bottom: none; }
 </style>
 </head>
 <body>
@@ -419,6 +549,20 @@ tr:hover td { background: var(--mist); }
 
     <div class="stats" id="stats"></div>
     <div id="price-alerts"></div>
+
+    <!-- Supply chain map -->
+    <div class="card sc-section" id="sc-section">
+      <div class="sc-title">Supply chain fraud hotspot map</div>
+      <div class="sc-sub" id="sc-sub">RASFF alerts plotted by supply chain stage · Adulteration/Fraud, Labelling, Controls, Radiation, Vet Residues · Badge colour: red = serious/alert, amber = information, green = border rejection</div>
+      <div class="sc-map" id="sc-map"></div>
+      <div class="sc-legend">
+        <span class="sc-leg-item"><span class="sc-leg-dot" style="background:#8B2020"></span>Serious / Alert</span>
+        <span class="sc-leg-item"><span class="sc-leg-dot" style="background:#D4820A"></span>Information</span>
+        <span class="sc-leg-item"><span class="sc-leg-dot" style="background:#2D6B2D"></span>Border rejection</span>
+        <span class="sc-leg-item"><span class="sc-leg-dot" style="background:var(--border)"></span>No alerts</span>
+        <span style="margin-left:auto;font-size:10px;color:var(--muted)">Hover node to see alerts · <em>Unknown</em> nodes need manual mapping in Sheet</span>
+      </div>
+    </div>
 
     <div class="two-col">
 
@@ -688,6 +832,112 @@ var COMM = {
   }
 };
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SUPPLY CHAIN NODE DEFINITIONS (must match Apps Script)
+// ─────────────────────────────────────────────────────────────────────────────
+var SUPPLY_CHAIN = {
+  beef:      ['Farm/Ranch','Slaughter & Dressing','Cutting & Deboning','Processing & Manufacture','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
+  lamb:      ['Farm/Ranch','Slaughter & Dressing','Cutting & Deboning','Processing & Manufacture','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
+  chicken:   ['Hatchery','Rearing Farm','Slaughter & Evisceration','Cutting & Processing','Further Processing','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
+  honey:     ['Apiary/Hive','Extraction & Filtering','Blending','Heat Treatment','Packaging & Labelling','Import/Border','Warehouse','Distribution','Retail','Consumer'],
+  oliveoil:  ['Olive Grove','Harvest & Milling','First Press/Extraction','Refining','Blending','Bottling & Labelling','Import/Border','Storage','Distribution','Retail','Consumer'],
+  salmon:    ['Hatchery/Catch','Farm/Fishing Vessel','Slaughter & Gutting','Filleting & Processing','Smoking/Further Processing','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
+  cod:       ['Fishing Vessel','Landing & Grading','Filleting & Processing','Freezing','Breading/Further Processing','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
+  milk:      ['Dairy Farm','Collection & Transport','Pasteurisation/UHT','Separation & Processing','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail','Consumer'],
+  oregano:   ['Growing Region','Harvest & Drying','Milling & Blending','Packaging & Labelling','Import/Border','Warehouse','Distribution','Retail','Consumer'],
+  eggs:      ['Laying Farm','Grading & Washing','Packing','Import/Border','Warehouse','Distribution','Retail/Food Service','Consumer'],
+  pistachio: ['Orchard','Harvest & Hulling','Drying','Processing & Sorting','Packaging & Labelling','Import/Border','Warehouse','Distribution','Retail','Consumer']
+};
+
+// ── Render supply chain map ───────────────────────────────────────────────────
+function renderSupplyChain() {
+  var mapEl = document.getElementById('sc-map');
+  var nodes = SUPPLY_CHAIN[cur] || [];
+
+  // Get RASFF alerts for this commodity that have a node assigned
+  var alerts = rasffData.filter(function(r) {
+    return r.commodity === cur && r.node && r.node !== 'Unknown – needs review' && r.node !== '';
+  });
+
+  // Group alerts by node
+  var byNode = {};
+  nodes.forEach(function(n) { byNode[n] = []; });
+  alerts.forEach(function(r) {
+    if (byNode[r.node]) byNode[r.node].push(r);
+    // If not in known nodes, still group it (will show as unmatched)
+  });
+
+  // Count unknowns
+  var unknowns = rasffData.filter(function(r) {
+    return r.commodity === cur && (!r.node || r.node === 'Unknown – needs review');
+  });
+
+  // Build node HTML
+  mapEl.innerHTML = nodes.map(function(node, idx) {
+    var nodeAlerts = byNode[node] || [];
+    var count = nodeAlerts.length;
+
+    // Determine badge colour from highest severity alert
+    var badgeClass = 'sc-badge-g';
+    var hasSerious = nodeAlerts.some(function(a) {
+      var s = (a.severity||'').toLowerCase();
+      return s.indexOf('serious') > -1 || s.indexOf('alert') > -1;
+    });
+    var hasInfo = nodeAlerts.some(function(a) {
+      return (a.severity||'').toLowerCase().indexOf('info') > -1;
+    });
+    if (hasSerious) badgeClass = 'sc-badge-r';
+    else if (hasInfo) badgeClass = 'sc-badge-a';
+
+    // Box background colour
+    var boxBg = '';
+    var boxBorder = '';
+    if (count > 0) {
+      if (badgeClass === 'sc-badge-r') { boxBg = 'background:#FDF0EF;'; boxBorder = 'border-color:#C84040;'; }
+      else if (badgeClass === 'sc-badge-a') { boxBg = 'background:#FDF6EC;'; boxBorder = 'border-color:#D4820A;'; }
+      else { boxBg = 'background:#EEF6E8;'; boxBorder = 'border-color:#2D6B2D;'; }
+    }
+
+    // Tooltip content
+    var tooltipHtml = '';
+    if (count > 0) {
+      tooltipHtml = '<div class="sc-tooltip"><div class="sc-tooltip-title">' + node + ' · ' + count + ' alert' + (count!==1?'s':'') + '</div>' +
+        nodeAlerts.slice(0,5).map(function(a) {
+          return '<div class="sc-tooltip-item">' +
+            '<span style="font-size:9px;opacity:.7">' + (a.date||'') + ' · ' + (a.hazard||'') + '</span><br>' +
+            a.title.slice(0, 80) + (a.title.length > 80 ? '…' : '') +
+          '</div>';
+        }).join('') +
+        (count > 5 ? '<div style="opacity:.6;margin-top:3px">+ ' + (count-5) + ' more</div>' : '') +
+      '</div>';
+    }
+
+    var arrow = idx < nodes.length - 1
+      ? '<div class="sc-arrow">›</div>'
+      : '';
+
+    return '<div class="sc-node-wrap">' +
+      '<div class="sc-node">' +
+        '<div class="sc-box has-alerts" style="' + boxBg + boxBorder + '">' +
+          (count > 0 ? '<span class="sc-badge ' + badgeClass + '">' + count + '</span>' : '') +
+          node +
+        '</div>' +
+        tooltipHtml +
+      '</div>' +
+      arrow +
+    '</div>';
+  }).join('');
+
+  // Show unknown count if any
+  var subEl = document.getElementById('sc-sub');
+  if (unknowns.length > 0) {
+    subEl.innerHTML = 'RASFF alerts plotted by supply chain stage · Adulteration/Fraud, Labelling, Controls, Radiation &amp; Vet Residues · ' +
+      '<span style="color:#D4820A;font-weight:600">' + unknowns.length + ' alert' + (unknowns.length!==1?'s':'') + ' need supply chain node mapping</span> — open your Google Sheet rasff tab and fill in the <strong>node_override</strong> column for rows marked "Unknown – needs review"';
+  } else {
+    subEl.innerHTML = 'RASFF alerts plotted by supply chain stage · Adulteration/Fraud, Labelling, Controls, Radiation &amp; Vet Residues · Hover any node to see alerts · Badge colour: <span style="color:#8B2020">red</span> = serious, <span style="color:#D4820A">amber</span> = information, <span style="color:#2D6B2D">green</span> = border rejection';
+  }
+}
 // ─────────────────────────────────────────────────────────────────────────────
 // STATE
 // ─────────────────────────────────────────────────────────────────────────────
@@ -921,6 +1171,9 @@ function render() {
 
   // RASFF
   renderRasff();
+
+  // Supply chain map
+  renderSupplyChain();
 }
 
 function stat(lbl, val, sub, pct, col) {
@@ -1006,8 +1259,10 @@ function loadData() {
             date:      (r[2]||'').trim(),
             country:   (r[3]||'').trim(),
             severity:  (r[4]||'').trim(),
-            ref:       (r[5]||'').trim(),
-            link:      (r[6]||'').trim()
+            hazard:    (r[5]||'').trim(),
+            node:      (r[7]||r[6]||'').trim(), // node_override (col 8) takes priority over auto-mapped (col 7)
+            ref:       '',
+            link:      (r[8]||'').trim()
           };
         }).filter(function(r){ return r.commodity && r.commodity !== '_none'; });
         console.log('RASFF filtered rows:', rasffData.length);
@@ -1018,6 +1273,7 @@ function loadData() {
           console.log('Matching rows for current commodity:', matched.length);
         }
         renderRasff();
+        renderSupplyChain();
       })
       .catch(function(e){
         console.error('RASFF fetch error:', e);
