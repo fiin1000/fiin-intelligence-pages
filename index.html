@@ -1,0 +1,2919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>fiin Commodity Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:    #0E1C0E;
+  --forest: #1A3D1A;
+  --pine:   #2D5F2D;
+  --lime:   #8DC63F;
+  --sage:   #C8E6A0;
+  --paper:  #F5F7F2;
+  --mist:   #EBF0E5;
+  --border: #D4DCC8;
+  --muted:  #7A8F70;
+  --alert-r-bg: #FDF0EF; --alert-r: #8B2020;
+  --alert-a-bg: #FDF6EC; --alert-a: #7A4800;
+  --alert-g-bg: #EEF6E8; --alert-g: #2A5A10;
+  --blue-bg: #EDF4FD; --blue: #1A4F8A;
+}
+
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--forest);
+  padding: 8px 28px;
+  border-bottom: 3px solid var(--lime);
+}
+.header-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.logo-group { display: flex; align-items: center; gap: 14px; }
+.logo { display: block; }
+.header-title { color: rgba(255,255,255,.95); font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+.header-meta { font-size: 11px; color: var(--sage); font-family: 'DM Mono', monospace; }
+
+/* ── LAYOUT ── */
+.page { max-width: 1280px; margin: 0 auto; padding: 10px 28px 48px; }
+
+/* ── SETUP NOTICE ── */
+.setup-notice {
+  background: var(--blue-bg);
+  border: 1px solid #B8D0EE;
+  border-radius: 6px;
+  padding: 14px 18px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--blue);
+  line-height: 1.7;
+  display: none;
+}
+.setup-notice.visible { display: block; }
+.setup-notice strong { font-weight: 600; }
+.setup-notice code {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  background: rgba(26,79,138,.08);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+/* ── COMMODITY PICKER ── */
+.picker-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+.pill {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 100px;
+  border: 1px solid rgba(255,255,255,.25);
+  background: rgba(255,255,255,.1);
+  color: rgba(255,255,255,.75);
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.pill:hover { border-color: var(--lime); color: var(--lime); background: rgba(255,255,255,.15); }
+.pill.active { background: var(--lime); color: var(--forest); border-color: var(--lime); font-weight: 600; }
+
+/* ── CATEGORY DROPDOWN ── */
+.picker-dropdown-wrap { margin-bottom: 22px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.cat-select {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--forest);
+  background: white;
+  border: 2px solid var(--forest);
+  border-radius: 6px;
+  padding: 8px 36px 8px 14px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%231A3D1A' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  min-width: 220px;
+  transition: border-color .15s;
+}
+.cat-select:focus { outline: none; border-color: var(--lime); }
+.cat-select:hover { border-color: var(--lime); }
+.cat-select-sub { font-size: 11px; color: var(--muted); line-height: 1.5; max-width: 540px; }
+
+/* ── COMMODITY HEADER ── */
+.com-header {
+  background: var(--forest);
+  border-radius: 8px 8px 0 0;
+  padding: 12px 22px 10px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.com-name {
+  font-size: 26px;
+  font-weight: 600;
+  color: white;
+  line-height: 1.2;
+  text-transform: capitalize;
+}
+.com-context { font-size: 11px; color: var(--sage); margin-top: 4px; line-height: 1.5; max-width: 540px; }
+.com-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.com-tag {
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  color: var(--lime);
+  border: 1px solid rgba(141,198,63,.35);
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+.com-meta { text-align: right; flex-shrink: 0; }
+.com-meta-label { font-size: 10px; color: rgba(255,255,255,.4); font-family: 'DM Mono', monospace; }
+.com-meta-value { font-size: 11px; color: var(--lime); margin-top: 3px; }
+
+/* ── BODY ── */
+.com-body {
+  background: white;
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  padding: 12px 22px 20px;
+  margin-bottom: 0;
+}
+
+/* ── STAT STRIP ── */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.stat {
+  background: var(--mist);
+  border-radius: 6px;
+  padding: 12px 14px;
+}
+.stat-label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+.stat-value { font-size: 22px; font-weight: 600; color: var(--ink); line-height: 1; }
+.stat-sub { font-size: 11px; margin-top: 4px; }
+.bar { height: 3px; background: var(--border); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 2px; transition: width .4s ease; }
+
+/* ── PRICE ALERTS ── */
+.alert {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+.alert-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.alert-title { font-size: 12px; font-weight: 600; }
+.alert-desc { font-size: 11px; margin-top: 3px; line-height: 1.55; }
+.alert-r { background: var(--alert-r-bg); }
+.alert-r .alert-title { color: var(--alert-r); }
+.alert-r .alert-desc  { color: #6B2020; }
+.alert-a { background: var(--alert-a-bg); }
+.alert-a .alert-title { color: var(--alert-a); }
+.alert-a .alert-desc  { color: #5E3800; }
+.alert-g { background: var(--alert-g-bg); }
+.alert-g .alert-title { color: var(--alert-g); }
+.alert-g .alert-desc  { color: #1E4A08; }
+
+/* ── TWO-COLUMN ── */
+.two-col { display: grid; grid-template-columns: 1fr 380px; gap: 18px; margin-top: 18px; }
+.left { min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+.right { min-width: 0; }
+
+/* ── PERIOD CONTROL ── */
+.period-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.period-row label { font-size: 11px; color: var(--muted); white-space: nowrap; font-family: 'DM Mono', monospace; }
+input[type=range] { flex: 1; max-width: 140px; accent-color: var(--forest); cursor: pointer; }
+.period-val { font-size: 12px; font-weight: 600; color: var(--ink); font-family: 'DM Mono', monospace; min-width: 80px; }
+
+/* ── CHART CARDS ── */
+.card {
+  background: var(--mist);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+}
+.card-title { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+.card-sub { font-size: 10px; color: var(--muted); margin-bottom: 10px; line-height: 1.5; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
+.leg { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--muted); }
+.leg-swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+/* ── GEO TABLE ── */
+.table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th {
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  padding: 6px 10px 8px;
+  border-bottom: 1.5px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+}
+td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--mist); }
+.pressure-badge {
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.bar-inline { width: 52px; height: 4px; background: var(--border); border-radius: 2px; display: inline-block; vertical-align: middle; margin-right: 5px; overflow: hidden; }
+.bar-inline-fill { height: 100%; border-radius: 2px; }
+
+/* ── SECTION DIVIDERS ── */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0 8px;
+}
+.section-header-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.section-header-label {
+  font-size: 10px;
+  font-weight: 700;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: white;
+  background: var(--forest);
+  padding: 3px 10px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+.section-header-sub {
+  font-size: 10px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  white-space: nowrap;
+}
+
+/* ── PRODUCT SECTION BOX ── */
+.product-section {
+  background: var(--mist);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 18px 18px;
+  margin-top: 4px;
+}
+.product-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.product-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--forest);
+}
+
+/* ── SOURCES ── */
+
+.sources-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 10px;
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--muted);
+}
+.src-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+.src-fiin { background: var(--forest); color: var(--lime); }
+.src-ext  { background: var(--mist); border: 1px solid var(--border); color: var(--muted); }
+
+/* ── EXPLAINER ── */
+.explainer {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.7;
+  padding: 12px 14px;
+  background: var(--mist);
+  border-radius: 6px;
+  border-left: 3px solid var(--border);
+}
+.explainer strong { color: var(--ink); font-weight: 600; }
+
+/* ── RASFF PANEL ── */
+.rasff {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.rasff-head {
+  background: var(--forest);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.rasff-head-left { display: flex; align-items: center; gap: 8px; }
+.rasff-title-text { font-size: 12px; font-weight: 600; color: white; }
+.rasff-badge {
+  font-size: 9px;
+  font-family: 'DM Mono', monospace;
+  color: var(--lime);
+  border: 1px solid rgba(141,198,63,.4);
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+.rasff-count { font-size: 10px; color: var(--sage); font-family: 'DM Mono', monospace; }
+.rasff-scroll { overflow-y: auto; flex: 1; max-height: 220px; }
+.rasff-status { padding: 28px 18px; text-align: center; font-size: 11px; color: var(--muted); line-height: 1.7; }
+.rasff-status a { color: var(--blue); text-decoration: none; }
+.rasff-status a:hover { text-decoration: underline; }
+.rasff-item { padding: 11px 16px; border-bottom: 1px solid var(--border); }
+.rasff-item:last-child { border-bottom: none; }
+.rasff-item-head { display: flex; align-items: flex-start; gap: 8px; justify-content: space-between; }
+.rasff-item-title { font-size: 11px; font-weight: 600; color: var(--ink); line-height: 1.4; flex: 1; }
+.rasff-sev {
+  font-size: 9px;
+  font-family: 'DM Mono', monospace;
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-weight: 500;
+  flex-shrink: 0;
+  margin-top: 1px;
+  white-space: nowrap;
+}
+.sev-serious   { background: var(--alert-r-bg); color: var(--alert-r); }
+.sev-alert     { background: var(--alert-a-bg); color: var(--alert-a); }
+.sev-info, .sev-information, .sev-information-notification-for-follow-up, .sev-information-notification-for-attention { background: var(--blue-bg); color: var(--blue); }
+.sev-border, .sev-border-rejection { background: var(--alert-g-bg); color: var(--alert-g); }
+.sev-default   { background: var(--mist); color: var(--muted); }
+.rasff-meta { font-size: 10px; color: var(--muted); margin-top: 5px; display: flex; flex-wrap: wrap; gap: 10px; font-family: 'DM Mono', monospace; }
+.rasff-link { font-size: 10px; color: var(--blue); text-decoration: none; margin-top: 4px; display: inline-block; }
+.rasff-link:hover { text-decoration: underline; }
+.rasff-foot {
+  padding: 9px 16px;
+  background: var(--mist);
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.rasff-foot a { color: var(--blue); text-decoration: none; }
+
+/* ── FOOTER ── */
+.footer {
+  background: var(--forest);
+  margin-top: 40px;
+  padding: 14px 28px;
+  text-align: center;
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  color: rgba(255,255,255,.35);
+  letter-spacing: .03em;
+}
+
+@media (max-width: 960px) {
+  .two-col { grid-template-columns: 1fr; }
+  .stats   { grid-template-columns: 1fr 1fr; }
+  .com-header { flex-direction: column; }
+  .com-meta { text-align: left; }
+}
+@media (max-width: 560px) {
+  .stats { grid-template-columns: 1fr 1fr; }
+  .page  { padding: 16px 16px 40px; }
+}
+
+/* ── SUPPLY CHAIN MAP ──────────────────────────────────────────── */
+.sc-section { margin-top: 18px; }
+.sc-title { font-size: 12px; font-weight: 600; margin-bottom: 3px; }
+.sc-sub { font-size: 10px; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
+
+.sc-map {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
+  padding: 14px 0 6px;
+  overflow-x: auto;
+}
+
+.sc-node-wrap {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.sc-node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  cursor: default;
+}
+
+.sc-box {
+  width: 90px;
+  min-height: 52px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ink);
+  padding: 6px 5px;
+  line-height: 1.3;
+  transition: all .15s;
+  position: relative;
+}
+
+.sc-box:hover { border-color: var(--pine); }
+.sc-box.has-alerts { border-color: transparent; }
+
+.sc-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  font-size: 9px;
+  font-weight: 700;
+  font-family: 'DM Mono', monospace;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 1.5px solid white;
+  color: white;
+}
+
+.sc-badge-r  { background: #8B2020; }
+.sc-badge-a  { background: #D4820A; }
+.sc-badge-g  { background: #2D6B2D; }
+
+.sc-arrow {
+  width: 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--border);
+  font-size: 14px;
+  margin: 0 1px;
+  padding-bottom: 14px;
+}
+
+.sc-legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--muted);
+}
+.sc-leg-item { display: flex; align-items: center; gap: 5px; }
+.sc-leg-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* Floating tooltip — appended to body to avoid clipping */
+#sc-float-tip {
+  position: fixed;
+  background: #1a2a1a;
+  color: white;
+  border-radius: 10px;
+  padding: 0;
+  font-size: 11px;
+  width: 320px;
+  z-index: 9999;
+  pointer-events: none;
+  display: none;
+  line-height: 1.55;
+  box-shadow: 0 6px 28px rgba(0,0,0,.35);
+  overflow: hidden;
+  max-height: 480px;
+  display: none;
+  flex-direction: column;
+}
+.sc-tip-scroll {
+  overflow-y: auto;
+  max-height: 280px;
+  flex: 1;
+}
+.sc-tip-scroll::-webkit-scrollbar { width: 4px; }
+.sc-tip-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,.05); }
+.sc-tip-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.2); border-radius: 2px; }
+.sc-tip-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.35); }
+#sc-float-tip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 24px;
+  border: 7px solid transparent;
+  border-top-color: #1a2a1a;
+}
+.sc-tip-node-title {
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--lime);
+  padding: 9px 13px 7px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+}
+.sc-tip-section-head {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: rgba(255,255,255,.45);
+  padding: 7px 13px 3px;
+  font-family: 'DM Mono', monospace;
+}
+.sc-tip-risk { padding: 3px 13px; font-size: 10px; display: flex; align-items: flex-start; gap: 6px; }
+.sc-tip-risk::before { content: '◦'; flex-shrink: 0; margin-top: 1px; }
+.sc-tip-risk.high::before { content: '●'; color: #ff8080; }
+.sc-tip-risk.med::before  { content: '●'; color: #ffb347; }
+.sc-tip-item { padding: 3px 13px 3px 13px; border-bottom: 0.5px solid rgba(255,255,255,.08); font-size: 10px; }
+.sc-tip-item:last-child { border-bottom: none; }
+.sc-tip-meta { font-size: 9px; opacity: .55; margin-bottom: 1px; }
+.sc-tip-divider { border-top: 1px solid rgba(255,255,255,.1); margin: 4px 0 2px; }
+.sc-tip-empty { padding: 4px 13px 6px; font-size: 10px; opacity: .45; font-style: italic; }
+.sc-tip-footer { padding: 5px 13px 8px; font-size: 9px; opacity: .35; border-top: 1px solid rgba(255,255,255,.08); }
+
+/* ── MARKET INTELLIGENCE ── */
+.intel-section { margin-bottom: 18px; }
+.intel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.intel-title { font-size: 12px; font-weight: 600; color: var(--ink); }
+.intel-meta  { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.intel-items { display: flex; flex-direction: column; gap: 0; }
+.intel-item  {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 9px 0; border-bottom: 0.5px solid var(--border);
+}
+.intel-item:last-child { border-bottom: none; padding-bottom: 0; }
+.intel-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.intel-dot-r { background: #8B2020; }
+.intel-dot-a { background: #7A4800; }
+.intel-dot-b { background: #185FA5; }
+.intel-dot-g { background: #2D6B2D; }
+.intel-body  {}
+.intel-headline { font-size: 12px; font-weight: 600; color: var(--ink); line-height: 1.4; margin-bottom: 3px; }
+.intel-detail   { font-size: 11px; color: var(--sub); line-height: 1.55; }
+.intel-src      { font-size: 10px; color: var(--muted); margin-top: 3px; font-style: italic; }
+.intel-fraud {
+  background: var(--lbg); border-radius: 6px;
+  padding: 10px 12px; margin-top: 10px;
+  border-left: 3px solid #D4820A;
+  border-bottom-left-radius: 0; border-top-left-radius: 0;
+}
+.intel-fraud-label {
+  font-size: 9px; font-weight: 600; color: #7A4800;
+  text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px;
+  font-family: 'DM Mono', monospace;
+}
+.intel-fraud-text { font-size: 11px; color: var(--text); line-height: 1.6; }
+.intel-pills { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+.intel-pill { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 12px; white-space: nowrap; }
+.intel-pill-r { background: var(--red-bg); color: var(--red-tx); }
+.intel-pill-a { background: var(--amb-bg); color: var(--amb-tx); }
+.intel-pill-b { background: var(--blue-bg); color: var(--blue-tx); }
+.intel-pill-g { background: var(--grn-bg); color: var(--grn-tx); }
+.intel-empty  { font-size: 11px; color: var(--muted); font-style: italic; padding: 8px 0; }
+
+/* ── TSG GUIDANCE ── */
+.tsg-section { margin-bottom: 18px; }
+.tsg-card { background: white; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.tsg-header { display: flex; align-items: center; justify-content: space-between; padding: 13px 18px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, #f0f5e8, #e8f2dd); }
+.tsg-header-left { display: flex; align-items: center; gap: 10px; }
+.tsg-badge { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; background: var(--pine); color: white; padding: 3px 9px; border-radius: 10px; font-family: 'DM Mono', monospace; }
+.tsg-title { font-size: 13px; font-weight: 600; color: var(--forest); }
+.tsg-version { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.tsg-body { padding: 16px 18px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+@media(max-width:720px){ .tsg-body { grid-template-columns: 1fr; } }
+.tsg-block { }
+.tsg-block-title { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--pine); font-family: 'DM Mono', monospace; margin-bottom: 7px; padding-bottom: 5px; border-bottom: 1px solid var(--mist); }
+.tsg-block-body { font-size: 12px; color: var(--sub); line-height: 1.65; }
+.tsg-block-body li { margin-left: 14px; margin-bottom: 3px; }
+.tsg-placeholder { padding: 20px 18px; font-size: 12px; color: var(--muted); font-style: italic; display: flex; align-items: center; gap: 10px; }
+.tsg-placeholder::before { content: '📋'; font-style: normal; font-size: 16px; }
+.tsg-footer { padding: 9px 18px; background: var(--mist); border-top: 1px solid var(--border); font-size: 10px; color: var(--muted); display: flex; align-items: center; justify-content: space-between; }
+.tsg-footer a { color: var(--pine); text-decoration: none; font-size: 10px; }
+
+
+
+
+
+
+/* ── TESTING PANEL ── */
+.tp-panel{background:white;border:1px solid var(--border);border-radius:6px;display:flex;flex-direction:column;overflow:hidden}
+.tp-head{background:var(--forest);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.tp-head-left{display:flex;align-items:center;gap:8px}
+.tp-head-title{font-size:12px;font-weight:600;color:white}
+.tp-soon{font-size:9px;font-family:'DM Mono',monospace;color:var(--lime);border:1px solid rgba(141,198,63,.4);padding:2px 7px;border-radius:3px}
+.tp-period{font-size:10px;color:var(--sage);font-family:'DM Mono',monospace}
+.tp-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid var(--border);flex-shrink:0}
+.tp-kpi{padding:10px 14px;border-right:1px solid var(--border)}
+.tp-kpi:last-child{border-right:none}
+.tp-kpi-label{font-size:9px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px}
+.tp-kpi-value{font-size:20px;font-weight:700;color:var(--forest);line-height:1}
+.tp-kpi-value.red{color:var(--alert-r)}
+.tp-kpi-sub{font-size:9px;color:var(--muted);margin-top:2px}
+.tp-chart-area{flex:1;padding:12px 14px 8px;position:relative}
+.tp-chart-title{font-size:11px;font-weight:600;color:var(--ink);margin-bottom:2px}
+.tp-chart-sub{font-size:10px;color:var(--muted);margin-bottom:8px}
+.tp-chart-wrap{position:relative;height:140px}
+.tp-legend{display:flex;gap:14px;margin-top:6px;flex-wrap:wrap}
+.tp-leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.tp-leg-swatch{width:10px;height:10px;border-radius:2px;display:inline-block}
+.tp-footer{padding:7px 14px;background:var(--mist);border-top:1px solid var(--border);font-size:10px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+
+/* ── TSG + RESOURCES ROW ── */
+.tsg-resources-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+@media(max-width:860px){ .tsg-resources-row { grid-template-columns: 1fr; } }
+.tsg-resources-row .tsg-section { margin-bottom: 0; }
+.tsg-resources-row .tsg-card { height: 100%; display: flex; flex-direction: column; }
+.tsg-resources-row .tsg-card #tsg-content { flex: 1; }
+
+/* ── RESOURCES PANEL ── */
+.res-card { background: white; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; height: 100%; }
+.res-header { display: flex; align-items: center; justify-content: space-between; padding: 13px 18px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, #f0f5e8, #e8f2dd); }
+.res-header-left { display: flex; align-items: center; gap: 10px; }
+.res-badge { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; background: var(--pine); color: white; padding: 3px 9px; border-radius: 10px; font-family: 'DM Mono', monospace; }
+.res-title { font-size: 13px; font-weight: 600; color: var(--forest); }
+.res-body { padding: 10px 14px; max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; }
+.res-body::-webkit-scrollbar { width: 5px; }
+.res-body::-webkit-scrollbar-track { background: var(--mist); border-radius: 3px; }
+.res-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.res-body::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+.res-placeholder { padding: 14px 4px; font-size: 12px; color: var(--muted); font-style: italic; display: flex; align-items: center; gap: 10px; }
+.res-placeholder::before { content: '📁'; font-style: normal; font-size: 16px; }
+.res-file { display: flex; align-items: center; gap: 9px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; text-decoration: none; color: var(--ink); font-size: 12px; transition: background .12s; cursor: pointer; }
+.res-file:hover { background: var(--mist); border-color: var(--pine); }
+.res-file-icon { flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.res-file-name { flex: 1; line-height: 1.35; }
+.res-file-ext { font-size: 9px; font-family: 'DM Mono', monospace; color: var(--muted); background: var(--mist); padding: 1px 5px; border-radius: 3px; flex-shrink: 0; }
+.res-footer { padding: 9px 18px; background: var(--mist); border-top: 1px solid var(--border); font-size: 10px; color: var(--muted); display: flex; align-items: center; justify-content: space-between; }
+
+.sc-node { cursor: help; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="logo-group">
+      <img src="data:image/webp;base64,UklGRrYKAABXRUJQVlA4IKoKAACwPQCdASrIAMgAPlEkj0SjoiGVm2T8OAUEpu3V68un+V/Gbxiuyd8/IfnwdyO7nQfHy9O/dT9L+Zn+q7W33Ae4B+ln+X/uP7idqrzDfzP+3f9r/M+67/qv1m97P959QD+Zf4TrLPQG/cf01/28+Dv9qf3d+Ar+Sf33/q50l/m+sx5u2J3f79j6/uy+V3Dg+Unot8zOwnxtf8r2mPAbmx74Ab9BKYFB4Nq8lLBp90NORasrnLwVpVKnY71pcC8k7xQ8qRoCjLt09N11PxxKjYnIkxeuhxh+6CHEchH3ES9JHzS4nr+WSms035ab+phgWl/5+avLX2Ju+m5mLI/jkOKu+U8i+RX8CVMTWAYNSUi70TqNVksUi5pUWpL/xBIa8v/Joh33KHCPu9mbC49UatlIOToTYeDXe9QzRxGpkc2E0gXQZbj+KgdUHOjUUqGnqlicn1fBnszNeFDTvdMekJJjRfTmyNZHo+TvW8s5k+9N+e1+hElDRi06u273SaVO5up1i4BMvO8Xl0IB1GcElwVoqd/mqJWycJcodV/p2h8zU1r29ywG53WXkyoH7jmDFuG5FILyX4rxtqTw53JN/AnxTp26i8rzEdr+T5NcTRMlo9A2iGSdrKfW30nH3g3N3ootBKYFR9RHhBegteO1eSmBQeDavG4AAP79wIAAABT6aU3u+vEyPtq5B1SF9x/Rjj1SGa4Kwg/tXvnH5/X4oiZNa+ekMUZTJansv4c+P/xJ39DdMBcORztCv4twbaRaQm6IBZNCRaT4yeIVttpX6ZoRLgKNFI3FOkQGoEKMBj03nAkeO9issgsTXyADv82tzyfKwoLtB09RpasSeugwemIuMwLtDbDYF0eIDCcN+sAfoaHh2a2xWey4fWWUIPfhbJ76O3v0RLRB4qQFShdxAMeVb5VekqNdEKLcVwCK+qUtxHLEQjlYOKFuBlsULscnqFP/nDHLP6fP286QY65uD4UJ062WugaHUmOFUf8fnluDjELtSZOzEUPpYSFau6jxmyOsOO1dcXP/88/iqfTv8x3ec7+Q8ZnwW82J0KmMn+AADlad5kRhu6tt0ft3jT/fFQ2VWiF/gpUbWspmYLWhiTJGn327scOmNvHN5xfF1bqG7o+tlfHu+QN9sWDO8zpjUDNQJvpKKgp7zfDeg9d09RM36azBHzLFXp30GMLs28+f2/Tn9q+3j51XH46Fn8t45yJv+txu3Ssmm73bCVHbpCy0wEBmG78OprJRz1zXUTw8eYqhdsZQUX9G/ZBJBNDZJf5qATTDEwf0/DISp26bttCwMaod7q2zG3C5zb5TE5lxLW2zdISbUb7mJhMY+5xBPL5Ya69c1nTywSFqNY5/RPFvwA/MmR4r9VxTCAW6WBq5xstHZjCLEQ972TZapHSMX0665vQvNHc5aYREcYvFxGV4gfxf9xPOLvfhAPfvzIcJxMFp5dEqmbGZc33s9kvtEw/b9URP/jXp7sLf+5m3TG1qngaoKJhq3o+wP/Bp3pxWB13y8rg0XpFc1CWAzNge9FPhCPFJ55lTa/P4Y/iQ3SYv5/Gzm4w5bQ6NWorEM8s+H4lugePVIoRiL04Y/BkyH/9vp1uEjnYW2P474bAtch4iN1hnIr1tAhgnJGCfk9HlYdG+foYah//z8PhRlT/vfZpdb270ikh8LkFY08fcRjLMxqXdJXqsk5776JYksK1E4iPsZ6Q1Zj5f/30CUPYAAUcB4Z48IxCahEIeKqJjNEYkI4xUH8cEsxhNElKrrrApF0HD5BH9+GlqmP0cFBKPNj7+lrTS3SfhYdSJk0YdMgygjqWjPVlJS5Yc129mDEt6eFyPgmN5nqArRdT/R8m+e6LyP/VaugpTaWRMHSAPR1O8/5oUmK0NHOtrxy+SV2yQBVS/v2R+aaP3OZlJZxuqoTDSIf9Zv8/iEQvvjNSydwTdBaeDJTTgehmtSykus50rfmiwB/OH3xkp6f7+viOzYTLA07YjOnzt1qutAPZgj5XaHm+EYlTbTf/g8+rm6oNb5mMyt+wu/pQ+Ne5lIOK3RwD1GrFQBzw7Fbm0a8aIkXhVpu2ZaTR6Tjb9ntrLUiEIADk9A2NmzAZGTEk/RSAk8GpjNr87Kb3cZVjjK9nnDoE6/SFb4PoIKlb8UgyVPZkP7bcHH6HdtOkJCc6CgC/IPEZ/7aRAOG9QgGkAeJU3QE1X/f0bGtol27JW2g9p2E1H+RCyFNldVKCrtC7qZg4LhKbw2wv6F+PF4PLkTD+sTDxVf08sn1OaZ39BEB0J8i1f/+Btj8q/0YM1FpCq4LecMlC7OTm0sta3SRZCY+156zGKx7XZ2haUF6fEGEwcB80cZJ4PybyH9kxrHMbuV+g6b/VjNK8QCj+Edqz05E4AM5URvwjVjAsGtHRHM73wRnJsEoSuPMTYjy78ARlikIcM14BjPCmxieUebORekng3dD4YfwHdAw/CWdU9vgQUZw+sGwkHRS0y5mHDb8F/avir/wbGTvUkUtRj1s+indNX25n183Er4+mi033eWAQuVdkse+5zMgPXQlJ11nzM5KVsKCsshZcXXZ7Dr2pi4ReigA2/QHBFIDWOggimqVUxD0LsHa2cLRPK1EX45nAMH3V+gP94lOOjTLpTnGB8oag3BM0/1l1E1ZZ93tKwmmDvS+6NN7JpneQPqet+CHi0577/Sd34ERYglWTXNwGFKrgHU/orhGJ5qpQzz3gARbhuRBCZywZxS3XJ87ppfyH+CksIJDojyIxBlw685tgPwkoOqcov95Lo9Jf//lM/54/+5vna9egMpN6hPP24VehJh5d8e0LzSmOk44cG66aQF47j0/uxOUMdpffkKE//TXRjdvnEkQFrwDz3r+/rQfQVjn55US3I36gp/iitO6BaEtsavoT9mdih14c/rHZk3xCRls6R4Hbk7uuBwd8fvDlmT6t8/j58B0XJQ6HeDRZnJn7U0wFlgOQf/9OY/hxy5fDJ0MLTmiggWp2pqmRTQKaIg3PSifDtWdJFz5IOiuAVRIFw47UmCFNVKoD/wnwqttp6uNmAQRu3CtzivGSqbQXV6yOWUs+V4ucN6wNPrfr+P5uDP9mKmJB6tDCn15JQ0Y4+LFe6wBfR9pANbeyt0jafxAIHNBDBp20XMHcjk5g3HEtDcwscepLQeHqFH7arAGLEgluHnSfs5TgDe3KXj7Kf85XYdZUOXhtVuq+lrCNLy4aHtgtyi0SH0z5ynvsH+0VlkRKvOT55/VWQuzxXGT7mBb19Sa0sI1fnlkrCKNcKSAy4VzAVJf6cOhSDXSbHplG5HKAxZ/RitTyKvDup1DIzLOKzZYGfg7BheAif0eyYS/8/9iCRk/zfTiySEyaEf1IOd8kQPBlfFqc+A38CvEXjQWLh0bCJ3BK0swOfnugSWgXsnAXrEOuho+FyOPIQvn1oAT9CcXg7Ruj5D5eOBv58bV7ayASOwn6b7FLf595Pw3pDNqve1bkHq7xtrd5w8MRIFwV/EOu44O4YFJmWGghoghoPQ1P7GY/jS4Rj6BDJxnHqtn+a0WMNM72tjEfeLRmOAuvNXI6g+7zfz6QAoxn0559AocIqJMHaEA29o2KKg/+lVGOrdulXkv4C1PaagE+uuotKFZ8aM+wAAAAAAAA=" alt="fiin logo" style="height:44px;width:44px;display:block;object-fit:contain">
+      <span class="header-title">Commodity Intelligence</span>
+    </div>
+    <div id="picker" style="display:flex;flex-wrap:wrap;gap:4px;align-items:center"></div>
+    <span class="header-meta" id="hdr-date"></span>
+  </div>
+</header>
+
+<main class="page">
+
+  <div class="setup-notice" id="setup-notice">
+    <strong>Data connection required.</strong> Paste your Google Sheet CSV URLs into the
+    <code>PRICE_CSV_URL</code> and <code>RASFF_CSV_URL</code> variables at the top of this
+    page's &lt;script&gt; block, then re-upload to GitHub. The page works with built-in
+    indicative prices until then.
+  </div>
+
+
+  <div class="com-header" id="com-header" style="margin-top:6px">
+    <div>
+      <div class="com-name" id="com-name"></div>
+
+    </div>
+    <div class="com-meta">
+      <div class="com-meta-label" id="com-period"></div>
+      <div class="com-meta-value">RASFF: daily &nbsp;·&nbsp; News: daily &nbsp;·&nbsp; Prices: quarterly &nbsp;·&nbsp; fiin data: quarterly</div>
+    </div>
+  </div>
+
+  <div class="com-body">
+    <div class="section-header" style="margin-top:4px;margin-bottom:6px">
+      <div class="section-header-label">Category intelligence</div>
+      <div class="section-header-sub" id="cat-section-sub">TSG guidance &nbsp;·&nbsp; Supply chain fraud map &nbsp;·&nbsp; RASFF alerts</div>
+      <div class="section-header-line"></div>
+    </div>
+    <div class="tsg-resources-row">
+
+      <div class="tsg-section" id="tsg-section">
+        <div class="tsg-card">
+          <div class="tsg-header">
+            <div class="tsg-header-left">
+              <span class="tsg-badge">TSG guidance</span>
+              <span class="tsg-title" id="tsg-commodity-name">Commodity</span>
+            </div>
+            <span class="tsg-version" id="tsg-version">Placeholder — guidance to be added</span>
+          </div>
+          <div id="tsg-content">
+            <div class="tsg-placeholder">
+              Best practice guidance for this commodity has not yet been added. fiin TSG working group guidance will appear here once published — covering recommended testing methods, key vulnerabilities and suggested sampling strategies.
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="res-card" id="res-panel">
+        <div class="res-header">
+          <div class="res-header-left">
+            <span class="res-badge">Resources</span>
+            <span class="res-title" id="res-title">Commodity Resources</span>
+          </div>
+        </div>
+        <div class="res-body" id="res-body">
+          <div class="res-placeholder" id="res-placeholder">No resources uploaded yet for this commodity.</div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Supply chain map + Indicators -->
+    <div class="card sc-section" id="sc-section" style="margin-top:14px">
+      <div class="sc-title">Supply chain fraud hotspot map</div>
+      <div class="sc-sub" id="sc-sub">RASFF alerts plotted by supply chain stage · Badge colour: red = serious/alert, amber = information, green = border rejection</div>
+      <div class="sc-map" id="sc-map"></div>
+      <div style="display:none">
+        <span id="rasff-com"></span>
+        <span id="rasff-badge"></span>
+        <span id="rasff-count"></span>
+        <div id="rasff-body"></div>
+        <div id="fiin-indicators-body"></div>
+      </div>
+
+      <div class="sc-legend">
+        <span class="sc-leg-item"><span class="sc-leg-dot" style="background:#8B2020"></span>Serious / Alert</span>
+        <span class="sc-leg-item"><span class="sc-leg-dot" style="background:#D4820A"></span>Information</span>
+        <span class="sc-leg-item"><span class="sc-leg-dot" style="background:#2D6B2D"></span>Border rejection</span>
+        <span class="sc-leg-item"><span class="sc-leg-dot" style="background:var(--border)"></span>No alerts</span>
+        <span style="margin-left:auto;font-size:10px;color:var(--muted)">Hover node to see alerts · <em>Unknown</em> nodes need manual mapping in Sheet</span>
+      </div>
+
+    </div>
+    <div style="margin-top:14px">
+      <div class="tp-panel">
+        <div class="tp-head">
+          <div class="tp-head-left">
+            <span class="tp-head-title">fiin member testing data</span>
+            <span class="tp-soon">coming soon</span>
+          </div>
+          <span class="tp-period" id="testing-period">Q1 2024 – Q1 2025</span>
+        </div>
+        <div class="tp-kpis">
+          <div class="tp-kpi"><div class="tp-kpi-label">Items Tested</div><div class="tp-kpi-value">—</div><div class="tp-kpi-sub">awaiting data</div></div>
+          <div class="tp-kpi"><div class="tp-kpi-label">Tests Performed</div><div class="tp-kpi-value">—</div><div class="tp-kpi-sub">awaiting data</div></div>
+          <div class="tp-kpi"><div class="tp-kpi-label">% Anomalous</div><div class="tp-kpi-value red">—</div><div class="tp-kpi-sub">awaiting data</div></div>
+          <div class="tp-kpi"><div class="tp-kpi-label">% Auth. Concern</div><div class="tp-kpi-value red">—</div><div class="tp-kpi-sub">awaiting data</div></div>
+        </div>
+        <div class="tp-chart-area">
+          <div class="tp-chart-title">Tests performed vs anomalies detected</div>
+          <div class="tp-chart-sub">Quarterly · illustrative placeholder — member data will populate this chart</div>
+          <div class="tp-chart-wrap"><canvas id="testingChart"></canvas></div>
+          <div class="tp-legend">
+            <span class="tp-leg-item"><span class="tp-leg-swatch" style="background:#8DC63F"></span>Tests performed</span>
+            <span class="tp-leg-item"><span class="tp-leg-swatch" style="background:#1A5FA5"></span>Anomalies detected</span>
+            <span class="tp-leg-item"><span class="tp-leg-swatch" style="background:#C84040"></span>Authenticity concerns</span>
+          </div>
+        </div>
+        <div class="tp-footer">
+          <span>fiin member testing programme &nbsp;·&nbsp; member use only</span>
+          <span style="color:var(--pine);cursor:pointer">Connect data →</span>
+        </div>
+      </div>
+    </div>
+    <div class="section-header" style="margin-top:32px">
+      <div class="section-header-label">Product intelligence</div>
+      <div class="section-header-sub">Select a product to view price data and market news</div>
+      <div class="section-header-line"></div>
+    </div>
+
+    <div class="product-section">
+      <div class="product-section-header">
+        <span class="product-section-title">Product</span>
+        <select id="prod-select" class="cat-select" style="font-size:13px;border-width:1.5px;border-radius:5px;padding:5px 28px 5px 10px;min-width:180px"></select>
+        <span id="prod-sources" style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace"></span>
+      </div>
+      <div class="stats" id="stats"></div>
+      <div id="price-alerts"></div>
+
+      <!-- Price charts + comparison table -->
+      <div class="period-row" style="margin:14px 0 10px">
+        <label>Period shown</label>
+        <input type="range" id="period-slider" min="0" max="2" step="1" value="1">
+        <span class="period-val" id="period-label">12 months</span>
+      </div>
+
+      <div class="two-col">
+        <div class="left">
+
+          <div class="card">
+            <div class="card-title" id="price-chart-title">Price by origin</div>
+            <div class="card-sub" id="chart1-sub"></div>
+            <div class="legend" id="legend1"></div>
+            <div style="position:relative;height:185px">
+              <canvas id="trendChart"></canvas>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title" id="vsavg-title">Price vs average by origin</div>
+            <div class="card-sub">Each origin's current price relative to the average across all origins for this product. Negative bars indicate a discount — the larger the discount, the higher the fraud incentive.</div>
+            <div style="position:relative;height:185px">
+              <canvas id="spreadChart"></canvas>
+            </div>
+          </div>
+
+          <div class="card table-scroll">
+            <div class="card-title" id="table-title" style="margin-bottom:10px">Origin price comparison</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Origin</th>
+                  <th>Price</th>
+                  <th>vs avg</th>
+                  <th>Discount</th>
+                  <th>Source</th>
+                  <th>Pressure</th>
+                </tr>
+              </thead>
+              <tbody id="geo-table"></tbody>
+            </table>
+            <div class="sources-row">
+              <span class="src-badge src-fiin">fiin analysis</span>
+              <span class="src-badge src-ext" id="src-label"></span>
+              <span>Prices indicative &nbsp;·&nbsp; not real-time trading data</span>
+            </div>
+          </div>
+
+          <div class="explainer">
+            <strong>How to read this:</strong> The fraud pressure signal is driven by
+            <strong>spread divergence</strong> — when one origin trades significantly below
+            the highest-priced origin, the financial incentive to blend, substitute or
+            mislabel increases sharply. <strong>RASFF alerts</strong> above reflect
+            EU/UK enforcement notifications for the whole category, not just this product.
+          </div>
+
+        </div>
+
+        <!-- Market news — product level, right column -->
+        <div class="right">
+          <div class="card intel-section" id="intel-section" style="height:100%">
+            <div class="intel-head">
+              <span class="intel-title" style="font-size:13px;font-weight:600;color:var(--ink)">Market news &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="intel-prod-label" style="color:var(--forest)"></span></span>
+              <span class="intel-meta" id="intel-meta">Loading&hellip;</span>
+            </div>
+            <div class="intel-items" id="intel-items">
+              <div class="intel-empty">Loading intelligence&hellip;</div>
+            </div>
+
+          </div>
+        </div>
+
+    </div><!-- end product-section -->
+
+  </div>
+
+</main>
+
+<footer class="footer">
+  fiin &mdash; Food Industry Intelligence Network &nbsp;&middot;&nbsp; www.fiin.co.uk
+  &nbsp;&middot;&nbsp; For member use only &nbsp;&middot;&nbsp; RASFF data &copy; European Commission
+</footer>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// CONFIGURATION — paste your Google Sheet CSV URLs here after setup
+// ─────────────────────────────────────────────────────────────────────────────
+var PRICE_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR68kbziTvBGmuCrsqLB8m_MbCKs6JrSidcoLtiybXwZHkyvaGwCtslyJtPeiN5pJCyMAbE-LydRyO1/pub?gid=1313679453&single=true&output=csv';
+// 'https://docs.google.com/spreadsheets/d/YOUR_ID/gviz/tq?tqx=out:csv&sheet=prices'
+
+var RASFF_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR68kbziTvBGmuCrsqLB8m_MbCKs6JrSidcoLtiybXwZHkyvaGwCtslyJtPeiN5pJCyMAbE-LydRyO1/pub?gid=203457174&single=true&output=csv';
+
+// Paste your published news tab CSV URL below when ready
+// In Google Sheets: File → Share → Publish to web → news tab → CSV → Publish → copy URL
+var NEWS_CSV_URL = null;
+// var NEWS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/YOUR_PUBLISHED_ID/pub?gid=YOUR_GID&single=true&output=csv';
+
+var FRAUD_CSV_URL = null;
+// var FRAUD_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/YOUR_PUBLISHED_ID/pub?gid=YOUR_GID&single=true&output=csv';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COMMODITY DATA
+// ─────────────────────────────────────────────────────────────────────────────
+var COMM = {
+  poultry: {
+    label:'Poultry', sources:'AHDB + FAO',
+    context:'Geographic origin fraud, welfare status mislabelling, species substitution in processed products',
+    threshold:1.0, norm:0.7,
+    rasffCategories:['poultry'],
+    products:{
+    'Chicken': {unit:'£/kg',sources:'AHDB + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[1.98, 1.96, 1.97, 1.96, 1.97, 1.96, 1.94, 1.93, 1.92, 1.9, 1.88, 1.88]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[1.63, 1.65, 1.67, 1.65, 1.64, 1.62, 1.64, 1.65, 1.64, 1.64, 1.65, 1.64]},
+        {n:'Brazil',c:'#C84040',dash:true,p:[1.01, 1.01, 1.01, 1.01, 1.01, 1.01, 1.01, 1.02, 1.0, 1.0, 1.01, 1.01]},
+        {n:'Thailand',c:'#7A4800',dash:true,p:[0.98, 0.98, 0.98, 0.97, 0.97, 0.97, 0.98, 0.97, 0.97, 0.96, 0.95, 0.96]},
+        {n:'Ukraine',c:'#5B2D8E',dash:true,p:[0.89, 0.88, 0.89, 0.89, 0.89, 0.89, 0.89, 0.9, 0.9, 0.9, 0.89, 0.88]}
+      ]},
+    'Turkey': {unit:'£/kg',sources:'AHDB + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[1.95, 1.93, 1.92, 1.93, 1.94, 1.94, 1.95, 1.96, 1.96, 1.97, 1.99, 1.98]},
+        {n:'Brazil',c:'#C84040',dash:true,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]},
+        {n:'Hungary',c:'#7A4800',dash:true,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]}
+      ]},
+    'Duck': {unit:'£/kg',sources:'AHDB + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[2.58, 2.61, 2.61, 2.61, 2.63, 2.63, 2.62, 2.61, 2.6, 2.63, 2.6, 2.63]},
+        {n:'China',c:'#C84040',dash:true,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
+        {n:'Hungary',c:'#7A4800',dash:true,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]}
+      ]},
+    'Goose': {unit:'£/kg',sources:'AHDB + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[4.45, 4.5, 4.54, 4.5, 4.55, 4.61, 4.62, 4.67, 4.7, 4.67, 4.69, 4.7]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[3.64, 3.62, 3.66, 3.62, 3.59, 3.56, 3.6, 3.56, 3.59, 3.55, 3.52, 3.54]},
+        {n:'Poland',c:'#C84040',dash:true,p:[3.01, 3.0, 2.96, 2.95, 2.97, 2.97, 2.97, 2.95, 2.94, 2.93, 2.9, 2.89]},
+        {n:'Hungary',c:'#7A4800',dash:true,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]}
+      ]}
+  }
+  },
+  red_meat: {
+    label:'Red Meat', sources:'AHDB + FAO + MLA',
+    context:'Species substitution, geographic origin fraud, halal certification abuse, welfare status mislabelling',
+    threshold:1.8, norm:1.3,
+    rasffCategories:['red_meat'],
+    products:{
+    'Beef': {unit:'£/kg',sources:'AHDB + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]},
+        {n:'Ireland',c:'#1A5FA5',dash:false,p:[4.18, 4.15, 4.13, 4.1, 4.11, 4.13, 4.09, 4.09, 4.14, 4.11, 4.15, 4.18]},
+        {n:'Brazil',c:'#C84040',dash:true,p:[2.81, 2.81, 2.78, 2.79, 2.8, 2.79, 2.79, 2.77, 2.76, 2.75, 2.74, 2.74]},
+        {n:'Argentina',c:'#7A4800',dash:true,p:[2.61, 2.61, 2.61, 2.6, 2.59, 2.57, 2.54, 2.54, 2.57, 2.59, 2.57, 2.56]},
+        {n:'Australia',c:'#5B2D8E',dash:true,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]}
+      ]},
+    'Lamb': {unit:'£/kg',sources:'AHDB + MLA',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[5.42, 5.37, 5.33, 5.32, 5.31, 5.36, 5.32, 5.25, 5.31, 5.36, 5.31, 5.38]},
+        {n:'New Zealand',c:'#1A5FA5',dash:false,p:[4.02, 4.02, 4.03, 4.01, 4.03, 4.05, 4.0, 4.01, 4.04, 4.08, 4.07, 4.05]},
+        {n:'Australia',c:'#C84040',dash:true,p:[4.1, 4.12, 4.07, 4.12, 4.08, 4.05, 4.02, 4.02, 3.98, 4.0, 3.98, 4.03]},
+        {n:'Iceland',c:'#7A4800',dash:true,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]}
+      ]},
+    'Pork': {unit:'£/kg',sources:'AHDB + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[2.33, 2.35, 2.37, 2.4, 2.4, 2.4, 2.42, 2.45, 2.48, 2.47, 2.47, 2.49]},
+        {n:'Denmark',c:'#1A5FA5',dash:false,p:[1.62, 1.62, 1.63, 1.63, 1.64, 1.62, 1.62, 1.6, 1.61, 1.6, 1.61, 1.61]},
+        {n:'EU',c:'#C84040',dash:true,p:[1.83, 1.82, 1.84, 1.85, 1.84, 1.85, 1.87, 1.89, 1.9, 1.92, 1.93, 1.94]},
+        {n:'Germany',c:'#7A4800',dash:true,p:[1.75, 1.73, 1.73, 1.74, 1.74, 1.77, 1.77, 1.75, 1.75, 1.75, 1.76, 1.75]},
+        {n:'Netherlands',c:'#5B2D8E',dash:true,p:[1.71, 1.73, 1.73, 1.73, 1.71, 1.7, 1.69, 1.7, 1.68, 1.7, 1.69, 1.69]}
+      ]},
+    'Veal': {unit:'£/kg',sources:'FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[6.47, 6.5, 6.56, 6.55, 6.58, 6.58, 6.52, 6.58, 6.63, 6.68, 6.76, 6.69]},
+        {n:'Netherlands',c:'#1A5FA5',dash:false,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]},
+        {n:'France',c:'#C84040',dash:true,p:[5.26, 5.2, 5.25, 5.24, 5.19, 5.18, 5.22, 5.27, 5.23, 5.22, 5.24, 5.3]},
+        {n:'Poland',c:'#7A4800',dash:true,p:[4.15, 4.18, 4.16, 4.11, 4.13, 4.15, 4.1, 4.08, 4.13, 4.08, 4.11, 4.07]}
+      ]},
+    'Venison': {unit:'£/kg',sources:'FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[8.03, 8.12, 8.03, 8.02, 8.03, 7.99, 7.89, 7.84, 7.78, 7.87, 7.88, 7.94]},
+        {n:'New Zealand',c:'#1A5FA5',dash:false,p:[5.55, 5.54, 5.57, 5.51, 5.55, 5.54, 5.56, 5.51, 5.45, 5.39, 5.42, 5.45]},
+        {n:'Germany',c:'#C84040',dash:true,p:[6.16, 6.16, 6.17, 6.22, 6.15, 6.19, 6.19, 6.16, 6.09, 6.05, 5.99, 5.95]}
+      ]}
+  }
+  },
+  fish_shellfish: {
+    label:'Fish & Shellfish', sources:'Seafish + FAO',
+    context:'Species substitution, geographic origin fraud, farmed vs wild claims, short-weighting',
+    threshold:2.0, norm:1.4,
+    rasffCategories:['fish_shellfish'],
+    products:{
+    'Salmon': {unit:'£/kg',sources:'Seafish',origins:[
+        {n:'Scotland',c:'#2D6B2D',dash:false,p:[6.47, 6.5, 6.56, 6.55, 6.58, 6.58, 6.52, 6.58, 6.63, 6.68, 6.76, 6.69]},
+        {n:'Norway',c:'#1A5FA5',dash:false,p:[6.11, 6.08, 6.03, 6.05, 6.01, 5.96, 5.93, 5.86, 5.93, 5.86, 5.84, 5.82]},
+        {n:'Chile',c:'#C84040',dash:true,p:[4.66, 4.64, 4.61, 4.63, 4.65, 4.6, 4.57, 4.54, 4.54, 4.51, 4.46, 4.42]},
+        {n:'Canada',c:'#7A4800',dash:true,p:[5.26, 5.2, 5.25, 5.24, 5.19, 5.18, 5.22, 5.27, 5.23, 5.22, 5.24, 5.3]}
+      ]},
+    'Cod': {unit:'£/kg',sources:'Seafish + FAO',origins:[
+        {n:'Iceland',c:'#2D6B2D',dash:false,p:[8.57, 8.57, 8.56, 8.56, 8.55, 8.5, 8.41, 8.32, 8.28, 8.22, 8.25, 8.21]},
+        {n:'Norway',c:'#1A5FA5',dash:false,p:[7.74, 7.8, 7.87, 7.96, 7.9, 7.96, 8.05, 8.03, 8.05, 7.97, 7.99, 7.99]},
+        {n:'Russia',c:'#C84040',dash:true,p:[5.26, 5.2, 5.25, 5.24, 5.19, 5.18, 5.22, 5.27, 5.23, 5.22, 5.24, 5.3]},
+        {n:'Pacific pollock (sub)',c:'#7A4800',dash:true,p:[4.12, 4.13, 4.09, 4.13, 4.15, 4.14, 4.19, 4.22, 4.19, 4.15, 4.13, 4.1]},
+        {n:'Pangasius (sub)',c:'#5B2D8E',dash:true,p:[2.66, 2.68, 2.7, 2.71, 2.74, 2.72, 2.71, 2.71, 2.68, 2.65, 2.66, 2.69]}
+      ]},
+    'Haddock': {unit:'£/kg',sources:'Seafish',origins:[
+        {n:'Iceland',c:'#2D6B2D',dash:false,p:[6.82, 6.88, 6.82, 6.87, 6.87, 6.88, 6.96, 7.0, 7.0, 6.97, 7.02, 6.96]},
+        {n:'Norway',c:'#1A5FA5',dash:false,p:[6.16, 6.16, 6.17, 6.22, 6.15, 6.19, 6.19, 6.16, 6.09, 6.05, 5.99, 5.95]},
+        {n:'UK North Sea',c:'#C84040',dash:true,p:[7.41, 7.33, 7.39, 7.34, 7.26, 7.19, 7.24, 7.2, 7.16, 7.17, 7.15, 7.09]}
+      ]},
+    'Tuna (skipjack)': {unit:'£/kg',sources:'FAO',origins:[
+        {n:'Papua New Guinea',c:'#2D6B2D',dash:false,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
+        {n:'Ecuador',c:'#1A5FA5',dash:false,p:[2.58, 2.61, 2.61, 2.61, 2.63, 2.63, 2.62, 2.61, 2.6, 2.63, 2.6, 2.63]},
+        {n:'Maldives',c:'#C84040',dash:true,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
+        {n:'Philippines',c:'#7A4800',dash:true,p:[2.49, 2.52, 2.52, 2.5, 2.47, 2.45, 2.43, 2.42, 2.42, 2.45, 2.44, 2.45]}
+      ]},
+    'Tuna (yellowfin)': {unit:'£/kg',sources:'FAO',origins:[
+        {n:'Indian Ocean',c:'#2D6B2D',dash:false,p:[4.45, 4.5, 4.54, 4.5, 4.55, 4.61, 4.62, 4.67, 4.7, 4.67, 4.69, 4.7]},
+        {n:'Pacific',c:'#1A5FA5',dash:false,p:[4.15, 4.18, 4.16, 4.11, 4.13, 4.15, 4.1, 4.08, 4.13, 4.08, 4.11, 4.07]},
+        {n:'Atlantic',c:'#C84040',dash:true,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]}
+      ]},
+    'Prawns (warm water)': {unit:'£/kg',sources:'Seafish + FAO',origins:[
+        {n:'Ecuador',c:'#2D6B2D',dash:false,p:[5.26, 5.2, 5.25, 5.24, 5.19, 5.18, 5.22, 5.27, 5.23, 5.22, 5.24, 5.3]},
+        {n:'India',c:'#1A5FA5',dash:false,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]},
+        {n:'Vietnam',c:'#C84040',dash:true,p:[4.65, 4.68, 4.71, 4.7, 4.72, 4.69, 4.68, 4.72, 4.7, 4.75, 4.78, 4.79]},
+        {n:'Thailand',c:'#7A4800',dash:true,p:[4.95, 4.95, 4.94, 4.95, 4.99, 5.02, 5.07, 5.05, 5.02, 5.06, 5.04, 5.03]},
+        {n:'Indonesia',c:'#5B2D8E',dash:true,p:[4.36, 4.31, 4.29, 4.27, 4.24, 4.19, 4.2, 4.2, 4.22, 4.23, 4.2, 4.19]}
+      ]},
+    'Prawns (cold water)': {unit:'£/kg',sources:'Seafish + FAO',origins:[
+        {n:'Iceland',c:'#2D6B2D',dash:false,p:[8.17, 8.1, 8.06, 7.99, 8.06, 8.07, 8.12, 8.09, 8.1, 8.11, 8.06, 8.06]},
+        {n:'Greenland',c:'#1A5FA5',dash:false,p:[7.74, 7.8, 7.87, 7.96, 7.9, 7.96, 8.05, 8.03, 8.05, 7.97, 7.99, 7.99]},
+        {n:'Canada',c:'#C84040',dash:true,p:[8.57, 8.57, 8.56, 8.56, 8.55, 8.5, 8.41, 8.32, 8.28, 8.22, 8.25, 8.21]},
+        {n:'Norway',c:'#7A4800',dash:true,p:[8.03, 8.12, 8.03, 8.02, 8.03, 7.99, 7.89, 7.84, 7.78, 7.87, 7.88, 7.94]}
+      ]},
+    'Crab': {unit:'£/kg',sources:'Seafish + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[9.1, 9.04, 9.09, 9.13, 9.18, 9.23, 9.12, 9.11, 9.12, 9.13, 9.22, 9.27]},
+        {n:'Canada',c:'#1A5FA5',dash:false,p:[7.47, 7.4, 7.35, 7.37, 7.44, 7.37, 7.4, 7.43, 7.38, 7.36, 7.34, 7.26]},
+        {n:'Russia',c:'#C84040',dash:true,p:[6.82, 6.88, 6.82, 6.87, 6.87, 6.88, 6.96, 7.0, 7.0, 6.97, 7.02, 6.96]},
+        {n:'China',c:'#7A4800',dash:true,p:[5.26, 5.2, 5.25, 5.24, 5.19, 5.18, 5.22, 5.27, 5.23, 5.22, 5.24, 5.3]}
+      ]},
+    'Squid': {unit:'£/kg',sources:'FAO',origins:[
+        {n:'Falkland Islands',c:'#2D6B2D',dash:false,p:[4.15, 4.18, 4.16, 4.11, 4.13, 4.15, 4.1, 4.08, 4.13, 4.08, 4.11, 4.07]},
+        {n:'Peru',c:'#1A5FA5',dash:false,p:[3.64, 3.62, 3.66, 3.62, 3.59, 3.56, 3.6, 3.56, 3.59, 3.55, 3.52, 3.54]},
+        {n:'China',c:'#C84040',dash:true,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
+        {n:'Morocco',c:'#7A4800',dash:true,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]}
+      ]},
+    'Scallops': {unit:'£/kg',sources:'Seafish + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[12.14, 12.17, 12.05, 12.13, 12.17, 12.08, 12.0, 12.13, 12.25, 12.24, 12.13, 12.04]},
+        {n:'Canada',c:'#1A5FA5',dash:false,p:[9.43, 9.48, 9.55, 9.52, 9.61, 9.54, 9.44, 9.32, 9.31, 9.24, 9.33, 9.32]},
+        {n:'Peru',c:'#C84040',dash:true,p:[7.24, 7.18, 7.23, 7.29, 7.28, 7.21, 7.12, 7.14, 7.13, 7.15, 7.12, 7.08]},
+        {n:'China',c:'#7A4800',dash:true,p:[5.8, 5.77, 5.82, 5.89, 5.91, 5.93, 5.92, 5.89, 5.96, 6.03, 5.99, 6.04]}
+      ]},
+    'Mussels': {unit:'£/kg',sources:'Seafish + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
+        {n:'Netherlands',c:'#1A5FA5',dash:false,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
+        {n:'Spain',c:'#C84040',dash:true,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]},
+        {n:'Chile',c:'#7A4800',dash:true,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]}
+      ]},
+    'Oysters': {unit:'£/kg',sources:'Seafish + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[4.45, 4.5, 4.54, 4.5, 4.55, 4.61, 4.62, 4.67, 4.7, 4.67, 4.69, 4.7]},
+        {n:'France',c:'#1A5FA5',dash:false,p:[3.84, 3.82, 3.83, 3.83, 3.87, 3.86, 3.89, 3.91, 3.93, 3.9, 3.9, 3.92]},
+        {n:'Ireland',c:'#C84040',dash:true,p:[3.64, 3.62, 3.66, 3.62, 3.59, 3.56, 3.6, 3.56, 3.59, 3.55, 3.52, 3.54]},
+        {n:'Australia',c:'#7A4800',dash:true,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]}
+      ]},
+    'Mackerel': {unit:'£/kg',sources:'Seafish',origins:[
+        {n:'UK North Sea',c:'#2D6B2D',dash:false,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
+        {n:'Norway',c:'#1A5FA5',dash:false,p:[1.58, 1.58, 1.57, 1.57, 1.58, 1.58, 1.58, 1.59, 1.6, 1.6, 1.59, 1.58]},
+        {n:'Iceland',c:'#C84040',dash:true,p:[1.71, 1.73, 1.73, 1.73, 1.71, 1.7, 1.69, 1.7, 1.68, 1.7, 1.69, 1.69]}
+      ]}
+  }
+  },
+  honey: {
+    label:'Honey', sources:'FAO + BBKA',
+    context:'Sugar syrup adulteration, geographic origin fraud, false monofloral claims, antibiotic contamination',
+    threshold:2.5, norm:1.8,
+    rasffCategories:['honey'],
+    products:{
+    'Blossom honey': {unit:'£/kg',sources:'BBKA + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[6.07, 6.04, 6.03, 6.1, 6.17, 6.15, 6.14, 6.21, 6.24, 6.24, 6.17, 6.21]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[5.16, 5.15, 5.2, 5.21, 5.15, 5.18, 5.18, 5.23, 5.27, 5.23, 5.18, 5.12]},
+        {n:'Argentina',c:'#C84040',dash:true,p:[4.46, 4.41, 4.39, 4.34, 4.34, 4.33, 4.37, 4.33, 4.34, 4.37, 4.42, 4.41]},
+        {n:'Mexico',c:'#7A4800',dash:true,p:[3.84, 3.82, 3.83, 3.83, 3.87, 3.86, 3.89, 3.91, 3.93, 3.9, 3.9, 3.92]},
+        {n:'China',c:'#5B2D8E',dash:true,p:[2.43, 2.43, 2.42, 2.44, 2.47, 2.48, 2.51, 2.52, 2.54, 2.58, 2.6, 2.59]}
+      ]},
+    'Manuka honey': {unit:'£/kg',sources:'FAO',origins:[
+        {n:'New Zealand',c:'#2D6B2D',dash:false,p:[34.92, 34.92, 35.17, 35.4, 35.71, 35.59, 35.94, 35.62, 35.3, 35.58, 35.56, 35.19]},
+        {n:'Australia',c:'#1A5FA5',dash:false,p:[17.94, 17.74, 17.66, 17.71, 17.89, 17.87, 17.71, 17.67, 17.77, 17.77, 17.91, 17.79]}
+      ]},
+    'Acacia honey': {unit:'£/kg',sources:'FAO',origins:[
+        {n:'Hungary',c:'#2D6B2D',dash:false,p:[8.57, 8.57, 8.56, 8.56, 8.55, 8.5, 8.41, 8.32, 8.28, 8.22, 8.25, 8.21]},
+        {n:'Romania',c:'#1A5FA5',dash:false,p:[7.74, 7.8, 7.87, 7.96, 7.9, 7.96, 8.05, 8.03, 8.05, 7.97, 7.99, 7.99]},
+        {n:'China',c:'#C84040',dash:true,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]}
+      ]},
+    'Heather honey': {unit:'£/kg',sources:'BBKA',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[9.1, 9.04, 9.09, 9.13, 9.18, 9.23, 9.12, 9.11, 9.12, 9.13, 9.22, 9.27]},
+        {n:'Germany',c:'#1A5FA5',dash:false,p:[7.47, 7.4, 7.35, 7.37, 7.44, 7.37, 7.4, 7.43, 7.38, 7.36, 7.34, 7.26]},
+        {n:'Netherlands',c:'#C84040',dash:true,p:[6.82, 6.88, 6.82, 6.87, 6.87, 6.88, 6.96, 7.0, 7.0, 6.97, 7.02, 6.96]}
+      ]},
+    'Clover honey': {unit:'£/kg',sources:'FAO',origins:[
+        {n:'Canada',c:'#2D6B2D',dash:false,p:[5.55, 5.54, 5.57, 5.51, 5.55, 5.54, 5.56, 5.51, 5.45, 5.39, 5.42, 5.45]},
+        {n:'USA',c:'#1A5FA5',dash:false,p:[5.26, 5.2, 5.25, 5.24, 5.19, 5.18, 5.22, 5.27, 5.23, 5.22, 5.24, 5.3]},
+        {n:'Argentina',c:'#C84040',dash:true,p:[3.84, 3.82, 3.83, 3.83, 3.87, 3.86, 3.89, 3.91, 3.93, 3.9, 3.9, 3.92]},
+        {n:'China',c:'#7A4800',dash:true,p:[2.43, 2.43, 2.42, 2.44, 2.47, 2.48, 2.51, 2.52, 2.54, 2.58, 2.6, 2.59]}
+      ]},
+    'Blended honey': {unit:'£/kg',sources:'FAO',origins:[
+        {n:'China blend',c:'#2D6B2D',dash:false,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
+        {n:'SE Asia blend',c:'#1A5FA5',dash:false,p:[2.09, 2.1, 2.12, 2.11, 2.09, 2.07, 2.06, 2.03, 2.01, 2.02, 2.02, 2.03]},
+        {n:'South America blend',c:'#C84040',dash:true,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
+        {n:'EU blend',c:'#7A4800',dash:true,p:[3.53, 3.56, 3.55, 3.57, 3.58, 3.62, 3.65, 3.62, 3.62, 3.64, 3.69, 3.69]}
+      ]}
+  }
+  },
+  herbs_spices: {
+    label:'Herbs & Spices', sources:'ITC + FAO',
+    context:'Filler species substitution, geographic origin fraud, dye addition, adulteration',
+    threshold:8.0, norm:5.6,
+    rasffCategories:['herbs_spices'],
+    products:{
+    'Oregano': {unit:'$/kg',sources:'ITC',origins:[
+        {n:'Greece',c:'#2D6B2D',dash:false,p:[13.5, 13.33, 13.34, 13.25, 13.28, 13.32, 13.31, 13.39, 13.3, 13.38, 13.43, 13.27]},
+        {n:'Turkey',c:'#1A5FA5',dash:false,p:[8.2, 8.3, 8.26, 8.32, 8.24, 8.32, 8.25, 8.28, 8.34, 8.24, 8.26, 8.28]},
+        {n:'Morocco',c:'#C84040',dash:true,p:[5.09, 5.11, 5.11, 5.05, 5.04, 4.98, 5.0, 4.99, 5.04, 5.05, 5.07, 5.06]},
+        {n:'China',c:'#7A4800',dash:true,p:[3.71, 3.72, 3.68, 3.72, 3.68, 3.69, 3.7, 3.68, 3.73, 3.71, 3.7, 3.74]}
+      ]},
+    'Black pepper': {unit:'$/kg',sources:'ITC + FAO',origins:[
+        {n:'Vietnam',c:'#2D6B2D',dash:false,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]},
+        {n:'Indonesia',c:'#1A5FA5',dash:false,p:[5.26, 5.2, 5.25, 5.24, 5.19, 5.18, 5.22, 5.27, 5.23, 5.22, 5.24, 5.3]},
+        {n:'India',c:'#C84040',dash:true,p:[6.47, 6.5, 6.56, 6.55, 6.58, 6.58, 6.52, 6.58, 6.63, 6.68, 6.76, 6.69]},
+        {n:'Brazil',c:'#7A4800',dash:true,p:[4.15, 4.18, 4.16, 4.11, 4.13, 4.15, 4.1, 4.08, 4.13, 4.08, 4.11, 4.07]}
+      ]},
+    'Cumin': {unit:'$/kg',sources:'ITC + FAO',origins:[
+        {n:'India',c:'#2D6B2D',dash:false,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
+        {n:'Turkey',c:'#1A5FA5',dash:false,p:[3.84, 3.82, 3.83, 3.83, 3.87, 3.86, 3.89, 3.91, 3.93, 3.9, 3.9, 3.92]},
+        {n:'Syria',c:'#C84040',dash:true,p:[3.53, 3.56, 3.55, 3.57, 3.58, 3.62, 3.65, 3.62, 3.62, 3.64, 3.69, 3.69]},
+        {n:'China',c:'#7A4800',dash:true,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]}
+      ]},
+    'Paprika': {unit:'$/kg',sources:'ITC + FAO',origins:[
+        {n:'Spain',c:'#2D6B2D',dash:false,p:[5.55, 5.54, 5.57, 5.51, 5.55, 5.54, 5.56, 5.51, 5.45, 5.39, 5.42, 5.45]},
+        {n:'Hungary',c:'#1A5FA5',dash:false,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]},
+        {n:'China',c:'#C84040',dash:true,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
+        {n:'Peru',c:'#7A4800',dash:true,p:[3.01, 3.0, 2.96, 2.95, 2.97, 2.97, 2.97, 2.95, 2.94, 2.93, 2.9, 2.89]}
+      ]},
+    'Turmeric': {unit:'$/kg',sources:'ITC + FAO',origins:[
+        {n:'India',c:'#2D6B2D',dash:false,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
+        {n:'Bangladesh',c:'#1A5FA5',dash:false,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]},
+        {n:'Myanmar',c:'#C84040',dash:true,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
+        {n:'China',c:'#7A4800',dash:true,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]}
+      ]},
+    'Chilli': {unit:'$/kg',sources:'ITC + FAO',origins:[
+        {n:'India',c:'#2D6B2D',dash:false,p:[3.53, 3.56, 3.55, 3.57, 3.58, 3.62, 3.65, 3.62, 3.62, 3.64, 3.69, 3.69]},
+        {n:'China',c:'#1A5FA5',dash:false,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
+        {n:'Mexico',c:'#C84040',dash:true,p:[3.98, 3.96, 3.99, 3.99, 4.02, 4.02, 4.06, 4.1, 4.1, 4.15, 4.12, 4.1]},
+        {n:'Peru',c:'#7A4800',dash:true,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]}
+      ]},
+    'Coriander': {unit:'$/kg',sources:'ITC + FAO',origins:[
+        {n:'India',c:'#2D6B2D',dash:false,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
+        {n:'Morocco',c:'#1A5FA5',dash:false,p:[1.58, 1.58, 1.57, 1.57, 1.58, 1.58, 1.58, 1.59, 1.6, 1.6, 1.59, 1.58]},
+        {n:'Bulgaria',c:'#C84040',dash:true,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
+        {n:'China',c:'#7A4800',dash:true,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]}
+      ]},
+    'Cinnamon': {unit:'$/kg',sources:'ITC + FAO',origins:[
+        {n:'Sri Lanka',c:'#2D6B2D',dash:false,p:[8.57, 8.57, 8.56, 8.56, 8.55, 8.5, 8.41, 8.32, 8.28, 8.22, 8.25, 8.21]},
+        {n:'Indonesia',c:'#1A5FA5',dash:false,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
+        {n:'China (cassia)',c:'#C84040',dash:true,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
+        {n:'Vietnam',c:'#7A4800',dash:true,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]}
+      ]},
+    'Basil': {unit:'$/kg',sources:'ITC + FAO',origins:[
+        {n:'Egypt',c:'#2D6B2D',dash:false,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
+        {n:'India',c:'#1A5FA5',dash:false,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]},
+        {n:'Italy',c:'#C84040',dash:true,p:[6.47, 6.5, 6.56, 6.55, 6.58, 6.58, 6.52, 6.58, 6.63, 6.68, 6.76, 6.69]},
+        {n:'China',c:'#7A4800',dash:true,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]}
+      ]},
+    'Rosemary': {unit:'$/kg',sources:'ITC + FAO',origins:[
+        {n:'Spain',c:'#2D6B2D',dash:false,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]},
+        {n:'Morocco',c:'#1A5FA5',dash:false,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
+        {n:'Tunisia',c:'#C84040',dash:true,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
+        {n:'Albania',c:'#7A4800',dash:true,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]}
+      ]},
+    'Saffron': {unit:'$/kg',sources:'ITC + FAO',origins:[
+        {n:'Iran',c:'#2D6B2D',dash:false,p:[1199.24, 1203.96, 1208.97, 1198.16, 1183.51, 1179.81, 1173.14, 1182.25, 1187.88, 1190.89, 1192.62, 1197.43]},
+        {n:'Spain',c:'#1A5FA5',dash:false,p:[3504.26, 3526.21, 3548.01, 3580.39, 3561.23, 3602.68, 3608.69, 3631.01, 3654.15, 3693.35, 3672.5, 3660.25]},
+        {n:'Afghanistan',c:'#C84040',dash:true,p:[899.17, 896.32, 888.22, 896.36, 885.3, 885.36, 894.18, 884.81, 886.01, 888.59, 878.39, 875.74]},
+        {n:'Morocco',c:'#7A4800',dash:true,p:[1001.79, 1000.0, 1001.96, 994.59, 1002.39, 1010.49, 1014.37, 1005.75, 1006.27, 1001.94, 995.68, 1006.95]}
+      ]}
+  }
+  },
+  bakery_cereals: {
+    label:'Bakery & Cereals', sources:'AHDB + FAO',
+    context:'Country of origin fraud, adulteration, undeclared ingredients, quality grade fraud',
+    threshold:50.0, norm:35.0,
+    rasffCategories:['cereals'],
+    products:{
+    'Wheat': {unit:'£/tonne',sources:'AHDB + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[202.28, 204.54, 202.28, 200.18, 201.86, 203.05, 203.91, 202.93, 203.47, 204.01, 204.43, 202.68]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[182.03, 181.0, 183.06, 181.62, 183.24, 184.05, 183.54, 182.66, 182.44, 181.88, 183.55, 182.97]},
+        {n:'US',c:'#C84040',dash:true,p:[173.13, 172.24, 173.74, 172.94, 174.93, 175.01, 177.14, 176.52, 177.67, 176.37, 177.84, 177.17]},
+        {n:'Ukraine',c:'#7A4800',dash:true,p:[143.92, 142.64, 143.52, 143.94, 144.81, 146.41, 146.94, 147.66, 147.29, 146.72, 145.73, 146.63]},
+        {n:'Canada',c:'#5B2D8E',dash:true,p:[187.8, 186.64, 186.94, 187.26, 187.76, 187.82, 188.82, 190.67, 191.23, 191.41, 192.64, 194.96]}
+      ]},
+    'Rice': {unit:'£/tonne',sources:'FAO',origins:[
+        {n:'Thailand',c:'#2D6B2D',dash:false,p:[479.63, 482.58, 478.88, 480.82, 481.9, 476.68, 473.45, 471.0, 476.37, 473.18, 473.43, 476.13]},
+        {n:'Vietnam',c:'#1A5FA5',dash:false,p:[420.26, 423.3, 420.19, 418.83, 420.59, 421.75, 422.83, 427.11, 423.46, 423.66, 427.84, 431.02]},
+        {n:'India',c:'#C84040',dash:true,p:[390.67, 394.79, 390.15, 390.39, 391.14, 391.83, 396.16, 396.7, 394.75, 395.51, 393.84, 394.99]},
+        {n:'Pakistan',c:'#7A4800',dash:true,p:[363.78, 367.61, 368.99, 366.87, 365.8, 369.88, 372.77, 374.8, 370.68, 366.84, 365.7, 368.41]},
+        {n:'USA',c:'#5B2D8E',dash:true,p:[519.35, 513.85, 510.12, 512.01, 506.86, 506.17, 510.29, 509.01, 514.39, 509.43, 504.6, 510.69]}
+      ]},
+    'Oats': {unit:'£/tonne',sources:'AHDB + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[180.38, 181.92, 183.01, 181.64, 181.99, 182.78, 182.44, 182.2, 180.91, 182.16, 181.21, 179.21]},
+        {n:'Sweden',c:'#1A5FA5',dash:false,p:[165.83, 164.94, 163.43, 164.37, 165.72, 164.11, 163.75, 162.84, 163.21, 165.16, 167.21, 167.64]},
+        {n:'Finland',c:'#C84040',dash:true,p:[168.37, 167.62, 168.28, 167.74, 168.51, 169.19, 170.12, 169.52, 170.15, 169.01, 169.74, 168.85]},
+        {n:'Canada',c:'#7A4800',dash:true,p:[154.29, 154.06, 154.66, 153.11, 151.22, 152.36, 152.7, 152.49, 153.72, 154.77, 155.92, 154.75]}
+      ]},
+    'Barley': {unit:'£/tonne',sources:'AHDB + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[168.37, 167.62, 168.28, 167.74, 168.51, 169.19, 170.12, 169.52, 170.15, 169.01, 169.74, 168.85]},
+        {n:'France',c:'#1A5FA5',dash:false,p:[157.48, 158.02, 157.95, 159.1, 160.17, 162.02, 163.13, 161.85, 161.11, 161.74, 160.46, 160.38]},
+        {n:'Ukraine',c:'#C84040',dash:true,p:[129.32, 129.14, 128.66, 127.84, 127.14, 127.7, 129.07, 128.99, 130.44, 131.78, 132.12, 131.68]},
+        {n:'Australia',c:'#7A4800',dash:true,p:[146.23, 147.55, 148.94, 150.09, 150.61, 151.73, 151.42, 151.49, 150.89, 151.62, 150.8, 149.32]}
+      ]},
+    'Maize': {unit:'£/tonne',sources:'FAO',origins:[
+        {n:'USA',c:'#2D6B2D',dash:false,p:[196.85, 196.62, 194.69, 194.92, 195.39, 192.97, 191.56, 191.07, 190.14, 189.22, 187.2, 186.85]},
+        {n:'Ukraine',c:'#1A5FA5',dash:false,p:[161.66, 162.64, 164.28, 162.94, 163.53, 164.2, 164.9, 166.85, 165.53, 164.88, 166.84, 166.56]},
+        {n:'Brazil',c:'#C84040',dash:true,p:[154.29, 154.06, 154.66, 153.11, 151.22, 152.36, 152.7, 152.49, 153.72, 154.77, 155.92, 154.75]},
+        {n:'Argentina',c:'#7A4800',dash:true,p:[150.26, 150.75, 151.64, 151.9, 150.45, 149.05, 149.32, 149.47, 149.34, 150.07, 148.92, 148.53]}
+      ]},
+    'Rye': {unit:'£/tonne',sources:'FAO',origins:[
+        {n:'Germany',c:'#2D6B2D',dash:false,p:[173.7, 174.76, 172.84, 174.19, 175.32, 174.98, 176.64, 177.85, 176.88, 178.09, 177.08, 176.97]},
+        {n:'Poland',c:'#1A5FA5',dash:false,p:[154.29, 154.06, 154.66, 153.11, 151.22, 152.36, 152.7, 152.49, 153.72, 154.77, 155.92, 154.75]},
+        {n:'Russia',c:'#C84040',dash:true,p:[129.32, 129.14, 128.66, 127.84, 127.14, 127.7, 129.07, 128.99, 130.44, 131.78, 132.12, 131.68]},
+        {n:'Belarus',c:'#7A4800',dash:true,p:[124.0, 122.82, 121.35, 120.01, 119.17, 118.26, 119.01, 119.21, 118.74, 118.67, 118.37, 118.2]}
+      ]}
+  }
+  },
+  prepared_dishes: {
+    label:'Prepared Dishes', sources:'ONS + FAO',
+    context:'Species substitution, undeclared ingredients, false provenance claims, allergen mislabelling',
+    threshold:1.5, norm:1.0,
+    rasffCategories:['prepared'],
+    products:{
+    'Ready meals (chilled)': {unit:'£/kg',sources:'ONS',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[4.13, 4.14, 4.1, 4.14, 4.16, 4.15, 4.2, 4.23, 4.2, 4.16, 4.14, 4.11]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[3.36, 3.4, 3.41, 3.41, 3.41, 3.43, 3.39, 3.4, 3.4, 3.36, 3.39, 3.42]},
+        {n:'Non-EU',c:'#C84040',dash:true,p:[2.29, 2.28, 2.28, 2.29, 2.31, 2.33, 2.34, 2.36, 2.36, 2.35, 2.35, 2.37]}
+      ]},
+    'Ready meals (frozen)': {unit:'£/kg',sources:'ONS',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
+        {n:'Non-EU',c:'#C84040',dash:true,p:[1.58, 1.58, 1.57, 1.57, 1.58, 1.58, 1.58, 1.59, 1.6, 1.6, 1.59, 1.58]}
+      ]},
+    'Soups': {unit:'£/kg',sources:'ONS',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[1.2, 1.19, 1.2, 1.21, 1.21, 1.22, 1.21, 1.22, 1.21, 1.21, 1.2, 1.21]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[0.96, 0.96, 0.97, 0.97, 0.98, 0.97, 0.97, 0.96, 0.95, 0.94, 0.94, 0.93]},
+        {n:'Non-EU',c:'#C84040',dash:true,p:[0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.66, 0.65, 0.65, 0.65]}
+      ]},
+    'Pasta sauces': {unit:'£/kg',sources:'ONS + FAO',origins:[
+        {n:'Italy',c:'#2D6B2D',dash:false,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
+        {n:'Non-EU',c:'#C84040',dash:true,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]}
+      ]},
+    'Ethnic ready meals': {unit:'£/kg',sources:'ONS + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[3.53, 3.56, 3.55, 3.57, 3.58, 3.62, 3.65, 3.62, 3.62, 3.64, 3.69, 3.69]},
+        {n:'India',c:'#1A5FA5',dash:false,p:[1.98, 1.96, 1.97, 1.96, 1.97, 1.96, 1.94, 1.93, 1.92, 1.9, 1.88, 1.88]},
+        {n:'China',c:'#C84040',dash:true,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
+        {n:'Thailand',c:'#7A4800',dash:true,p:[1.88, 1.89, 1.91, 1.9, 1.89, 1.92, 1.9, 1.92, 1.93, 1.96, 1.93, 1.96]}
+      ]}
+  }
+  },
+  fruit_veg: {
+    label:'Fruit & Vegetables', sources:'DEFRA + FAO',
+    context:'Country of origin fraud, organic status fraud, pesticide residue concealment',
+    threshold:0.5, norm:0.3,
+    rasffCategories:['fruit_veg'],
+    products:{
+    'Tomatoes': {unit:'£/kg',sources:'DEFRA + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[1.71, 1.73, 1.73, 1.73, 1.71, 1.7, 1.69, 1.7, 1.68, 1.7, 1.69, 1.69]},
+        {n:'Spain',c:'#1A5FA5',dash:false,p:[1.08, 1.08, 1.08, 1.07, 1.07, 1.09, 1.09, 1.09, 1.1, 1.09, 1.09, 1.1]},
+        {n:'Morocco',c:'#C84040',dash:true,p:[0.75, 0.75, 0.74, 0.73, 0.73, 0.74, 0.74, 0.74, 0.74, 0.74, 0.75, 0.75]},
+        {n:'Netherlands',c:'#7A4800',dash:true,p:[1.2, 1.19, 1.2, 1.21, 1.21, 1.22, 1.21, 1.22, 1.21, 1.21, 1.2, 1.21]},
+        {n:'Non-EU',c:'#5B2D8E',dash:true,p:[0.55, 0.54, 0.54, 0.54, 0.55, 0.55, 0.55, 0.55, 0.54, 0.55, 0.56, 0.56]}
+      ]},
+    'Apples': {unit:'£/kg',sources:'DEFRA + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[0.89, 0.88, 0.89, 0.89, 0.89, 0.89, 0.89, 0.9, 0.9, 0.9, 0.89, 0.88]},
+        {n:'France',c:'#1A5FA5',dash:false,p:[0.71, 0.7, 0.7, 0.7, 0.71, 0.7, 0.7, 0.7, 0.71, 0.71, 0.7, 0.7]},
+        {n:'Poland',c:'#C84040',dash:true,p:[0.54, 0.55, 0.55, 0.55, 0.55, 0.56, 0.55, 0.55, 0.56, 0.56, 0.56, 0.56]},
+        {n:'South Africa',c:'#7A4800',dash:true,p:[0.6, 0.6, 0.59, 0.6, 0.6, 0.6, 0.6, 0.61, 0.61, 0.61, 0.61, 0.61]},
+        {n:'Chile',c:'#5B2D8E',dash:true,p:[0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.66, 0.65, 0.65, 0.65]}
+      ]},
+    'Strawberries': {unit:'£/kg',sources:'DEFRA + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
+        {n:'Spain',c:'#1A5FA5',dash:false,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
+        {n:'Morocco',c:'#C84040',dash:true,p:[1.58, 1.58, 1.57, 1.57, 1.58, 1.58, 1.58, 1.59, 1.6, 1.6, 1.59, 1.58]},
+        {n:'Egypt',c:'#7A4800',dash:true,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]}
+      ]},
+    'Blueberries': {unit:'£/kg',sources:'DEFRA + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[4.45, 4.5, 4.54, 4.5, 4.55, 4.61, 4.62, 4.67, 4.7, 4.67, 4.69, 4.7]},
+        {n:'Spain',c:'#1A5FA5',dash:false,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
+        {n:'Peru',c:'#C84040',dash:true,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]},
+        {n:'South Africa',c:'#7A4800',dash:true,p:[2.58, 2.61, 2.61, 2.61, 2.63, 2.63, 2.62, 2.61, 2.6, 2.63, 2.6, 2.63]}
+      ]},
+    'Avocado': {unit:'£/kg',sources:'FAO',origins:[
+        {n:'Spain',c:'#2D6B2D',dash:false,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
+        {n:'Peru',c:'#1A5FA5',dash:false,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]},
+        {n:'South Africa',c:'#C84040',dash:true,p:[1.51, 1.53, 1.52, 1.51, 1.51, 1.49, 1.48, 1.49, 1.48, 1.49, 1.51, 1.5]},
+        {n:'Kenya',c:'#7A4800',dash:true,p:[1.3, 1.29, 1.3, 1.31, 1.32, 1.3, 1.29, 1.29, 1.3, 1.31, 1.31, 1.31]},
+        {n:'Colombia',c:'#5B2D8E',dash:true,p:[1.2, 1.19, 1.2, 1.21, 1.21, 1.22, 1.21, 1.22, 1.21, 1.21, 1.2, 1.21]}
+      ]},
+    'Broccoli': {unit:'£/kg',sources:'DEFRA + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[0.96, 0.96, 0.97, 0.97, 0.98, 0.97, 0.97, 0.96, 0.95, 0.94, 0.94, 0.93]},
+        {n:'Spain',c:'#1A5FA5',dash:false,p:[0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.66, 0.65, 0.65, 0.65]},
+        {n:'Italy',c:'#C84040',dash:true,p:[0.71, 0.7, 0.7, 0.7, 0.71, 0.7, 0.7, 0.7, 0.71, 0.71, 0.7, 0.7]}
+      ]},
+    'Peppers': {unit:'£/kg',sources:'DEFRA + FAO',origins:[
+        {n:'Spain',c:'#2D6B2D',dash:false,p:[1.11, 1.11, 1.12, 1.11, 1.11, 1.1, 1.11, 1.09, 1.09, 1.09, 1.07, 1.08]},
+        {n:'Netherlands',c:'#1A5FA5',dash:false,p:[1.2, 1.19, 1.2, 1.21, 1.21, 1.22, 1.21, 1.22, 1.21, 1.21, 1.2, 1.21]},
+        {n:'Morocco',c:'#C84040',dash:true,p:[0.75, 0.75, 0.74, 0.74, 0.75, 0.75, 0.75, 0.75, 0.76, 0.76, 0.76, 0.77]},
+        {n:'Israel',c:'#7A4800',dash:true,p:[0.89, 0.88, 0.89, 0.89, 0.89, 0.89, 0.89, 0.9, 0.9, 0.9, 0.89, 0.88]}
+      ]},
+    'Garlic': {unit:'£/kg',sources:'FAO',origins:[
+        {n:'Spain',c:'#2D6B2D',dash:false,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
+        {n:'China',c:'#1A5FA5',dash:false,p:[0.89, 0.88, 0.89, 0.89, 0.89, 0.89, 0.89, 0.9, 0.9, 0.9, 0.89, 0.88]},
+        {n:'Argentina',c:'#C84040',dash:true,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]},
+        {n:'Egypt',c:'#7A4800',dash:true,p:[1.11, 1.11, 1.12, 1.11, 1.11, 1.1, 1.11, 1.09, 1.09, 1.09, 1.07, 1.08]}
+      ]},
+    'Onions': {unit:'£/kg',sources:'DEFRA + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[0.45, 0.45, 0.44, 0.44, 0.44, 0.43, 0.43, 0.42, 0.42, 0.42, 0.42, 0.42]},
+        {n:'Netherlands',c:'#1A5FA5',dash:false,p:[0.35, 0.35, 0.35, 0.36, 0.36, 0.36, 0.36, 0.36, 0.37, 0.37, 0.37, 0.37]},
+        {n:'Spain',c:'#C84040',dash:true,p:[0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4]},
+        {n:'New Zealand',c:'#7A4800',dash:true,p:[0.54, 0.55, 0.55, 0.55, 0.55, 0.56, 0.55, 0.55, 0.56, 0.56, 0.56, 0.56]}
+      ]},
+    'Potatoes': {unit:'£/kg',sources:'DEFRA + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[0.28, 0.27, 0.28, 0.27, 0.27, 0.27, 0.27, 0.27, 0.27, 0.27, 0.27, 0.26]},
+        {n:'Netherlands',c:'#1A5FA5',dash:false,p:[0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22]},
+        {n:'Egypt',c:'#C84040',dash:true,p:[0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.17, 0.18, 0.17]},
+        {n:'France',c:'#7A4800',dash:true,p:[0.25, 0.25, 0.25, 0.25, 0.25, 0.26, 0.25, 0.26, 0.25, 0.25, 0.25, 0.25]}
+      ]},
+    'Bananas': {unit:'£/kg',sources:'FAO',origins:[
+        {n:'Colombia',c:'#2D6B2D',dash:false,p:[0.54, 0.55, 0.55, 0.55, 0.55, 0.56, 0.55, 0.55, 0.56, 0.56, 0.56, 0.56]},
+        {n:'Ecuador',c:'#1A5FA5',dash:false,p:[0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.49, 0.5, 0.49, 0.49, 0.49]},
+        {n:'Costa Rica',c:'#C84040',dash:true,p:[0.53, 0.52, 0.52, 0.52, 0.53, 0.53, 0.53, 0.53, 0.54, 0.53, 0.53, 0.53]},
+        {n:'Cameroon',c:'#7A4800',dash:true,p:[0.45, 0.45, 0.44, 0.44, 0.44, 0.43, 0.43, 0.42, 0.42, 0.42, 0.42, 0.42]}
+      ]},
+    'Oranges': {unit:'£/kg',sources:'FAO',origins:[
+        {n:'Spain',c:'#2D6B2D',dash:false,p:[0.6, 0.6, 0.59, 0.6, 0.6, 0.6, 0.6, 0.61, 0.61, 0.61, 0.61, 0.61]},
+        {n:'South Africa',c:'#1A5FA5',dash:false,p:[0.54, 0.55, 0.55, 0.55, 0.55, 0.56, 0.55, 0.55, 0.56, 0.56, 0.56, 0.56]},
+        {n:'Egypt',c:'#C84040',dash:true,p:[0.45, 0.45, 0.44, 0.44, 0.44, 0.43, 0.43, 0.42, 0.42, 0.42, 0.42, 0.42]},
+        {n:'Morocco',c:'#7A4800',dash:true,p:[0.42, 0.42, 0.41, 0.41, 0.41, 0.42, 0.42, 0.42, 0.41, 0.41, 0.41, 0.41]}
+      ]}
+  }
+  },
+  dairy: {
+    label:'Dairy Products', sources:'AHDB + FAO',
+    context:'Adulteration, organic/welfare status fraud, geographic origin fraud',
+    threshold:12.0, norm:8.4,
+    rasffCategories:['dairy'],
+    products:{
+    'Liquid milk': {unit:'£/100L',sources:'AHDB + DG Agri',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[37.31, 37.44, 37.09, 36.98, 37.22, 37.62, 37.49, 37.05, 36.87, 36.7, 36.79, 37.08]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[32.98, 33.17, 33.58, 33.31, 33.52, 33.23, 33.36, 33.21, 33.46, 33.15, 33.44, 33.73]},
+        {n:'New Zealand (equiv)',c:'#C84040',dash:true,p:[25.54, 25.45, 25.13, 25.32, 25.22, 25.19, 24.95, 24.88, 24.88, 24.68, 24.37, 24.35]}
+      ]},
+    'Cheddar': {unit:'£/kg',sources:'AHDB + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[4.15, 4.18, 4.16, 4.11, 4.13, 4.15, 4.1, 4.08, 4.13, 4.08, 4.11, 4.07]},
+        {n:'Ireland',c:'#1A5FA5',dash:false,p:[3.64, 3.62, 3.66, 3.62, 3.59, 3.56, 3.6, 3.56, 3.59, 3.55, 3.52, 3.54]},
+        {n:'New Zealand',c:'#C84040',dash:true,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
+        {n:'EU',c:'#7A4800',dash:true,p:[3.84, 3.82, 3.83, 3.83, 3.87, 3.86, 3.89, 3.91, 3.93, 3.9, 3.9, 3.92]}
+      ]},
+    'Mozzarella': {unit:'£/kg',sources:'FAO',origins:[
+        {n:'Italy',c:'#2D6B2D',dash:false,p:[5.26, 5.2, 5.25, 5.24, 5.19, 5.18, 5.22, 5.27, 5.23, 5.22, 5.24, 5.3]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[3.84, 3.82, 3.83, 3.83, 3.87, 3.86, 3.89, 3.91, 3.93, 3.9, 3.9, 3.92]},
+        {n:'USA',c:'#C84040',dash:true,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
+        {n:'Argentina',c:'#7A4800',dash:true,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]}
+      ]},
+    'Butter': {unit:'£/kg',sources:'AHDB + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[5.8, 5.77, 5.82, 5.89, 5.91, 5.93, 5.92, 5.89, 5.96, 6.03, 5.99, 6.04]},
+        {n:'Ireland',c:'#1A5FA5',dash:false,p:[5.26, 5.2, 5.25, 5.24, 5.19, 5.18, 5.22, 5.27, 5.23, 5.22, 5.24, 5.3]},
+        {n:'New Zealand',c:'#C84040',dash:true,p:[4.15, 4.18, 4.16, 4.11, 4.13, 4.15, 4.1, 4.08, 4.13, 4.08, 4.11, 4.07]},
+        {n:'EU',c:'#7A4800',dash:true,p:[5.04, 5.09, 5.1, 5.07, 5.11, 5.09, 5.13, 5.11, 5.12, 5.15, 5.09, 5.07]}
+      ]},
+    'Cream': {unit:'£/kg',sources:'AHDB',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
+        {n:'Ukraine',c:'#C84040',dash:true,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]}
+      ]},
+    'Skimmed milk powder': {unit:'£/kg',sources:'FAO',origins:[
+        {n:'EU',c:'#2D6B2D',dash:false,p:[2.58, 2.61, 2.61, 2.61, 2.63, 2.63, 2.62, 2.61, 2.6, 2.63, 2.6, 2.63]},
+        {n:'New Zealand',c:'#1A5FA5',dash:false,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]},
+        {n:'USA',c:'#C84040',dash:true,p:[2.49, 2.52, 2.52, 2.5, 2.47, 2.45, 2.43, 2.42, 2.42, 2.45, 2.44, 2.45]},
+        {n:'Australia',c:'#7A4800',dash:true,p:[2.43, 2.43, 2.42, 2.44, 2.47, 2.48, 2.51, 2.52, 2.54, 2.58, 2.6, 2.59]}
+      ]},
+    'Whole milk powder': {unit:'£/kg',sources:'FAO',origins:[
+        {n:'New Zealand',c:'#2D6B2D',dash:false,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[2.9, 2.89, 2.89, 2.85, 2.84, 2.84, 2.81, 2.79, 2.8, 2.81, 2.82, 2.81]},
+        {n:'USA',c:'#C84040',dash:true,p:[3.01, 3.0, 2.96, 2.95, 2.97, 2.97, 2.97, 2.95, 2.94, 2.93, 2.9, 2.89]},
+        {n:'Australia',c:'#7A4800',dash:true,p:[2.86, 2.85, 2.85, 2.82, 2.81, 2.84, 2.81, 2.81, 2.78, 2.79, 2.8, 2.78]}
+      ]},
+    'Yoghurt': {unit:'£/kg',sources:'AHDB + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]},
+        {n:'Turkey',c:'#C84040',dash:true,p:[1.2, 1.19, 1.2, 1.21, 1.21, 1.22, 1.21, 1.22, 1.21, 1.21, 1.2, 1.21]}
+      ]}
+  }
+  },
+  cakes_conf: {
+    label:'Cakes & Confectionery', sources:'ONS + FAO',
+    context:'Undeclared ingredients, allergen fraud, origin fraud in premium products',
+    threshold:1.0, norm:0.7,
+    rasffCategories:['confectionery'],
+    products:{
+    'Chocolate (dark)': {unit:'£/kg',sources:'ONS + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[5.13, 5.18, 5.14, 5.1, 5.05, 5.06, 5.07, 5.09, 5.11, 5.09, 5.07, 5.12]},
+        {n:'Belgium',c:'#1A5FA5',dash:false,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]},
+        {n:'EU',c:'#C84040',dash:true,p:[4.36, 4.37, 4.41, 4.43, 4.41, 4.42, 4.37, 4.31, 4.3, 4.27, 4.23, 4.27]},
+        {n:'Non-EU',c:'#7A4800',dash:true,p:[3.06, 3.02, 3.0, 3.02, 3.0, 3.02, 3.04, 3.04, 3.02, 3.04, 3.07, 3.07]}
+      ]},
+    'Chocolate (milk)': {unit:'£/kg',sources:'ONS + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]},
+        {n:'Belgium',c:'#1A5FA5',dash:false,p:[4.45, 4.5, 4.54, 4.5, 4.55, 4.61, 4.62, 4.67, 4.7, 4.67, 4.69, 4.7]},
+        {n:'EU',c:'#C84040',dash:true,p:[4.13, 4.14, 4.1, 4.14, 4.16, 4.15, 4.2, 4.23, 4.2, 4.16, 4.14, 4.11]},
+        {n:'Non-EU',c:'#7A4800',dash:true,p:[2.9, 2.89, 2.89, 2.85, 2.84, 2.84, 2.81, 2.79, 2.8, 2.81, 2.82, 2.81]}
+      ]},
+    'Cocoa powder': {unit:'£/kg',sources:'FAO',origins:[
+        {n:'Netherlands',c:'#2D6B2D',dash:false,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
+        {n:'Ivory Coast',c:'#1A5FA5',dash:false,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]},
+        {n:'Ghana',c:'#C84040',dash:true,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]}
+      ]},
+    'Sugar confectionery': {unit:'£/kg',sources:'ONS + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[3.84, 3.82, 3.83, 3.83, 3.87, 3.86, 3.89, 3.91, 3.93, 3.9, 3.9, 3.92]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[3.01, 3.0, 2.96, 2.95, 2.97, 2.97, 2.97, 2.95, 2.94, 2.93, 2.9, 2.89]},
+        {n:'China',c:'#C84040',dash:true,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
+        {n:'Turkey',c:'#7A4800',dash:true,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]}
+      ]},
+    'Biscuits': {unit:'£/kg',sources:'ONS',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
+        {n:'Non-EU',c:'#C84040',dash:true,p:[1.2, 1.19, 1.2, 1.21, 1.21, 1.22, 1.21, 1.22, 1.21, 1.21, 1.2, 1.21]}
+      ]},
+    'Cakes': {unit:'£/kg',sources:'ONS + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[4.15, 4.18, 4.16, 4.11, 4.13, 4.15, 4.1, 4.08, 4.13, 4.08, 4.11, 4.07]},
+        {n:'France',c:'#1A5FA5',dash:false,p:[3.64, 3.62, 3.66, 3.62, 3.59, 3.56, 3.6, 3.56, 3.59, 3.55, 3.52, 3.54]},
+        {n:'EU',c:'#C84040',dash:true,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
+        {n:'Non-EU',c:'#7A4800',dash:true,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]}
+      ]}
+  }
+  },
+  diet_foods: {
+    label:'Dietary & Supplement Foods', sources:'ONS + FAO',
+    context:'False nutritional claims, undeclared ingredients, adulteration of supplements',
+    threshold:3.0, norm:2.1,
+    rasffCategories:['supplements'],
+    products:{
+    'Whey protein': {unit:'£/kg',sources:'ONS + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[16.97, 16.96, 17.03, 16.82, 16.78, 16.94, 16.9, 16.98, 17.14, 17.07, 17.04, 17.08]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[13.01, 13.17, 13.09, 13.02, 12.95, 12.98, 12.99, 12.95, 13.04, 13.09, 13.17, 13.28]},
+        {n:'USA',c:'#C84040',dash:true,p:[11.4, 11.41, 11.33, 11.26, 11.12, 11.12, 11.23, 11.16, 11.25, 11.11, 11.15, 11.09]},
+        {n:'Non-EU',c:'#7A4800',dash:true,p:[8.41, 8.33, 8.29, 8.23, 8.26, 8.33, 8.36, 8.44, 8.52, 8.59, 8.59, 8.48]}
+      ]},
+    'Vitamin supplements': {unit:'£/kg',sources:'ONS + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[21.91, 22.06, 21.99, 21.99, 22.15, 22.0, 21.91, 21.7, 21.83, 21.65, 21.72, 21.73]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[15.81, 15.82, 15.91, 16.01, 16.03, 16.16, 16.13, 16.09, 15.93, 15.97, 15.88, 15.99]},
+        {n:'China',c:'#C84040',dash:true,p:[7.47, 7.4, 7.35, 7.37, 7.44, 7.37, 7.4, 7.43, 7.38, 7.36, 7.34, 7.26]},
+        {n:'India',c:'#7A4800',dash:true,p:[6.82, 6.88, 6.82, 6.87, 6.87, 6.88, 6.96, 7.0, 7.0, 6.97, 7.02, 6.96]}
+      ]},
+    'Sports nutrition bars': {unit:'£/kg',sources:'ONS',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[8.57, 8.57, 8.56, 8.56, 8.55, 8.5, 8.41, 8.32, 8.28, 8.22, 8.25, 8.21]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[6.16, 6.16, 6.17, 6.22, 6.15, 6.19, 6.19, 6.16, 6.09, 6.05, 5.99, 5.95]},
+        {n:'USA',c:'#C84040',dash:true,p:[5.8, 5.77, 5.82, 5.89, 5.91, 5.93, 5.92, 5.89, 5.96, 6.03, 5.99, 6.04]},
+        {n:'Non-EU',c:'#7A4800',dash:true,p:[3.53, 3.56, 3.55, 3.57, 3.58, 3.62, 3.65, 3.62, 3.62, 3.64, 3.69, 3.69]}
+      ]},
+    'Meal replacements': {unit:'£/kg',sources:'ONS',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[12.14, 12.17, 12.05, 12.13, 12.17, 12.08, 12.0, 12.13, 12.25, 12.24, 12.13, 12.04]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[9.1, 9.04, 9.09, 9.13, 9.18, 9.23, 9.12, 9.11, 9.12, 9.13, 9.22, 9.27]},
+        {n:'Non-EU',c:'#C84040',dash:true,p:[5.55, 5.54, 5.57, 5.51, 5.55, 5.54, 5.56, 5.51, 5.45, 5.39, 5.42, 5.45]}
+      ]},
+    'Infant formula': {unit:'£/kg',sources:'ONS + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[17.94, 17.74, 17.66, 17.71, 17.89, 17.87, 17.71, 17.67, 17.77, 17.77, 17.91, 17.79]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[13.88, 13.9, 14.02, 14.14, 14.05, 14.14, 14.24, 14.27, 14.24, 14.28, 14.13, 14.18]},
+        {n:'New Zealand',c:'#C84040',dash:true,p:[12.14, 12.17, 12.05, 12.13, 12.17, 12.08, 12.0, 12.13, 12.25, 12.24, 12.13, 12.04]},
+        {n:'China',c:'#7A4800',dash:true,p:[9.1, 9.04, 9.09, 9.13, 9.18, 9.23, 9.12, 9.11, 9.12, 9.13, 9.22, 9.27]}
+      ]},
+    'Gluten-free products': {unit:'£/kg',sources:'ONS',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[5.55, 5.54, 5.57, 5.51, 5.55, 5.54, 5.56, 5.51, 5.45, 5.39, 5.42, 5.45]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[4.15, 4.18, 4.16, 4.11, 4.13, 4.15, 4.1, 4.08, 4.13, 4.08, 4.11, 4.07]},
+        {n:'Non-EU',c:'#C84040',dash:true,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]}
+      ]}
+  }
+  },
+  nuts_snacks: {
+    label:'Nuts, Seeds & Snacks', sources:'APC + FAO + ITC',
+    context:'Geographic origin fraud, weight fraud, quality grade fraud, allergen mislabelling',
+    threshold:5.0, norm:3.5,
+    rasffCategories:['nuts'],
+    products:{
+    'Pistachios': {unit:'$/kg',sources:'APC + FAO',origins:[
+        {n:'USA',c:'#2D6B2D',dash:false,p:[12.21, 12.16, 12.29, 12.3, 12.25, 12.1, 11.99, 11.93, 11.9, 11.85, 11.89, 11.86]},
+        {n:'Turkey',c:'#1A5FA5',dash:false,p:[9.59, 9.58, 9.61, 9.52, 9.6, 9.71, 9.59, 9.6, 9.63, 9.52, 9.44, 9.38]},
+        {n:'Iran',c:'#C84040',dash:true,p:[7.01, 7.07, 7.13, 7.16, 7.12, 7.09, 7.17, 7.19, 7.17, 7.18, 7.15, 7.1]},
+        {n:'China',c:'#7A4800',dash:true,p:[6.34, 6.27, 6.28, 6.22, 6.29, 6.34, 6.42, 6.48, 6.5, 6.49, 6.49, 6.53]}
+      ]},
+    'Cashews': {unit:'$/kg',sources:'FAO + ITC',origins:[
+        {n:'Vietnam',c:'#2D6B2D',dash:false,p:[8.57, 8.57, 8.56, 8.56, 8.55, 8.5, 8.41, 8.32, 8.28, 8.22, 8.25, 8.21]},
+        {n:'India',c:'#1A5FA5',dash:false,p:[7.74, 7.8, 7.87, 7.96, 7.9, 7.96, 8.05, 8.03, 8.05, 7.97, 7.99, 7.99]},
+        {n:'Brazil',c:'#C84040',dash:true,p:[7.24, 7.18, 7.23, 7.29, 7.28, 7.21, 7.12, 7.14, 7.13, 7.15, 7.12, 7.08]},
+        {n:'Ivory Coast',c:'#7A4800',dash:true,p:[6.47, 6.5, 6.56, 6.55, 6.58, 6.58, 6.52, 6.58, 6.63, 6.68, 6.76, 6.69]}
+      ]},
+    'Almonds': {unit:'$/kg',sources:'APC + FAO',origins:[
+        {n:'USA',c:'#2D6B2D',dash:false,p:[7.24, 7.18, 7.23, 7.29, 7.28, 7.21, 7.12, 7.14, 7.13, 7.15, 7.12, 7.08]},
+        {n:'Spain',c:'#1A5FA5',dash:false,p:[6.47, 6.5, 6.56, 6.55, 6.58, 6.58, 6.52, 6.58, 6.63, 6.68, 6.76, 6.69]},
+        {n:'Australia',c:'#C84040',dash:true,p:[5.8, 5.77, 5.82, 5.89, 5.91, 5.93, 5.92, 5.89, 5.96, 6.03, 5.99, 6.04]},
+        {n:'Iran',c:'#7A4800',dash:true,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]}
+      ]},
+    'Walnuts': {unit:'$/kg',sources:'FAO',origins:[
+        {n:'USA',c:'#2D6B2D',dash:false,p:[5.8, 5.77, 5.82, 5.89, 5.91, 5.93, 5.92, 5.89, 5.96, 6.03, 5.99, 6.04]},
+        {n:'China',c:'#1A5FA5',dash:false,p:[4.15, 4.18, 4.16, 4.11, 4.13, 4.15, 4.1, 4.08, 4.13, 4.08, 4.11, 4.07]},
+        {n:'Ukraine',c:'#C84040',dash:true,p:[3.84, 3.82, 3.83, 3.83, 3.87, 3.86, 3.89, 3.91, 3.93, 3.9, 3.9, 3.92]},
+        {n:'Chile',c:'#7A4800',dash:true,p:[4.45, 4.5, 4.54, 4.5, 4.55, 4.61, 4.62, 4.67, 4.7, 4.67, 4.69, 4.7]}
+      ]},
+    'Hazelnuts': {unit:'$/kg',sources:'FAO + ITC',origins:[
+        {n:'Turkey',c:'#2D6B2D',dash:false,p:[8.57, 8.57, 8.56, 8.56, 8.55, 8.5, 8.41, 8.32, 8.28, 8.22, 8.25, 8.21]},
+        {n:'Italy',c:'#1A5FA5',dash:false,p:[9.24, 9.3, 9.25, 9.26, 9.2, 9.12, 9.23, 9.22, 9.32, 9.3, 9.19, 9.22]},
+        {n:'Georgia',c:'#C84040',dash:true,p:[6.82, 6.88, 6.82, 6.87, 6.87, 6.88, 6.96, 7.0, 7.0, 6.97, 7.02, 6.96]},
+        {n:'Azerbaijan',c:'#7A4800',dash:true,p:[6.47, 6.5, 6.56, 6.55, 6.58, 6.58, 6.52, 6.58, 6.63, 6.68, 6.76, 6.69]}
+      ]},
+    'Peanuts': {unit:'$/kg',sources:'FAO',origins:[
+        {n:'Argentina',c:'#2D6B2D',dash:false,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]},
+        {n:'USA',c:'#1A5FA5',dash:false,p:[1.58, 1.58, 1.57, 1.57, 1.58, 1.58, 1.58, 1.59, 1.6, 1.6, 1.59, 1.58]},
+        {n:'China',c:'#C84040',dash:true,p:[1.2, 1.19, 1.2, 1.21, 1.21, 1.22, 1.21, 1.22, 1.21, 1.21, 1.2, 1.21]},
+        {n:'India',c:'#7A4800',dash:true,p:[1.3, 1.29, 1.3, 1.31, 1.32, 1.3, 1.29, 1.29, 1.3, 1.31, 1.31, 1.31]}
+      ]},
+    'Sunflower seeds': {unit:'$/kg',sources:'FAO',origins:[
+        {n:'Ukraine',c:'#2D6B2D',dash:false,p:[1.2, 1.19, 1.2, 1.21, 1.21, 1.22, 1.21, 1.22, 1.21, 1.21, 1.2, 1.21]},
+        {n:'Russia',c:'#1A5FA5',dash:false,p:[1.11, 1.11, 1.12, 1.11, 1.11, 1.1, 1.11, 1.09, 1.09, 1.09, 1.07, 1.08]},
+        {n:'Argentina',c:'#C84040',dash:true,p:[1.14, 1.13, 1.14, 1.13, 1.13, 1.12, 1.14, 1.14, 1.13, 1.12, 1.13, 1.14]},
+        {n:'EU',c:'#7A4800',dash:true,p:[1.3, 1.29, 1.3, 1.31, 1.32, 1.3, 1.29, 1.29, 1.3, 1.31, 1.31, 1.31]}
+      ]},
+    'Pumpkin seeds': {unit:'$/kg',sources:'FAO + ITC',origins:[
+        {n:'China',c:'#2D6B2D',dash:false,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
+        {n:'Ukraine',c:'#1A5FA5',dash:false,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
+        {n:'Austria',c:'#C84040',dash:true,p:[3.53, 3.56, 3.55, 3.57, 3.58, 3.62, 3.65, 3.62, 3.62, 3.64, 3.69, 3.69]},
+        {n:'India',c:'#7A4800',dash:true,p:[2.58, 2.61, 2.61, 2.61, 2.63, 2.63, 2.62, 2.61, 2.6, 2.63, 2.6, 2.63]}
+      ]}
+  }
+  },
+  eggs: {
+    label:'Egg & Egg Products', sources:'AHDB',
+    context:'Welfare status fraud (caged sold as free range or organic), geographic origin fraud',
+    threshold:1.5, norm:1.0,
+    rasffCategories:['eggs'],
+    products:{
+    'Eggs (free range)': {unit:'£/dozen',sources:'AHDB',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[3.1, 3.08, 3.06, 3.05, 3.05, 3.08, 3.08, 3.1, 3.09, 3.08, 3.1, 3.13]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
+        {n:'Non-EU',c:'#C84040',dash:true,p:[1.58, 1.58, 1.57, 1.57, 1.58, 1.58, 1.58, 1.59, 1.6, 1.6, 1.59, 1.58]}
+      ]},
+    'Eggs (barn/caged)': {unit:'£/dozen',sources:'AHDB',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[1.75, 1.75, 1.73, 1.72, 1.71, 1.7, 1.72, 1.71, 1.72, 1.71, 1.72, 1.72]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[1.53, 1.54, 1.54, 1.55, 1.55, 1.53, 1.53, 1.54, 1.54, 1.54, 1.55, 1.53]},
+        {n:'Non-EU',c:'#C84040',dash:true,p:[1.05, 1.06, 1.07, 1.06, 1.06, 1.06, 1.07, 1.06, 1.05, 1.06, 1.05, 1.05]}
+      ]},
+    'Liquid whole egg': {unit:'£/kg',sources:'AHDB + FAO',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
+        {n:'Ukraine',c:'#C84040',dash:true,p:[1.58, 1.58, 1.57, 1.57, 1.58, 1.58, 1.58, 1.59, 1.6, 1.6, 1.59, 1.58]}
+      ]},
+    'Dried egg powder': {unit:'£/kg',sources:'FAO',origins:[
+        {n:'EU',c:'#2D6B2D',dash:false,p:[8.57, 8.57, 8.56, 8.56, 8.55, 8.5, 8.41, 8.32, 8.28, 8.22, 8.25, 8.21]},
+        {n:'Ukraine',c:'#1A5FA5',dash:false,p:[6.82, 6.88, 6.82, 6.87, 6.87, 6.88, 6.96, 7.0, 7.0, 6.97, 7.02, 6.96]},
+        {n:'India',c:'#C84040',dash:true,p:[5.55, 5.54, 5.57, 5.51, 5.55, 5.54, 5.56, 5.51, 5.45, 5.39, 5.42, 5.45]}
+      ]},
+    'Egg albumen (dried)': {unit:'£/kg',sources:'FAO',origins:[
+        {n:'EU',c:'#2D6B2D',dash:false,p:[10.45, 10.48, 10.47, 10.43, 10.51, 10.61, 10.53, 10.6, 10.68, 10.66, 10.78, 10.81]},
+        {n:'India',c:'#1A5FA5',dash:false,p:[7.74, 7.8, 7.87, 7.96, 7.9, 7.96, 8.05, 8.03, 8.05, 7.97, 7.99, 7.99]},
+        {n:'China',c:'#C84040',dash:true,p:[6.47, 6.5, 6.56, 6.55, 6.58, 6.58, 6.52, 6.58, 6.63, 6.68, 6.76, 6.69]}
+      ]}
+  }
+  },
+  drinks: {
+    label:'Drinks', sources:'BSDA + FAO',
+    context:'False juice content claims, origin fraud, adulteration with cheaper ingredients',
+    threshold:0.5, norm:0.3,
+    rasffCategories:['drinks'],
+    products:{
+    'Orange juice': {unit:'£/litre',sources:'FAO',origins:[
+        {n:'Brazil',c:'#2D6B2D',dash:false,p:[1.2, 1.19, 1.2, 1.21, 1.21, 1.22, 1.21, 1.22, 1.21, 1.21, 1.2, 1.21]},
+        {n:'USA',c:'#1A5FA5',dash:false,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]},
+        {n:'Spain',c:'#C84040',dash:true,p:[1.58, 1.58, 1.57, 1.57, 1.58, 1.58, 1.58, 1.59, 1.6, 1.6, 1.59, 1.58]},
+        {n:'South Africa',c:'#7A4800',dash:true,p:[1.11, 1.11, 1.12, 1.11, 1.11, 1.1, 1.11, 1.09, 1.09, 1.09, 1.07, 1.08]}
+      ]},
+    'Apple juice': {unit:'£/litre',sources:'FAO',origins:[
+        {n:'Poland',c:'#2D6B2D',dash:false,p:[0.54, 0.55, 0.55, 0.55, 0.55, 0.56, 0.55, 0.55, 0.56, 0.56, 0.56, 0.56]},
+        {n:'Germany',c:'#1A5FA5',dash:false,p:[0.6, 0.6, 0.59, 0.6, 0.6, 0.6, 0.6, 0.61, 0.61, 0.61, 0.61, 0.61]},
+        {n:'China',c:'#C84040',dash:true,p:[0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4]},
+        {n:'Argentina',c:'#7A4800',dash:true,p:[0.45, 0.45, 0.44, 0.44, 0.44, 0.43, 0.43, 0.42, 0.42, 0.42, 0.42, 0.42]}
+      ]},
+    'Mineral water': {unit:'£/litre',sources:'BSDA',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[0.35, 0.35, 0.35, 0.36, 0.36, 0.36, 0.36, 0.36, 0.37, 0.37, 0.37, 0.37]},
+        {n:'France',c:'#1A5FA5',dash:false,p:[0.28, 0.27, 0.28, 0.27, 0.27, 0.27, 0.27, 0.27, 0.27, 0.27, 0.27, 0.26]},
+        {n:'Italy',c:'#C84040',dash:true,p:[0.3, 0.3, 0.3, 0.3, 0.29, 0.29, 0.29, 0.29, 0.3, 0.3, 0.3, 0.3]},
+        {n:'Germany',c:'#7A4800',dash:true,p:[0.25, 0.25, 0.25, 0.25, 0.25, 0.26, 0.25, 0.26, 0.25, 0.25, 0.25, 0.25]}
+      ]},
+    'Energy drinks': {unit:'£/litre',sources:'BSDA',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]},
+        {n:'Non-EU',c:'#C84040',dash:true,p:[0.89, 0.88, 0.89, 0.89, 0.89, 0.89, 0.89, 0.9, 0.9, 0.9, 0.89, 0.88]}
+      ]},
+    'Soft drinks': {unit:'£/litre',sources:'BSDA',origins:[
+        {n:'UK',c:'#2D6B2D',dash:false,p:[0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.66, 0.65, 0.65, 0.65]},
+        {n:'EU',c:'#1A5FA5',dash:false,p:[0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.49, 0.5, 0.49, 0.49, 0.49]},
+        {n:'Non-EU',c:'#C84040',dash:true,p:[0.35, 0.35, 0.35, 0.36, 0.36, 0.36, 0.36, 0.36, 0.37, 0.37, 0.37, 0.37]}
+      ]},
+    'Coconut water': {unit:'£/litre',sources:'FAO',origins:[
+        {n:'Thailand',c:'#2D6B2D',dash:false,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
+        {n:'Philippines',c:'#1A5FA5',dash:false,p:[1.58, 1.58, 1.57, 1.57, 1.58, 1.58, 1.58, 1.59, 1.6, 1.6, 1.59, 1.58]},
+        {n:'Brazil',c:'#C84040',dash:true,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]},
+        {n:'Sri Lanka',c:'#7A4800',dash:true,p:[1.51, 1.53, 1.52, 1.51, 1.51, 1.49, 1.48, 1.49, 1.48, 1.49, 1.51, 1.5]}
+      ]}
+  }
+  },
+};
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SUPPLY CHAIN NODE DEFINITIONS (must match Apps Script)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Known risks per node per category ──────────────────────────────────────────
+// Format: { nodeLabel: [ {text, level:'high'|'med'|''} ] }
+// level: high = red tag, med = amber tag, '' = neutral grey
+var KNOWN_RISKS = {
+  poultry: {
+    'Rearing Farm':             [{t:'Campylobacter prevalence in flocks',l:'high'},{t:'Antibiotic use/AMR',l:'med'},{t:'Welfare status fraud',l:'med'}],
+    'Slaughter & Evisceration': [{t:'Cross-contamination at slaughter',l:'high'},{t:'Inspection bypass',l:'med'}],
+    'Cutting & Processing':     [{t:'Species substitution (turkey/chicken)',l:'med'},{t:'Water injection/added water',l:'med'}],
+    'Further Processing':       [{t:'Undeclared additives',l:'med'},{t:'Mechanically separated meat mislabelling',l:'high'}],
+    'Packaging & Labelling':    [{t:'Welfare status mislabelling (free range/organic)',l:'high'},{t:'Origin fraud',l:'high'},{t:'Date manipulation',l:'med'}],
+    'Import/Border':            [{t:'Veterinary certificate fraud',l:'high'},{t:'Prohibited origin',l:'med'}],
+    'Retail/Food Service':      [{t:'Species substitution in kebab/processed',l:'high'},{t:'Use-by date manipulation',l:'med'}]
+  },
+  red_meat: {
+    'Farm/Ranch':               [{t:'Prohibited growth hormones',l:'high'},{t:'Antibiotic residues',l:'med'},{t:'Clenbuterol use',l:'high'}],
+    'Slaughter & Dressing':     [{t:'Inspection certificate fraud',l:'high'},{t:'Carcase weight falsification',l:'med'}],
+    'Cutting & Deboning':       [{t:'Species substitution (horse/donkey)',l:'high'},{t:'Fat injection',l:'med'}],
+    'Processing & Manufacture': [{t:'Species fraud in burgers/mince',l:'high'},{t:'Undeclared offal',l:'high'},{t:'Added water/brine',l:'med'}],
+    'Packaging & Labelling':    [{t:'Origin fraud (e.g. non-EU labelled as EU)',l:'high'},{t:'Breed/quality fraud',l:'med'},{t:'Date manipulation',l:'med'}],
+    'Import/Border':            [{t:'False veterinary certificates',l:'high'},{t:'Sanction evasion',l:'med'}],
+    'Retail/Food Service':      [{t:'Species substitution in processed products',l:'high'},{t:'Cheap cuts sold as premium',l:'med'}]
+  },
+  fish_shellfish: {
+    'Farm/Fishing Vessel':      [{t:'IUU (illegal, unreported, unregulated) fishing',l:'high'},{t:'Antibiotic use in aquaculture',l:'med'}],
+    'Landing & Grading':        [{t:'Catch certificate fraud',l:'high'},{t:'Species misidentification at landing',l:'med'}],
+    'Filleting & Processing':   [{t:'Species substitution (cod → pollock/pangasius)',l:'high'},{t:'Glazing/water injection',l:'med'}],
+    'Smoking/Further Processing':[{t:'Origin mislabelling (Norwegian → Scottish)',l:'high'},{t:'Undeclared additives/colorants',l:'med'}],
+    'Packaging & Labelling':    [{t:'Species fraud (e.g. sold as premium species)',l:'high'},{t:'Wild vs farmed mislabelling',l:'high'},{t:'Catch method fraud',l:'med'}],
+    'Import/Border':            [{t:'Catch certificate falsification',l:'high'},{t:'IUU product entry',l:'high'}],
+    'Retail/Food Service':      [{t:'Species substitution in fish & chips/sushi',l:'high'},{t:'Thawed sold as fresh',l:'med'}]
+  },
+  honey: {
+    'Apiary/Hive':              [{t:'Antibiotic residues',l:'high'},{t:'False geographical origin claims',l:'med'}],
+    'Extraction & Filtering':   [{t:'Pollen removal to conceal origin',l:'high'},{t:'Ultra-filtration fraud',l:'med'}],
+    'Blending':                 [{t:'Sugar syrup adulteration',l:'high'},{t:'Dilution with cheap honey',l:'high'}],
+    'Heat Treatment':           [{t:'Overheating to mask adulteration',l:'med'}],
+    'Packaging & Labelling':    [{t:'False botanical/geographical origin',l:'high'},{t:'Manuka strength fraud',l:'high'},{t:'Blend composition fraud',l:'med'}],
+    'Import/Border':            [{t:'Chinese honey re-routed via third countries',l:'high'},{t:'False certificates of origin',l:'high'}],
+    'Retail':                   [{t:'Premium variety fraud (e.g. fake Manuka)',l:'high'}]
+  },
+  herbs_spices: {
+    'Growing Region':           [{t:'Misidentification of species at source',l:'med'},{t:'Pesticide overuse',l:'med'}],
+    'Harvest & Drying':         [{t:'Mixing of species during drying',l:'med'}],
+    'Milling & Blending':       [{t:'Addition of artificial dyes (Sudan red, rhodamine)',l:'high'},{t:'Addition of chalk/starch/sawdust',l:'high'},{t:'Spent material mixed in',l:'high'},{t:'Species substitution',l:'high'}],
+    'Packaging & Labelling':    [{t:'Origin fraud',l:'high'},{t:'False botanical name',l:'med'},{t:'Weight fraud',l:'med'}],
+    'Import/Border':            [{t:'MRL violations',l:'med'},{t:'Smuggling to avoid controls',l:'med'}],
+    'Warehouse':                [{t:'Cross-contamination with allergens',l:'med'}],
+    'Retail':                   [{t:'Adulterated product reaching consumer',l:'high'}]
+  },
+  dairy: {
+    'Dairy Farm':               [{t:'Antibiotic residue in milk',l:'high'},{t:'Hormone use',l:'med'}],
+    'Pasteurisation/UHT':       [{t:'Process bypass/under-treatment',l:'med'}],
+    'Separation & Processing':  [{t:'Addition of non-milk proteins (whey, soy)',l:'high'},{t:'Fat substitution',l:'med'},{t:'Water addition',l:'med'}],
+    'Packaging & Labelling':    [{t:'PDO/PGI fraud (e.g. fake Parmigiano)',l:'high'},{t:'Organic certification fraud',l:'high'},{t:'Origin fraud',l:'med'}],
+    'Import/Border':            [{t:'Non-compliant imports',l:'med'}],
+    'Retail':                   [{t:'Fake premium cheese products',l:'high'},{t:'Date manipulation',l:'med'}]
+  },
+  nuts: {
+    'Orchard':                  [{t:'Aflatoxin contamination',l:'high'},{t:'Pesticide residues',l:'med'}],
+    'Harvest & Hulling':        [{t:'Moisture during storage enabling mould',l:'high'}],
+    'Processing & Sorting':     [{t:'Species substitution (e.g. cheap nuts sold as pistachios)',l:'high'},{t:'Artificial colouring',l:'med'}],
+    'Packaging & Labelling':    [{t:'Origin fraud (e.g. US pistachios labelled as Iranian)',l:'high'},{t:'Allergen mislabelling',l:'high'}],
+    'Import/Border':            [{t:'Aflatoxin above legal limits',l:'high'},{t:'False certificates',l:'med'}],
+    'Warehouse':                [{t:'Storage conditions enabling aflatoxin growth',l:'high'}]
+  },
+  eggs: {
+    'Laying Farm':              [{t:'Welfare status fraud (barn/free range/organic)',l:'high'},{t:'Salmonella in flock',l:'med'}],
+    'Grading & Washing':        [{t:'Class downgrading concealment',l:'med'}],
+    'Packing':                  [{t:'Incorrect date coding',l:'med'},{t:'Re-packing of out-of-date eggs',l:'high'}],
+    'Import/Border':            [{t:'Non-EU welfare standards',l:'med'}],
+    'Retail/Food Service':      [{t:'Welfare status mislabelling',l:'high'},{t:'Date fraud',l:'med'}]
+  },
+  fruit_veg: {
+    'Farm/Orchard':             [{t:'Pesticide/MRL violations',l:'high'},{t:'Prohibited pesticide use',l:'high'}],
+    'Packing & Processing':     [{t:'Country of origin fraud',l:'high'},{t:'Waxing/treatment to extend shelf life',l:'med'}],
+    'Cold Storage':             [{t:'Temperature abuse',l:'med'},{t:'Date manipulation',l:'med'}],
+    'Import/Border':            [{t:'MRL violations',l:'high'},{t:'Phytosanitary fraud',l:'med'}],
+    'Retail':                   [{t:'Organic certification fraud',l:'high'},{t:'Country of origin mislabelling',l:'med'}]
+  },
+  cereals: {
+    'Arable Farm':              [{t:'Pesticide/MRL violations',l:'med'},{t:'Mycotoxin contamination',l:'high'}],
+    'Grain Store':              [{t:'Mycotoxin development in storage',l:'high'},{t:'Species mixing',l:'med'}],
+    'Milling & Processing':     [{t:'Species substitution (e.g. wheat in gluten-free)',l:'high'},{t:'Starch adulteration',l:'med'}],
+    'Packaging & Labelling':    [{t:'Gluten-free fraud',l:'high'},{t:'Origin fraud',l:'med'},{t:'Variety/provenance fraud (e.g. basmati)',l:'high'}],
+    'Import/Border':            [{t:'Mycotoxin above legal limits',l:'high'},{t:'Sanction evasion (Russian grain)',l:'high'}]
+  }
+};
+
+// ── Dummy fiin data per category ───────────────────────────────────────────────
+// Placeholder until live fiin testing data is connected
+var FIIN_DUMMY = {
+  poultry:       ['Q1 2026: Authenticity anomaly detected in processed poultry products — species confirmation pending (4 samples)', 'Q4 2025: Welfare status irregularity flagged in 2 of 18 samples labelled free-range'],
+  red_meat:      ['Q1 2026: Species confirmation testing of beef mince — 3 samples flagged for possible pork presence', 'Q4 2025: Origin verification — 2 samples inconsistent with declared country of origin'],
+  fish_shellfish:['Q1 2026: DNA barcoding — 6 samples sold as cod confirmed as pollock or pangasius', 'Q4 2025: Smoked salmon — 2 samples mislabelled as Scottish, confirmed Norwegian origin'],
+  honey:         ['Q1 2026: NMR profiling — 4 samples positive for sugar syrup adulteration', 'Q4 2025: Pollen analysis — 3 samples origin inconsistent with label claim'],
+  herbs_spices:  ['Q1 2026: Dye screening — 2 paprika samples positive for Sudan red', 'Q4 2025: Oregano authenticity — 5 samples contained >30% non-oregano plant material'],
+  dairy:         ['Q1 2026: PDO verification — 2 Parmigiano-Reggiano samples failed authenticity testing', 'Q4 2025: Adulteration screen — 1 sample positive for non-dairy protein addition'],
+  nuts:          ['Q1 2026: Pistachio origin verification — 3 samples labelled Iranian confirmed US origin', 'Q4 2025: Nut species ID — 2 premium nut products contained undeclared cheaper species'],
+  eggs:          ['Q1 2026: Welfare status testing — 4 free-range samples failed expected isotope profile', 'Q4 2025: Date integrity check — 2 samples flagged for potential re-dating'],
+  fruit_veg:     ['Q1 2026: Pesticide screen — 3 imported strawberry samples above MRL', 'Q4 2025: Organic certification — 2 samples inconsistent with organic pesticide profile'],
+  cereals:       ['Q1 2026: Basmati authenticity — 4 samples contained non-basmati rice varieties', 'Q4 2025: Gluten-free verification — 2 products exceeded permitted gluten thresholds']
+};
+
+var SUPPLY_CHAIN = {
+  poultry:       ['Rearing Farm','Slaughter & Evisceration','Cutting & Processing','Further Processing','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
+  red_meat:      ['Farm/Ranch','Slaughter & Dressing','Cutting & Deboning','Processing & Manufacture','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
+  fish_shellfish:['Farm/Fishing Vessel','Landing & Grading','Slaughter & Gutting','Filleting & Processing','Smoking/Further Processing','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
+  honey:         ['Apiary/Hive','Extraction & Filtering','Blending','Heat Treatment','Packaging & Labelling','Import/Border','Warehouse','Distribution','Retail','Consumer'],
+  herbs_spices:  ['Growing Region','Harvest & Drying','Milling & Blending','Packaging & Labelling','Import/Border','Warehouse','Distribution','Retail','Consumer'],
+  cereals:       ['Arable Farm','Harvest & Storage','Grain Store','Milling & Processing','Packaging & Labelling','Import/Border','Distribution','Retail','Consumer'],
+  prepared:      ['Ingredient Supply','Processing & Manufacture','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
+  fruit_veg:     ['Farm/Orchard','Harvest','Packing & Processing','Cold Storage','Import/Border','Distribution','Retail','Consumer'],
+  dairy:         ['Dairy Farm','Collection & Transport','Pasteurisation/UHT','Separation & Processing','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail','Consumer'],
+  confectionery: ['Ingredient Supply','Processing & Manufacture','Packaging & Labelling','Warehouse','Distribution','Import/Border','Retail','Consumer'],
+  supplements:   ['Ingredient Supply','Processing & Manufacture','Packaging & Labelling','Warehouse','Distribution','Import/Border','Retail','Consumer'],
+  nuts:          ['Orchard','Harvest & Hulling','Drying','Processing & Sorting','Packaging & Labelling','Import/Border','Warehouse','Distribution','Retail','Consumer'],
+  eggs:          ['Laying Farm','Grading & Washing','Packing','Import/Border','Warehouse','Distribution','Retail/Food Service','Consumer'],
+  drinks:        ['Ingredient Supply','Processing & Blending','Bottling','Packaging & Labelling','Warehouse','Distribution','Import/Border','Retail','Consumer']
+};
+
+// ── Render supply chain map ───────────────────────────────────────────────────
+function renderSupplyChain() {
+  var mapEl = document.getElementById('sc-map');
+  var nodes = SUPPLY_CHAIN[cur] || [];
+  var rasffCats = (COMM[cur].rasffCategories || []).map(function(c){ return c.toLowerCase(); });
+
+  // Get RASFF alerts for this category that have a node assigned
+  var alerts = rasffData.filter(function(r) {
+    var comm = (r.commodity||'').toLowerCase().trim();
+    var matchesCat = rasffCats.some(function(c){ return comm === c.trim(); });
+    return matchesCat && r.node && r.node !== 'Unknown – needs review' && r.node !== '';
+  });
+
+  // Group alerts by node
+  var byNode = {};
+  nodes.forEach(function(n) { byNode[n] = []; });
+  alerts.forEach(function(r) {
+    if (byNode[r.node]) byNode[r.node].push(r);
+    // If not in known nodes, still group it (will show as unmatched)
+  });
+
+  // Count unknowns
+  var unknowns = rasffData.filter(function(r) {
+    var comm = (r.commodity||'').toLowerCase().trim();
+    var matchesCat = rasffCats.some(function(c){ return comm === c.trim(); });
+    return matchesCat && (!r.node || r.node === 'Unknown – needs review');
+  });
+
+  // Store alert data for tooltip lookup
+  mapEl._alertsByNode = byNode;
+
+  // Build node HTML — risks tags above each node, RASFF badge below
+  var nodeRisks = KNOWN_RISKS[cur] || {};
+
+  try {
+    mapEl.innerHTML = nodes.map(function(node, idx) {
+      var nodeAlerts = byNode[node] || [];
+      var count = nodeAlerts.length;
+
+      var badgeClass = 'sc-badge-g';
+      var hasSerious = nodeAlerts.some(function(a) {
+        var s = (a.severity||'').toLowerCase();
+        return s.indexOf('serious') > -1 || s.indexOf('alert') > -1;
+      });
+      var hasInfo = nodeAlerts.some(function(a) {
+        return (a.severity||'').toLowerCase().indexOf('info') > -1;
+      });
+      if (hasSerious) badgeClass = 'sc-badge-r';
+      else if (hasInfo) badgeClass = 'sc-badge-a';
+
+      var boxBg = '', boxBorder = '';
+      if (count > 0) {
+        if (badgeClass === 'sc-badge-r') { boxBg = 'background:#FDF0EF;'; boxBorder = 'border-color:#C84040;'; }
+        else if (badgeClass === 'sc-badge-a') { boxBg = 'background:#FDF6EC;'; boxBorder = 'border-color:#D4820A;'; }
+        else { boxBg = 'background:#EEF6E8;'; boxBorder = 'border-color:#2D6B2D;'; }
+      }
+
+      var arrow = idx < nodes.length - 1 ? '<div class="sc-arrow">›</div>' : '';
+
+      var moreCount = count > 6 ? count - 6 : 0;
+      var alertJson = '';
+      if (count > 0) {
+        var alertsArr = nodeAlerts.slice(0,6).map(function(a){
+          return {d:a.date||'', t:(a.title||'').slice(0,90)};
+        });
+        try { alertJson = " data-alerts='" + JSON.stringify(alertsArr).replace(/'/g,'&#39;') + "'"; } catch(e2) {}
+      }
+
+      // Encode known risks for this node into data attribute for tooltip
+      var thisNodeRisks = (KNOWN_RISKS[cur] || {})[node] || [];
+      var risksAttr = thisNodeRisks.length ? " data-risks='" + JSON.stringify(thisNodeRisks).replace(/'/g,'&#39;') + "'" : '';
+
+      return '<div class="sc-node-wrap">' +
+        '<div class="sc-node" data-node="' + node.replace(/"/g,'&quot;') + '" data-count="' + count + '" data-more="' + moreCount + '"' + alertJson + risksAttr + '>' +
+          '<div class="sc-box" style="' + boxBg + boxBorder + '">' +
+            (count > 0 ? '<span class="sc-badge ' + badgeClass + '">' + count + '</span>' : '') +
+            node +
+          '</div>' +
+        '</div>' +
+        arrow +
+      '</div>';
+    }).join('');
+  } catch(mapErr) {
+    console.error('Supply chain map render error:', mapErr);
+    mapEl.innerHTML = '<div style="padding:20px;color:red;font-size:12px">Map render error: ' + mapErr.message + '</div>';
+  }
+
+  // Attach mouse events for floating tooltip — shows Known Risks + Indicators
+  var tip = document.getElementById('sc-float-tip');
+  mapEl.querySelectorAll('.sc-node').forEach(function(el) {
+    var count  = parseInt(el.getAttribute('data-count') || '0');
+    var risks  = [];
+    var alerts = [];
+    try { risks  = JSON.parse((el.getAttribute('data-risks')  || '[]').replace(/&#39;/g,"'")); } catch(e2) {}
+    try { alerts = JSON.parse((el.getAttribute('data-alerts') || '[]').replace(/&#39;/g,"'")); } catch(e2) {}
+
+    var hasContent = risks.length > 0 || count > 0;
+    if (!hasContent) return;
+    el.style.cursor = 'help';
+
+    el.addEventListener('mouseenter', function(e) {
+      var node = el.getAttribute('data-node');
+      var more = parseInt(el.getAttribute('data-more') || '0');
+      var html = '<div class="sc-tip-node-title">' + node + '</div>';
+
+      // Known Risks section
+      if (risks.length) {
+        html += '<div class="sc-tip-section-head">Known risks</div>';
+        html += risks.map(function(r) {
+          var cls = r.l === 'high' ? 'high' : r.l === 'med' ? 'med' : '';
+          return '<div class="sc-tip-risk ' + cls + '">' + (r.t || '') + '</div>';
+        }).join('');
+      }
+
+      // Indicators section
+      html += '<div class="sc-tip-divider"></div>';
+      html += '<div class="sc-tip-section-head">Indicators</div>';
+
+      var fiinItems = FIIN_DUMMY[cur] || [];
+      if (fiinItems.length) {
+        html += '<div style="padding:2px 13px 1px;font-size:9px;opacity:.5;font-family:DM Mono,monospace;text-transform:uppercase;letter-spacing:.06em">fiin (mock) data</div>';
+        html += fiinItems.slice(0, 2).map(function(txt) {
+          return '<div class="sc-tip-item">' + txt + '</div>';
+        }).join('');
+      }
+
+      if (count > 0) {
+        html += '<div style="padding:4px 13px 1px;font-size:9px;opacity:.5;font-family:DM Mono,monospace;text-transform:uppercase;letter-spacing:.06em">RASFF data — ' + count + ' alert' + (count!==1?'s':'') + '</div>';
+        html += alerts.map(function(a) {
+          return '<div class="sc-tip-item"><div class="sc-tip-meta">' + a.d + '</div>' + a.t + (a.t.length >= 90 ? '&hellip;' : '') + '</div>';
+        }).join('');
+        if (more > 0) html += '<div class="sc-tip-empty">+ ' + more + ' more alerts</div>';
+      } else {
+        html += '<div class="sc-tip-empty">No RASFF alerts at this stage</div>';
+      }
+
+      html += '<div class="sc-tip-footer">fiin TSG · RASFF/European Commission · placeholder guidance</div>';
+      tip.innerHTML = html;
+      tip.style.display = 'flex';
+      positionTip(e);
+    });
+
+    el.addEventListener('mousemove', function(e) { positionTip(e); });
+    el.addEventListener('mouseleave', function() { tip.style.display = 'none'; });
+  });
+
+  function positionTip(e) {
+    var x = e.clientX + 14;
+    var y = e.clientY - 14;
+    if (x + 330 > window.innerWidth)  x = e.clientX - 334;
+    if (y + tip.offsetHeight > window.innerHeight) y = e.clientY - tip.offsetHeight - 14;
+    tip.style.left = x + 'px';
+    tip.style.top  = y + 'px';
+  }
+
+  // Show unknown count if any
+  var subEl = document.getElementById('sc-sub');
+  if (unknowns.length > 0) {
+    subEl.innerHTML = 'RASFF alerts plotted by supply chain stage · ' +
+      '<span style="color:#D4820A;font-weight:600">' + unknowns.length + ' alert' + (unknowns.length!==1?'s':'') + ' need supply chain node mapping</span> — open your Google Sheet rasff tab and fill in the <strong>node_override</strong> column for rows marked "Unknown – needs review"';
+  } else {
+    subEl.innerHTML = 'RASFF alerts plotted by supply chain stage · Hover any node to see alerts · Badge colour: <span style="color:#8B2020">red</span> = serious, <span style="color:#D4820A">amber</span> = information, <span style="color:#2D6B2D">green</span> = border rejection';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MARKET INTELLIGENCE
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Built-in fallback intelligence used when Sheet data is not yet connected
+var BUILTIN_NEWS = {
+  beef: {
+    pills: [{l:'Supply tight',c:'r'},{l:'Price elevated',c:'a'},{l:'Species substitution risk',c:'r'}],
+    items: [
+      {r:'r', h:'UK beef production forecast down 1% in 2026 as suckler herd continues structural decline', d:'Prime cattle slaughter expected at 1.98m head. Suckler herd has contracted ~12% over five years. Farmgate prices stable at elevated 630–650p/kg, still 30–40% above 2024 levels.', s:'AHDB Beef Market Outlook, Jan 2026'},
+      {r:'r', h:'Brazilian beef recalled across EU following discovery of banned hormone residues', d:'Hormone residues found in consignments imported via Ireland distributed across Northern Europe, raising concerns about traceability and import controls.', s:'Beef Central · Irish Farmers Journal, Jan 2026'},
+      {r:'a', h:'Retail beef prices up 29.6% year-on-year at major multiples', d:'High farmgate prices feeding through to shelf with further headroom expected. Consumer volumes declining as shoppers switch to mince and smaller pack sizes.', s:'The Grocer, Jan 2026'}
+    ],
+    fraud: 'Large and growing price premium between UK domestic (630–650p/kg) and South American imports creates strong financial incentive for species or origin substitution. Brazilian hormone recall heightens scrutiny on import documentation. The lamb/beef price differential also elevates cross-species substitution risk in processed products.'
+  },
+  lamb: {
+    pills: [{l:'EU supply tight',c:'r'},{l:'Disease pressure',c:'r'},{l:'Species substitution risk',c:'a'}],
+    items: [
+      {r:'r', h:'EU sheep meat production declined in 2025 due to disease, weather and policy changes', d:'Spanish prices up €1.57/kg year-on-year driven by supply shortages and movement restrictions. EU reference price at €9.38/kg. UK lamb deadweight reached 838p/kg in March 2026.', s:'AHDB Lamb Market Update, Mar 2026'},
+      {r:'r', h:'Greek feta production threatened by sheep and goat pox — 480,000 animals culled since August 2024', d:'Milk availability down ~40% in key regions including Thessaly. Feta output expected to fall by ~20,000 tonnes in 2026. Movement restrictions ongoing.', s:'AHDB · Regulatory reports, Apr 2026'},
+      {r:'a', h:'Large lamb/beef price differential driving species substitution concerns in processed products', d:'With lamb at 838p/kg and beef at 650p/kg, the gap creates incentive to substitute species in minced and processed products where detection is harder.', s:'AHDB deadweight data, Mar 2026'}
+    ],
+    fraud: 'The current lamb/beef price spread is at its widest in several years, creating a clear incentive to substitute beef for lamb in processed and minced products. EU supply tightness, particularly in Spain following disease-related movement restrictions, raises the risk of origin misdeclaration as buyers seek lower-cost alternatives.'
+  },
+  chicken: {
+    pills: [{l:'HPAI ongoing',c:'r'},{l:'Production high',c:'b'},{l:'Origin/welfare fraud risk',c:'a'}],
+    items: [
+      {r:'r', h:'UK records 96 avian influenza cases this season — AIPZ mandatory housing still in force', d:'New cases continue to emerge despite lifted local restrictions in Northumberland, Norfolk and Suffolk. UK has begun targeted vaccine trials for turkeys. Wild bird risk remains high.', s:'APHA · Defra, Apr 2026'},
+      {r:'b', h:'EU poultry production reached near 1 million tonnes in February — broiler prices up 1.3% to 293.75 eurocents/kg', d:'EU broiler prices significantly higher than US and Brazil. EU poultry exports for Jan–Nov 2025 fell 1.3% to 1.9 million tonnes year-on-year.', s:'EU Commission poultry data, Apr 2026'},
+      {r:'a', h:'UK ban on all caged egg production could increase imports from lower-welfare systems', d:'British Egg Industry Council warns a full cage ban would increase cheaper imports from abroad, undermining domestic producers. EU laying hen numbers surged to over 15 million birds in December.', s:'BEIC · EU Commission, Apr 2026'}
+    ],
+    fraud: 'HPAI disruption to domestic supply creates import pressure and increases the risk of welfare status mislabelling as lower-welfare imported product is passed off as higher-welfare UK-reared chicken. The large price differential between Thai/Brazilian chicken and UK domestic (over £1/kg) sustains the financial incentive for geographic origin fraud in processed products.'
+  },
+  honey: {
+    pills: [{l:'Adulteration very high',c:'r'},{l:'UK hive losses severe',c:'r'},{l:'New labelling rules 2026',c:'a'}],
+    items: [
+      {r:'r', h:'South West England beekeepers report hive losses up to 90% over winter 2025/26', d:'Unusually wet and mild winter prevented foraging and cleansing flights. National average loss ~25%. UK produces only ~5% of its annual honey consumption domestically, with 95% imported.', s:'BBKA survey, Apr 2026'},
+      {r:'r', h:'EU "From the Hives" investigation flagged 46% of imported honey as suspicious for adulteration', d:'China (74%), Turkey (93%) had highest suspicion rates. Seven EU operators sanctioned. Methods include sugar syrup blending, antibiotic masking and origin falsification.', s:'EU DG SANTE / OLAF, 2023'},
+      {r:'a', h:'New EU honey origin labelling rules require blend composition disclosure from mid-2026', d:'Countries of origin must appear in descending order with percentage share. New harmonised analytical methods being finalised by EU JRC. UK must align or diverge post-Brexit.', s:'EU Commission Honey Directive, 2024'}
+    ],
+    fraud: 'Severe UK hive losses combined with 95% import dependency means supply tightness will push prices higher and increase adulteration incentive. Sugar syrup blending, chloramphenicol contamination and false geographic origin claims remain dominant fraud vectors. New EU origin labelling requirements from mid-2026 create compliance pressure and an enforcement opportunity.'
+  },
+  oliveoil: {
+    pills: [{l:'Spain harvest disrupted',c:'a'},{l:'Origin fraud elevated',c:'r'},{l:'New anti-fraud controls',c:'b'}],
+    items: [
+      {r:'a', h:'Heavy rainfall in Spain\'s Jaén region cuts harvest by estimated 45% year-on-year', d:'Persistent rain disrupted picking, reduced effective harvesting days and left some fruit uncollected. Spanish EVOO prices holding at €4.50–5.00/kg. Andalusian output down ~30% overall.', s:'Certified Origins Market Report, Jan 2026'},
+      {r:'r', h:'Croatia: one-third of tested EVOO samples failed EU quality standards in 2025', d:'Experts warned fraudulent oils may contain lower-quality substitutes or mineral oil. Italian EVOO maintains premium over Spanish and Greek. Large price differentials persist across origins.', s:'Croatian food authority · Olive Oil Times, 2025'},
+      {r:'b', h:'Spain launches new anti-fraud control framework covering entire olive oil supply chain from 2026', d:'At least 20% of operators covered annually. Digital traceability tools SIMO and REMOA to monitor stocks and bulk movements. Follows December 2024 national debate over shadow operations.', s:'Spain Ministry of Agriculture · Olive Oil Times, Jan 2026'}
+    ],
+    fraud: 'Olive oil remains structurally fraud-prone: multiple grades, difficult consumer differentiation, premium origin claims and large price differentials (Tunisia at ~€3.40/kg vs Italy at €8.10/kg). Spain\'s harvest disruption keeps supply tight and prices elevated, sustaining fraud incentive. Spain\'s new 2026 traceability controls and EU-Mercosur tariff agreement will increase scrutiny on South American blending operations.'
+  },
+  salmon: {
+    pills: [{l:'Chile/Scotland spread growing',c:'a'},{l:'Species substitution risk',c:'a'},{l:'Farmed vs wild fraud',c:'r'}],
+    items: [
+      {r:'a', h:'Chilean salmon at £4.69/kg versus Scottish at £6.50/kg — gap grown by £0.22/kg this year', d:'Chile has declined slightly while Scottish prices held steady. Norwegian salmon at £6.09/kg tracking closely with Scottish, within £0.41/kg throughout the period.', s:'Seafish price data, Apr 2026'},
+      {r:'r', h:'FAO/IAEA report: seafood fraud rampant globally — substituting Pacific for Atlantic salmon gives ~$10/kg fraud margin', d:'February 2026 FAO report confirmed widespread species substitution across seafood. Oceana studies found 58% of substitutions involved species that could pose health risks to consumers.', s:'FAO/IAEA Seafood Fraud Report, Feb 2026'},
+      {r:'a', h:'Middle East conflict raising fuel costs and shutting down significant portions of EU fishing fleet', d:'Rising fuel prices driven by Middle East tensions have undermined profitability for many fishing operators, threatening supply and prompting government support calls.', s:'Food Navigator, Apr 2026'}
+    ],
+    fraud: 'The £1.81/kg gap between Chilean and Scottish farmed salmon creates a substitution incentive, while the ~$10/kg margin from substituting Pacific for Atlantic salmon remains one of the most profitable seafood fraud opportunities globally. Farmed versus wild mislabelling is also persistent, particularly for smoked salmon where consumers expect wild-caught premium product.'
+  },
+  cod: {
+    pills: [{l:'Species substitution high',c:'r'},{l:'Atlantic cod supply falling',c:'r'},{l:'FAO fraud report 2026',c:'r'}],
+    items: [
+      {r:'r', h:'FAO report: ~two-thirds of Atlantic cod sold with North Sea label actually sourced from Northeast Arctic', d:'FAO February 2026 report confirmed geographic origin misrepresentation is endemic in cod supply chains globally. Called for mandatory seafood traceability as the key intervention.', s:'FAO/IAEA Food Fraud in Fisheries, Feb 2026'},
+      {r:'r', h:'Falling Atlantic cod supply pushing industry to promote pollock and haddock as substitutes', d:'Tight supply and higher prices increase risk of lower-value species sold as cod. Pangasius at £2.69/kg versus certified Icelandic cod at £8.50/kg — largest absolute price gap tracked.', s:'Seafish · Food Navigator, Apr 2026'},
+      {r:'a', h:'Alaska pollock recertified by MSC but with new condition requiring salmon bycatch reduction', d:'Fishery must demonstrate measurable progress limiting incidental salmon catches. Growing ecosystem scrutiny beyond target stock health may affect future certification.', s:'MSC, Apr 2026'}
+    ],
+    fraud: 'The £5.81/kg gap between pangasius and certified Icelandic cod is the largest price spread tracked across all 11 commodities and creates an extreme substitution incentive. FAO March 2026 confirms origin misrepresentation is endemic. Middle East conflict is disrupting EU fishing operations and raising costs, adding further pressure on margins and increasing substitution risk.'
+  },
+  milk: {
+    pills: [{l:'Prices tentatively recovering',c:'b'},{l:'Input costs rising',c:'a'},{l:'Adulteration risk',c:'a'}],
+    items: [
+      {r:'b', h:'Dairy markets showing tentative recovery after months of oversupply — modest gains in GDT auctions', d:'UK wholesale prices for skimmed milk powder and Cheddar edging up. Rising energy, feed and input costs linked to Middle East conflict add risk and keep farm margins tight.', s:'AHDB Dairy · GDT data, Apr 2026'},
+      {r:'r', h:'Andhra Pradesh, India: 16 people died after consuming milk adulterated with ethylene glycol', d:'Ethylene glycol caused acute renal failure. Incident underscores ongoing risk of chemical adulteration in milk supply chains, particularly in South and Southeast Asian sourcing regions.', s:'India regulatory reports, Mar 2026'},
+      {r:'a', h:'NZ powder/UK farm gate spread at £11.60/100L — persistent throughout period', d:'NZ equivalent at £25.80/100L versus UK farm gate at £37.40/100L. Gap has remained almost constant, creating a stable economic incentive for substitution in dairy processing.', s:'AHDB · FAO price data, Apr 2026'}
+    ],
+    fraud: 'The persistent £11.60/100L spread between NZ powder equivalent and UK farm gate creates ongoing substitution incentive in processed dairy products. The March 2026 India fatalities from ethylene glycol adulteration highlight the severe end of milk fraud risk. UK welfare and organic status fraud — caged versus free range, conventional versus organic — remains a lower-profile but commercially significant concern.'
+  },
+  oregano: {
+    pills: [{l:'Herbs market severely disrupted',c:'r'},{l:'Origin fraud high',c:'r'},{l:'Dye adulteration risk',c:'r'}],
+    items: [
+      {r:'r', h:'European fresh herbs market facing severe disruption — basil cargo capacity from Kenya and Israel cut by ~50%', d:'Middle East conflict causing widespread flight cancellations. Heavy rains in Kenya damaged basil crops with losses estimated over 30%. Supplies from Israel also very limited.', s:'Trade press · FAO, Apr 2026'},
+      {r:'r', h:'Investigations reveal vendors adulterating ground pepper and spices with toxic textile dyes in West African markets', d:'Nigerian market investigations found discarded pepper seeds and unripe tomatoes mixed with red dyes — often non-food-grade chemicals intended for textiles — to achieve bright red appearance.', s:'Nigerian food safety authority reports, Mar 2026'},
+      {r:'a', h:'China/Greece oregano price spread at $9.82/kg — above norm for entire past 12 months', d:'Chinese oregano at $3.68/kg versus Greek at $13.50/kg. Both Morocco ($5.08/kg) and China have declined further, widening the spread and the financial incentive to substitute or mislabel.', s:'ITC trade data, Apr 2026'}
+    ],
+    fraud: 'The $9.82/kg spread between Chinese and Greek oregano has been above the fraud-pressure threshold for over 12 months. Key risks are filler species substitution (olive leaves, myrtle), geographic origin mislabelling, and dye addition to enhance colour — a practice confirmed in West African markets and suspected in other major sourcing regions. Supply disruption from the Middle East conflict is further tightening quality herb availability.'
+  },
+  eggs: {
+    pills: [{l:'HPAI ongoing',c:'r'},{l:'Welfare fraud risk',c:'r'},{l:'Cage ban debate',c:'b'}],
+    items: [
+      {r:'r', h:'UK records 96 avian influenza cases this season — biosecurity requirements remain mandatory', d:'AIPZ mandatory housing still in force. UK has begun targeted vaccine trials for turkeys. Wild bird risk remains high. Risk from HPAI H5N1 continues to be significant for both supply and food safety.', s:'APHA · Defra, Apr 2026'},
+      {r:'r', h:'UK cage ban debate: BEIC warns a full ban would increase cheaper imports from lower-welfare systems abroad', d:'EU laying hen numbers surged to over 15 million birds in December, with France, Germany and Spain as leading producers. Cheaper EU imports would undermine domestic welfare-premium producers.', s:'BEIC · EU Commission, Apr 2026'},
+      {r:'a', h:'Free range/caged egg spread at £1.36/dozen — actively growing as free range prices rise', d:'UK free range at £3.10/dozen versus caged at £1.74/dozen. Gap growing as free range rises while caged dips. Creates financial incentive to sell caged or barn eggs as free range.', s:'AHDB egg price data, Apr 2026'}
+    ],
+    fraud: 'The £1.36/dozen spread between free range and caged eggs is actively growing, making welfare status fraud the primary concern. HPAI disruption creates supply pressure that may lead to importing from regions with lower welfare standards and mislabelling on entry. EU import volumes increasing through any cage ban transition period would require enhanced origin and welfare status verification.'
+  },
+  pistachio: {
+    pills: [{l:'Global supply constrained',c:'r'},{l:'Iran export disruption',c:'r'},{l:'Origin misdeclaration risk',c:'r'}],
+    items: [
+      {r:'r', h:'Middle East conflict blocking California pistachio exports to UAE and Saudi Arabia', d:'Key Gulf markets inaccessible. Exporters exploring alternative routes at rising cost. ~20% of 2025/26 California walnut crop remains uncommitted, raising concerns over pricing competition.', s:'Trade press · Food Forensics-equivalent sources, Apr 2026'},
+      {r:'r', h:'Iran exports constrained by unrest, drought and sanctions; Turkey in smaller 2025 off-year', d:'Global supply dominated by US, Iran and Turkey. US is in an off-year. Iran under multiple constraints. Turkey\'s smaller crop and shipping delays tightening supply. Pricing expected firm to rising.', s:'APC · Trade press, Apr 2026'},
+      {r:'a', h:'US pistachio sector facing heat stress, water constraints and disrupted export channels simultaneously', d:'California growers navigating combination of weather stress, water availability and disrupted export channels. FreshPlaza reports sector caution amid market uncertainty.', s:'FreshPlaza · AgNet News, Apr 2026'}
+    ],
+    fraud: 'Simultaneous supply constraints across all three major origins (US off-year, Iran sanctioned, Turkey smaller crop) create a rare convergence of supply pressure intensifying origin misdeclaration risk — particularly Iranian product declared as Turkish or US. Aflatoxin contamination concealment is also elevated when supply is stressed and quality controls under pressure.'
+  }
+};
+
+
+// BUILTIN_NEWS product name aliases
+[['Beef','beef'],['Lamb','lamb'],['Chicken','chicken'],['Blossom honey','honey'],
+ ['Salmon','salmon'],['Cod','cod'],['Liquid milk','milk'],['Oregano','oregano'],
+ ['Eggs (free range)','eggs'],['Pistachios','pistachio']
+].forEach(function(a){BUILTIN_NEWS[a[0]]=BUILTIN_NEWS[a[1]];});
+// ── Render market intelligence section ──────────────────────────────────────
+function renderNews() {
+  var section = document.getElementById('intel-section');
+  var items   = document.getElementById('intel-items');
+  var meta    = document.getElementById('intel-meta');
+
+  // Get data — keyed by curProd (product level), fall back to cur (category), then built-in
+  var prodKey   = typeof curProd !== 'undefined' ? curProd : cur;
+  // BUILTIN_NEWS may be keyed by old commodity name or new product name — try both
+  var builtinKey = BUILTIN_NEWS[prodKey] ? prodKey : (BUILTIN_NEWS[cur] ? cur : null);
+  var builtinData = builtinKey ? BUILTIN_NEWS[builtinKey] : null;
+  var commNews  = (newsData[prodKey] && newsData[prodKey].length) ? newsData[prodKey]
+                : (newsData[cur]     && newsData[cur].length)     ? newsData[cur]
+                : (builtinData ? builtinData.items : []);
+  var commFraud = fraudData[prodKey] || fraudData[cur] || (builtinData ? builtinData.fraud : '');
+  var isLive    = !!(newsData[prodKey] && newsData[prodKey].length) || !!(newsData[cur] && newsData[cur].length);
+
+  section.style.display = 'block';
+
+  meta.textContent = isLive ? 'Live · updated daily via Apps Script'
+    : NEWS_CSV_URL ? 'Loading...' : 'Built-in intelligence · connect Sheet for live updates';
+
+  // Pills
+
+  // News items
+  if (!commNews.length) {
+    items.innerHTML = '<div class="intel-empty">No news found for ' + prodKey + ' · check your Sheet has rows matching this product.</div>';
+  } else {
+    items.innerHTML = commNews.map(function(n) {
+      var risk = n.risk_level || n.r || 'b';
+      var head = n.headline   || n.h || '';
+      var det  = n.detail     || n.d || '';
+      var src  = n.source     || n.s || '';
+      return '<div class="intel-item">' +
+        '<div class="intel-dot intel-dot-' + risk + '"></div>' +
+        '<div class="intel-body">' +
+          '<div class="intel-headline">' + head + '</div>' +
+          '<div class="intel-detail">'   + det  + '</div>' +
+          '<div class="intel-src">'      + src  + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // Fraud signal removed
+}
+// ─────────────────────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────────────────────
+var cur     = 'poultry';
+var period  = 1;
+var tChart  = null;
+var sChart  = null;
+var rasffData = [];
+var newsData  = {};
+var fraudData = {};
+var PERIODS = ['6 months', '12 months', '24 months'];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+function months(n) {
+  var names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var now = new Date();
+  return Array.from({length:n}, function(_,i) {
+    var d = new Date(now.getFullYear(), now.getMonth()-(n-1-i), 1);
+    return names[d.getMonth()] + (d.getMonth()===0 ? " '" + String(d.getFullYear()).slice(2) : '');
+  });
+}
+
+function slice(arr, p) {
+  if (p === 0) return arr.slice(-6);
+  if (p === 2) {
+    var ext = [];
+    for (var i = 11; i >= 0; i--) {
+      ext.unshift(Math.round(arr[0] * (1 - Math.sin(i*3.7)*.03 - i*.002) * 100) / 100);
+    }
+    return ext.concat(arr);
+  }
+  return arr.slice();
+}
+
+function spread(comm, p) {
+  var n = p===0?6:p===2?24:12;
+  return Array.from({length:n}, function(_,i) {
+    var pp = comm.origins.map(function(o){ var s=slice(o.p,p); return s[i]||o.p[0]; });
+    return Math.round((Math.max.apply(null,pp)-Math.min.apply(null,pp))*100)/100;
+  });
+}
+
+function badge(r) {
+  if (r==='Very high') return {bg:'#FDF0EF',tc:'#8B2020'};
+  if (r==='High')      return {bg:'#FDF0EF',tc:'#A02828'};
+  if (r==='Medium')    return {bg:'#FDF6EC',tc:'#7A4800'};
+  return                      {bg:'#EEF6E8',tc:'#2A5A10'};
+}
+
+function sevClass(s) {
+  if (!s) return 'sev-default';
+  var l = s.toLowerCase().replace(/\s+/g,'-');
+  if (l.indexOf('serious') > -1)    return 'sev-serious';
+  if (l.indexOf('border') > -1)     return 'sev-border';
+  if (l.indexOf('info') > -1)       return 'sev-info';
+  if (l.indexOf('alert') > -1)      return 'sev-alert';
+  return 'sev-' + l;
+}
+
+function parseCSV(txt) {
+  var rows = [], lines = txt.trim().split('\n');
+  for (var i = 1; i < lines.length; i++) {
+    var cols = [], inQ = false, cur2 = '';
+    for (var c = 0; c < lines[i].length; c++) {
+      var ch = lines[i][c];
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { cols.push(cur2.trim()); cur2 = ''; }
+      else cur2 += ch;
+    }
+    cols.push(cur2.trim());
+    if (cols.length) rows.push(cols);
+  }
+  return rows;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────────────────────────────────────
+function render() {
+  var c      = COMM[cur];
+  var dark   = matchMedia('(prefers-color-scheme:dark)').matches;
+  var grd    = 'rgba(0,0,0,.05)';
+  var txt    = 'rgba(0,0,0,.35)';
+  var lbls   = months(period===0?6:period===2?24:12);
+
+  // Header date
+  document.getElementById('hdr-date').textContent =
+    new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+
+  // Current product data — declare first so available throughout render
+  var prod    = c.products && curProd ? c.products[curProd] : null;
+  var unit    = prod ? prod.unit : '';
+  var origins = prod ? prod.origins : [];
+
+  // Commodity header
+  document.getElementById('com-name').textContent    = c.label;
+  document.getElementById('tsg-commodity-name').textContent = c.label + ' — Best Practice Guidance';
+  document.getElementById('src-label').textContent   = 'Indicative prices only · ' + (prod ? prod.sources : c.sources);
+  document.getElementById('chart1-sub').textContent  = curProd + ' · price by supply origin · ' + unit;
+  if (document.getElementById('price-chart-title')) document.getElementById('price-chart-title').textContent = curProd + ' — price by origin';
+  if (document.getElementById('vsavg-title')) document.getElementById('vsavg-title').textContent = curProd + ' — price vs average by origin';
+  if (document.getElementById('table-title')) document.getElementById('table-title').textContent = curProd + ' — origin price comparison';
+  document.getElementById('rasff-com').textContent   = c.label.toLowerCase();
+  var intelProdEl = document.getElementById('intel-prod-label');
+  if (intelProdEl) intelProdEl.textContent = curProd;
+  var catSubEl = document.getElementById('cat-section-sub');
+  if (catSubEl) catSubEl.textContent = c.label + ' · TSG guidance · Supply chain fraud map · RASFF alerts (last 6 months)';
+  document.getElementById('com-period').textContent  = lbls[0] + ' – ' + lbls[lbls.length-1];
+
+  // Update product sources label
+  var prodSourcesEl = document.getElementById('prod-sources');
+  if (prodSourcesEl) prodSourcesEl.textContent = prod ? '· Sources: ' + prod.sources : '';
+
+  var lp   = origins.map(function(o){ return o.p[11]; });
+  var maxP = lp.length ? Math.max.apply(null, lp) : 0;
+  var minP = lp.length ? Math.min.apply(null, lp) : 0;
+  var sp   = Math.round((maxP-minP)*100)/100;
+  var avg  = lp.length ? Math.round((lp.reduce(function(a,b){return a+b;},0)/lp.length)*100)/100 : 0;
+  var high = sp > c.threshold;
+  var sig  = high ? 'High' : sp > c.threshold*.75 ? 'Elevated' : 'Normal';
+  var sigC = sig==='High'?'#8B2020':sig==='Elevated'?'#7A4800':'#2A5A10';
+  var vol  = (Math.abs(Math.sin(Date.now()/8e7))*2+1).toFixed(1);
+
+  // For stats strip: use overall spread across all origins (meaningful as fraud signal)
+  // but note it's cross-product for the summary only
+  var overallAvg = Math.round((lp.reduce(function(a,b){return a+b;},0)/lp.length)*100)/100;
+
+  var prodCount = Object.keys(c.products).length;
+  
+
+  document.getElementById('stats').innerHTML = [
+    stat('Avg price', avg + ' ' + unit, origins.length + ' origins · ' + curProd, 55, '#2D6B2D'),
+    stat('Price spread', sp + ' ' + unit, high?'▲ Above threshold':'Within norm', Math.min(100,Math.round(sp/c.threshold*65)), high?'#8B2020':'#2D6B2D'),
+    stat('90-day volatility', vol+'%', parseFloat(vol)>2?'Elevated':'Stable', Math.min(100,Math.round(parseFloat(vol)*28)), parseFloat(vol)>2?'#8B2020':'#2D6B2D'),
+    stat('Fraud signal', sig, 'Spread divergence', sig==='High'?85:sig==='Elevated'?55:25, sigC)
+  ].join('');
+
+  // Price alerts — auto-generated from spread analysis per product
+  var alerts = [];
+  if (sp > c.threshold) {
+    alerts.push({l:'r', t: curProd + ' — price spread above fraud pressure threshold (' + sp + ' ' + unit + ')',
+      d: 'The spread between the highest and lowest priced origins exceeds the threshold of ' + c.threshold + ' ' + unit + '. This indicates elevated financial incentive for origin substitution or mislabelling.'});
+  } else if (sp > c.threshold * 0.75) {
+    alerts.push({l:'a', t: curProd + ' — price spread elevated (' + sp + ' ' + unit + ')',
+      d: 'The spread between origins is approaching the fraud pressure threshold. Monitor for further divergence.'});
+  }
+  if (origins.length >= 2) {
+    var cheapest = origins.slice().sort(function(a,b){return a.p[11]-b.p[11];})[0];
+    var priciest = origins.slice().sort(function(a,b){return b.p[11]-a.p[11];})[0];
+    if (cheapest !== priciest) {
+      var disc = Math.round(((priciest.p[11]-cheapest.p[11])/priciest.p[11])*100);
+      if (disc > 30) {
+        alerts.push({l:'a', t: cheapest.n + ' at ' + disc + '% below ' + priciest.n,
+          d: cheapest.n + ' (' + cheapest.p[11].toFixed ? cheapest.p[11].toFixed(2) : cheapest.p[11] + ' ' + unit + ') versus ' + priciest.n + ' (' + (priciest.p[11].toFixed ? priciest.p[11].toFixed(2) : priciest.p[11]) + ' ' + unit + '). A discount of this magnitude increases the incentive to substitute or mislabel origin.'});
+      }
+    }
+  }
+  document.getElementById('price-alerts').innerHTML = alerts.map(function(a) {
+    return '<div class="alert alert-' + a.l + '">' +
+      '<div class="alert-dot" style="background:' + (a.l==='r'?'#8B2020':a.l==='a'?'#7A4800':'#2A5A10') + '"></div>' +
+      '<div><div class="alert-title">' + a.t + '</div><div class="alert-desc">' + a.d + '</div></div></div>';
+  }).join('');
+
+  // Trend chart
+  document.getElementById('legend1').innerHTML = origins.map(function(o) {
+    return '<span class="leg"><span class="leg-swatch" style="' +
+      (o.dash ? 'background:transparent;border:1.5px dashed '+o.c+';' : 'background:'+o.c+';') +
+      '"></span>' + o.n + '</span>';
+  }).join('');
+
+  if (tChart) tChart.destroy();
+  tChart = new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+      labels: lbls,
+      datasets: origins.map(function(o) {
+        return {
+          label: o.n, data: slice(o.p, period),
+          borderColor: o.c, backgroundColor: 'transparent',
+          borderWidth: 2, borderDash: o.dash ? [5,3] : [],
+          pointRadius: period===2?1:2.5, tension: .35
+        };
+      })
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {legend:{display:false}},
+      scales: {
+        x: {grid:{color:grd}, ticks:{color:txt,font:{size:10}}, border:{color:'transparent'}},
+        y: {grid:{color:grd}, ticks:{color:txt,font:{size:10}}, border:{color:'transparent'}}
+      }
+    }
+  });
+
+  // vs-average bar chart — all origins for the selected product vs their average
+  var vsAvgLabels = [], vsAvgPct = [], vsAvgCols = [];
+  origins.forEach(function(o) {
+    var pct = avg > 0 ? Math.round(((o.p[11] - avg) / avg) * 100) : 0;
+    vsAvgLabels.push(o.n);
+    vsAvgPct.push(pct);
+    vsAvgCols.push(pct < -30 ? '#C84040' : pct < -10 ? '#D4820A' : pct > 10 ? '#2D6B2D' : '#7A8F70');
+  });
+
+  if (sChart) sChart.destroy();
+  sChart = new Chart(document.getElementById('spreadChart'), {
+    type: 'bar',
+    data: {
+      labels: vsAvgLabels,
+      datasets: [{
+        label: curProd + ' vs avg %',
+        data: vsAvgPct,
+        backgroundColor: vsAvgCols,
+        borderRadius: 4,
+        borderWidth: 0
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {display: false},
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              return (ctx.raw >= 0 ? '+' : '') + ctx.raw + '% vs ' + curProd + ' avg';
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: {color: grd},
+          ticks: {
+            color: txt, font: {size: 10},
+            callback: function(v) { return (v>=0?'+':'') + v + '%'; }
+          },
+          border: {color: 'transparent'}
+        },
+        y: {
+          grid: {display: false},
+          ticks: {color: txt, font: {size: 10}},
+          border: {color: 'transparent'}
+        }
+      }
+    }
+  });
+
+  // Geo table — origins for selected product, sorted by price desc
+  var sorted = origins.slice().sort(function(a,b){ return b.p[11]-a.p[11]; });
+  document.getElementById('geo-table').innerHTML = sorted.map(function(o) {
+    var price = o.p[11];
+    var diff  = avg > 0 ? Math.round(((price-avg)/avg)*100) : 0;
+    var disc  = maxP > 0 ? Math.max(0, Math.round(((maxP-price)/maxP)*100)) : 0;
+    var bc    = disc>45?'#C84040':disc>25?'#D4820A':'#2D6B2D';
+    var risk  = disc>45?'Very high':disc>30?'High':disc>15?'Medium':'Low';
+    var b     = badge(risk);
+    var ps    = price>=100 ? Math.round(price).toLocaleString() : price.toFixed(2);
+    return '<tr>' +
+      '<td style="font-weight:600">' + o.n + '</td>' +
+      '<td style="font-family:\'DM Mono\',monospace;font-size:12px">' + ps + ' ' + unit + '</td>' +
+      '<td style="color:' + (diff<-20?'#8B2020':diff<-10?'#7A4800':diff>10?'#2A5A10':'var(--muted)') + ';font-weight:600;font-family:\'DM Mono\',monospace">' + (diff>=0?'+':'') + diff + '%</td>' +
+      '<td><span class="bar-inline"><span class="bar-inline-fill" style="width:' + disc + '%;background:' + bc + '"></span></span>' + disc + '%</td>' +
+      '<td style="font-size:10px;color:var(--muted);font-family:\'DM Mono\',monospace">' + (prod ? prod.sources : c.sources) + '</td>' +
+      '<td><span class="pressure-badge" style="background:' + b.bg + ';color:' + b.tc + '">' + risk + '</span></td>' +
+    '</tr>';
+  }).join('');
+
+  // RASFF
+  renderRasff();
+
+  // Market intelligence
+  renderNews();
+
+  // Supply chain map
+  renderSupplyChain();
+
+  // Resources panel
+  renderResources();
+}
+
+function stat(lbl, val, sub, pct, col) {
+  return '<div class="stat">' +
+    '<div class="stat-label">' + lbl + '</div>' +
+    '<div class="stat-value">' + val + '</div>' +
+    '<div class="stat-sub" style="color:' + col + '">' + sub + '</div>' +
+    '<div class="bar"><div class="bar-fill" style="width:' + pct + '%;background:' + col + '"></div></div>' +
+  '</div>';
+}
+
+function renderFiinIndicators() {
+  var el = document.getElementById('fiin-indicators-body');
+  if (!el) return;
+  var items = FIIN_DUMMY[cur] || ['No fiin testing data available for this category yet.'];
+  el.innerHTML = items.map(function(txt) {
+    return '<div class="indicators-dummy-item">' + txt + '</div>';
+  }).join('');
+}
+
+function renderRasff() {
+  renderFiinIndicators();
+  var body  = document.getElementById('rasff-body');
+  var count = document.getElementById('rasff-count');
+  var bdg   = document.getElementById('rasff-badge');
+
+  if (!RASFF_CSV_URL) {
+    bdg.textContent = 'not connected';
+    bdg.style.borderColor = 'rgba(255,255,255,.2)';
+    body.innerHTML = '<div class="rasff-status">RASFF data not yet connected.<br><br>' +
+      'Run the Apps Script to populate your Google Sheet, publish the <code>rasff</code> tab as CSV, ' +
+      'and paste the URL into <code>RASFF_CSV_URL</code>.<br><br>' +
+      '<a href="https://webgate.ec.europa.eu/rasff-window/screen/search" target="_blank">Search RASFF portal directly →</a></div>';
+    count.textContent = '';
+    return;
+  }
+
+  var sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+  function parseRasffDate(str) {
+    if (!str) return null;
+    var d = new Date(str);
+    if (!isNaN(d.getTime())) return d;
+    // DD/MM/YYYY or DD-MM-YYYY
+    var m = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if (m) return new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
+    // DD Mon YYYY e.g. 15 Jan 2024
+    m = str.match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/);
+    if (m) { var d2 = new Date(m[2] + ' ' + m[1] + ' ' + m[3]); if (!isNaN(d2.getTime())) return d2; }
+    return null;
+  }
+
+  var rasffCats = (COMM[cur].rasffCategories || []).map(function(c){ return c.toLowerCase(); });
+
+  // Also match old short keys (beef, chicken etc.) still in Sheet before v5 script runs
+  // OLD_KEY_MAP no longer needed — rasffCategories now match Sheet column A exactly
+  var oldKeys = [];
+
+  var items = rasffData.filter(function(r) {
+    if (!rasffCats.length) return false;
+    var cat = (r.commodity || '').toLowerCase();
+    // Match new full category labels OR old short commodity keys
+    var matchNew = rasffCats.some(function(c){ return cat === c; });
+    var matchOld = oldKeys.some(function(k){ return cat === k || cat.indexOf(k) > -1; });
+    if (!matchNew && !matchOld) return false;
+    if (!r.date) return false;
+    var d = parseRasffDate(r.date);
+    if (!d) return false;
+    return d >= sixMonthsAgo;
+  });
+
+  items.sort(function(a, b) {
+    var da = parseRasffDate(a.date), db = parseRasffDate(b.date);
+    if (!da && !db) return 0;
+    if (!da) return 1;
+    if (!db) return -1;
+    return db - da;
+  });
+
+  if (!items.length) {
+    if (rasffData.length === 0 && RASFF_CSV_URL) {
+      // Data hasn't loaded yet
+      bdg.textContent = 'loading';
+      count.textContent = '';
+      body.innerHTML = '<div class="rasff-status">Loading RASFF alerts&hellip;</div>';
+    } else {
+      bdg.textContent = 'via Sheet ✓';
+      count.textContent = '0 alerts';
+      body.innerHTML = '<div class="rasff-status">No RASFF alerts found for <strong>' + COMM[cur].label.toLowerCase() +
+        '</strong> in the last 6 months.<br><br>' +
+        '<a href="https://webgate.ec.europa.eu/rasff-window/screen/search" target="_blank">Search RASFF portal directly →</a></div>';
+    }
+    return;
+  }
+
+  bdg.textContent = 'via Sheet ✓';
+  count.textContent = items.length + ' alert' + (items.length!==1?'s':'');
+
+  body.innerHTML = items.map(function(r) {
+    var sc = sevClass(r.severity);
+    return '<div class="rasff-item">' +
+      '<div class="rasff-item-head">' +
+        '<span class="rasff-item-title">' + r.title + '</span>' +
+        '<span class="rasff-sev ' + sc + '">' + (r.severity||'Alert') + '</span>' +
+      '</div>' +
+      '<div class="rasff-meta">' +
+        (r.country ? '🌍 Origin: ' + r.country : '') +
+        (r.date    ? (r.country?' &nbsp;':'') + '📅 ' + r.date : '') +
+        (r.ref     ? ' &nbsp;Ref: ' + r.ref : '') +
+      '</div>' +
+      (r.link ? '<a class="rasff-link" href="' + r.link + '" target="_blank">View on RASFF portal →</a>' : '') +
+    '</div>';
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DATA LOADING
+// ─────────────────────────────────────────────────────────────────────────────
+function loadData() {
+  var hasUrls = PRICE_CSV_URL && RASFF_CSV_URL;
+  if (!hasUrls) {
+    // URLs configured
+  }
+
+  if (RASFF_CSV_URL) {
+    fetch(RASFF_CSV_URL)
+      .then(function(r){
+        console.log('RASFF fetch status:', r.status);
+        return r.text();
+      })
+      .then(function(txt) {
+        console.log('RASFF CSV length:', txt.length, 'chars');
+        console.log('RASFF CSV preview:', txt.slice(0, 200));
+        var rows = parseCSV(txt);
+        console.log('RASFF parsed rows:', rows.length);
+        var EXCLUDED_HAZARDS = [
+          'biological contaminants',
+          'biotoxins',
+          'industrial contaminants',
+          'foreign bodies',
+          'mycotoxins',
+          'natural toxins',
+          'non pathogenic micro-organisms',
+          'parasitic infestation',
+          'pathogenic micro-organisms',
+          'pesticide residues'
+        ];
+
+        rasffData = rows.map(function(r) {
+          return {
+            commodity: (r[0]||'').trim(),
+            title:     (r[1]||'').trim(),
+            date:      (r[2]||'').trim(),
+            country:   (r[3]||'').trim(),  // originCountry (col 4 = notifyingCountry, not displayed)
+            severity:  (r[5]||'').trim(),
+            hazard:    (r[6]||'').trim(),
+            node:      (r[8]||r[7]||'').trim(), // node_override takes priority
+            ref:       '',
+            link:      (r[9]||'').trim()
+          };
+        // Free-text title exclusions — any alert mentioning these phrases is excluded
+        var EXCLUDED_TITLE_TERMS = []; // no free-text title exclusions on page (handled in Apps Script)
+
+        // Vet residues first-node mapping — applies when no node_override set
+        var VET_FIRST_NODE = {
+          'poultry meat and poultry meat products':              'Rearing Farm',
+          'poultry':                                             'Rearing Farm',
+          'chicken': 'Rearing Farm', 'turkey': 'Rearing Farm', 'duck': 'Rearing Farm',
+          'meat and meat products (other than poultry)':         'Farm/Ranch',
+          'beef': 'Farm/Ranch', 'lamb': 'Farm/Ranch', 'pork': 'Farm/Ranch',
+          'veal': 'Farm/Ranch', 'venison': 'Farm/Ranch', 'red meat': 'Farm/Ranch',
+          'fish and fish products':                              'Farm/Fishing Vessel',
+          'cephalopods and products thereof':                    'Farm/Fishing Vessel',
+          'crustaceans and products thereof':                    'Farm/Fishing Vessel',
+          'bivalve molluscs and products thereof':               'Farm/Fishing Vessel',
+          'salmon': 'Farm/Fishing Vessel', 'cod': 'Farm/Fishing Vessel',
+          'fish': 'Farm/Fishing Vessel', 'shellfish': 'Farm/Fishing Vessel',
+          'honey and royal jelly':                               'Apiary/Hive',
+          'honey': 'Apiary/Hive',
+          'herbs and spices':                                    'Growing Region',
+          'cereals and bakery products':                         'Grain Farm',
+          'wheat': 'Grain Farm', 'barley': 'Grain Farm', 'oats': 'Grain Farm',
+          'prepared dishes and snacks':                          'Ingredient Supply',
+          'fruits and vegetables':                               'Growing Region',
+          'milk and milk products':                              'Dairy Farm',
+          'milk': 'Dairy Farm', 'dairy': 'Dairy Farm',
+          'confectionery':                                       'Ingredient Supply',
+          'dietetic foods, food supplements and fortified foods': 'Raw Ingredient Supply',
+          'nuts, nut products and seeds':                        'Orchard/Farm',
+          'eggs and egg products':                               'Laying Farm',
+          'eggs': 'Laying Farm', 'egg': 'Laying Farm',
+          'non-alcoholic beverages':                             'Raw Ingredient Supply'
+        };
+
+        });
+
+        // Apply vet residues first-node override where node is unknown or missing
+        rasffData.forEach(function(r) {
+          if ((r.hazard || '').toLowerCase().indexOf('vet residues') === -1) return;
+          if (r.node && r.node !== '' && r.node !== 'Unknown – needs review') return; // already mapped
+          var commLower = (r.commodity || '').toLowerCase();
+          var vetNode = VET_FIRST_NODE[commLower];
+          if (!vetNode) {
+            // Try partial match
+            Object.keys(VET_FIRST_NODE).forEach(function(k) {
+              if (!vetNode && commLower.indexOf(k) > -1) vetNode = VET_FIRST_NODE[k];
+            });
+          }
+          if (vetNode) r.node = vetNode;
+        });
+
+        rasffData = rasffData.filter(function(r) {
+          if (!r.commodity || r.commodity === '_none') return false;
+          var hazardLower = r.hazard.toLowerCase();
+          if (EXCLUDED_HAZARDS.some(function(ex) { return hazardLower === ex; })) return false;
+          var titleLower = r.title.toLowerCase();
+          if (EXCLUDED_TITLE_TERMS.some(function(t) { return titleLower.indexOf(t) > -1; })) return false;
+          return true;
+        });
+        console.log('RASFF filtered rows:', rasffData.length);
+        if (rasffData.length > 0) {
+          // Show unique commodity values in sheet so we can debug matching
+          var uniqueComms = {};
+          rasffData.forEach(function(r){ uniqueComms[r.commodity] = (uniqueComms[r.commodity]||0)+1; });
+          console.log('Unique commodity values in sheet:', JSON.stringify(uniqueComms));
+          console.log('Current category (cur):', cur);
+          console.log('rasffCategories for cur:', JSON.stringify(COMM[cur].rasffCategories));
+        }
+        renderRasff();
+        renderSupplyChain();
+      })
+      .catch(function(e){
+        console.error('RASFF fetch error:', e);
+        renderRasff();
+      });
+  }
+
+  if (NEWS_CSV_URL) {
+    fetch(NEWS_CSV_URL)
+      .then(function(r){ return r.text(); })
+      .then(function(txt) {
+        var rows = parseCSV(txt);
+        // columns: commodity, headline, detail, source, risk_level, updated
+        newsData = {};
+        rows.forEach(function(r) {
+          var comm = (r[0]||'').trim();
+          if (!comm || comm === '_none') return;
+          if (!newsData[comm]) newsData[comm] = [];
+          newsData[comm].push({
+            headline:   (r[1]||'').trim(),
+            detail:     (r[2]||'').trim(),
+            source:     (r[3]||'').trim(),
+            risk_level: (r[4]||'b').trim()
+          });
+        });
+        renderNews();
+      })
+      .catch(function(){ renderNews(); });
+  }
+
+  if (FRAUD_CSV_URL) {
+    fetch(FRAUD_CSV_URL)
+      .then(function(r){ return r.text(); })
+      .then(function(txt) {
+        var rows = parseCSV(txt);
+        // columns: commodity, fraud_signal, updated
+        fraudData = {};
+        rows.forEach(function(r) {
+          var comm = (r[0]||'').trim();
+          if (comm) fraudData[comm] = (r[1]||'').trim();
+        });
+        renderNews();
+      })
+      .catch(function(){ });
+  }
+
+  if (PRICE_CSV_URL) {
+    fetch(PRICE_CSV_URL)
+      .then(function(r){ return r.text(); })
+      .then(function(txt) {
+        var rows = parseCSV(txt);
+        // columns: category, product, origin, price, unit, source, updated
+        rows.forEach(function(r) {
+          var catKey  = (r[0]||'').trim();
+          var product = (r[1]||'').trim();
+          var origin  = (r[2]||'').trim();
+          var price   = parseFloat(r[3]);
+          if (!COMM[catKey] || !COMM[catKey].products || !product || isNaN(price)) return;
+          var prod = COMM[catKey].products[product];
+          if (!prod) return;
+          var orig = prod.origins.find(function(o){ return o.n === origin; });
+          if (orig) { orig.p = orig.p.slice(1).concat([price]); }
+        });
+        render();
+      })
+      .catch(function(){ /* use built-in data */ });
+  }
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RESOURCES PANEL
+// ─────────────────────────────────────────────────────────────────────────────
+var RESOURCES = {
+  honey: [
+    { name: 'Honey Sub-group methods table',                                    ext: 'PDF', icon: 'table' },
+    { name: 'Webinar: new methods for honey authenticity – Cranfield University',ext: 'PDF', icon: 'video' },
+    { name: 'Honey glossary',                                                   ext: 'PDF', icon: 'book' },
+    { name: "JRC report 'from the hives'",                                      ext: 'PDF', icon: 'report' }
+  ]
+};
+
+var RES_ICONS = {
+  table:  '<span style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;background:#EDF4FD;flex-shrink:0"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#1A6FB5" stroke-width="1.5" stroke-linecap="round"><rect x="1" y="1" width="14" height="14" rx="1.5"/><line x1="1" y1="5.5" x2="15" y2="5.5"/><line x1="1" y1="10" x2="15" y2="10"/><line x1="6" y1="5.5" x2="6" y2="15"/></svg></span>',
+  video:  '<span style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;background:#F2EDFD;flex-shrink:0"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#6B3FC0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="10" height="10" rx="1.5"/><path d="M11 6l4-2v8l-4-2V6z"/></svg></span>',
+  book:   '<span style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;background:#EEF6E8;flex-shrink:0"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#2D6B2D" stroke-width="1.5" stroke-linecap="round"><path d="M2 2h5a2 2 0 012 2v10a2 2 0 00-2-2H2V2z"/><path d="M14 2H9a2 2 0 00-2 2v10a2 2 0 012-2h5V2z"/></svg></span>',
+  report: '<span style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;background:#FDF6EC;flex-shrink:0"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#9A6200" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="8" x2="11" y2="8"/><line x1="5" y1="11" x2="9" y2="11"/></svg></span>',
+  file:   '<span style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;background:#F0F0F2;flex-shrink:0"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#555" stroke-width="1.5" stroke-linecap="round"><path d="M9 1H3a1 1 0 00-1 1v12a1 1 0 001 1h10a1 1 0 001-1V7L9 1z"/><polyline points="9,1 9,7 15,7"/></svg></span>'
+};
+
+function renderResources() {
+  var titleEl       = document.getElementById('res-title');
+  var bodyEl        = document.getElementById('res-body');
+  var placeholderEl = document.getElementById('res-placeholder');
+  if (!titleEl || !bodyEl) return;
+
+  var label = COMM[cur] ? COMM[cur].label : cur;
+  var RES_LABELS = {poultry:'Poultry',red_meat:'Red Meat',fish_shellfish:'Fish & Shellfish',honey:'Honey',herbs_spices:'Herbs & Spices',bakery_cereals:'Bakery & Cereals',prepared_dishes:'Prepared Dishes',fruit_veg:'Fruit & Vegetables',dairy:'Dairy Products',cakes_conf:'Cakes & Confectionery',diet_foods:'Dietary & Supplement Foods',nuts_snacks:'Nuts, Seeds & Snacks',eggs:'Egg & Egg Products',drinks:'Drinks'};
+  titleEl.textContent = 'fiin ' + (RES_LABELS[cur] || label) + ' Resources';
+
+  // Remove old file rows (keep placeholder and upload btn if present)
+  bodyEl.querySelectorAll('.res-file').forEach(function(el){ el.remove(); });
+
+  var files = RESOURCES[cur] || [];
+
+  if (files.length) {
+    if (placeholderEl) placeholderEl.style.display = 'none';
+    files.forEach(function(f) {
+      var a = document.createElement('a');
+      a.href = 'javascript:void(0)';
+      a.className = 'res-file';
+      a.innerHTML =
+        '<div class="res-file-icon">' + (RES_ICONS[f.icon] || RES_ICONS.file) + '</div>' +
+        '<div class="res-file-name">' + f.name + '</div>' +
+        '<span class="res-file-ext">' + f.ext + '</span>';
+      bodyEl.appendChild(a);
+    });
+  } else {
+    if (placeholderEl) placeholderEl.style.display = '';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BOOT
+// ─────────────────────────────────────────────────────────────────────────────
+// ── Category pill builder ────────────────────────────────────────────────────
+var pickerEl = document.getElementById('picker');
+Object.keys(COMM).forEach(function(key) {
+  var btn = document.createElement('button');
+  btn.className = 'pill' + (key===cur?' active':'');
+  btn.dataset.key = key;
+  btn.textContent = COMM[key].label;
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.pill').forEach(function(b){ b.classList.remove('active'); });
+    this.classList.add('active');
+    cur = this.dataset.key;
+    curProd = Object.keys(COMM[cur].products)[0];
+    rebuildProductDropdown();
+    render();
+  });
+  pickerEl.appendChild(btn);
+});
+
+// ── Product dropdown builder ──────────────────────────────────────────────────
+var curProd = Object.keys(COMM[cur].products)[0];
+
+function rebuildProductDropdown() {
+  var sel = document.getElementById('prod-select');
+  sel.innerHTML = '';
+  Object.keys(COMM[cur].products).forEach(function(p) {
+    var opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = p;
+    if (p === curProd) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+document.getElementById('prod-select').addEventListener('change', function() {
+  curProd = this.value;
+  render();
+});
+
+rebuildProductDropdown();
+
+document.getElementById('period-slider').addEventListener('input', function() {
+  period = parseInt(this.value);
+  document.getElementById('period-label').textContent = PERIODS[period];
+  render();
+});
+
+render();
+loadData();
+
+// ── fiin testing data placeholder chart ──────────────────────────────────────
+(function() {
+  var ctx = document.getElementById('testingChart');
+  if (!ctx) return;
+  var quarters = ['Q1 2024','Q2 2024','Q3 2024','Q4 2024','Q1 2025'];
+  var tests     = [9200, 10800, 7400, 13700, 8200];  // illustrative
+  var anomalies = [67,   89,    82,   109,   43];     // illustrative
+  var authConc  = [25,   28,    28,   43,    18];     // illustrative
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: quarters,
+      datasets: [
+        {
+          type: 'bar',
+          label: 'Tests performed',
+          data: tests,
+          backgroundColor: '#8DC63F',
+          yAxisID: 'yLeft',
+          borderRadius: 3,
+          order: 2
+        },
+        {
+          type: 'line',
+          label: 'Anomalies detected',
+          data: anomalies,
+          borderColor: '#1A5FA5',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: '#1A5FA5',
+          yAxisID: 'yRight',
+          tension: 0.3,
+          order: 1,
+          datalabels: { display: false }
+        },
+        {
+          type: 'line',
+          label: 'Authenticity concerns',
+          data: authConc,
+          borderColor: '#C84040',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: '#C84040',
+          yAxisID: 'yRight',
+          tension: 0.3,
+          order: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              if (ctx.dataset.yAxisID === 'yLeft') {
+                return ctx.dataset.label + ': ' + ctx.raw.toLocaleString();
+              }
+              return ctx.dataset.label + ': ' + ctx.raw;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(0,0,0,.04)' },
+          ticks: { color: 'rgba(0,0,0,.4)', font: { size: 10 } },
+          border: { color: 'transparent' }
+        },
+        yLeft: {
+          type: 'linear',
+          position: 'left',
+          grid: { color: 'rgba(0,0,0,.04)' },
+          ticks: {
+            color: 'rgba(0,0,0,.4)', font: { size: 10 },
+            callback: function(v) { return (v/1000).toFixed(0) + 'k'; }
+          },
+          border: { color: 'transparent' }
+        },
+        yRight: {
+          type: 'linear',
+          position: 'right',
+          grid: { display: false },
+          ticks: { color: 'rgba(0,0,0,.4)', font: { size: 10 } },
+          border: { color: 'transparent' }
+        }
+      }
+    }
+  });
+})();
+</script>
+<div id="sc-float-tip"></div>
+</body>
+</html>
