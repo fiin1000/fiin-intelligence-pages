@@ -1008,7 +1008,7 @@ var COMM = {
     label:'Poultry', sources:'AHDB + FAO',
     context:'Geographic origin fraud, welfare status mislabelling, species substitution in processed products',
     threshold:1.0, norm:0.7,
-    rasffCategories:['poultry'],
+    rasffCategories:['poultry meat and poultry meat products'],
     products:{
     'Chicken': {unit:'£/kg',sources:'AHDB + FAO',origins:[
         {n:'UK',c:'#2D6B2D',dash:false,p:[1.98, 1.96, 1.97, 1.96, 1.97, 1.96, 1.94, 1.93, 1.92, 1.9, 1.88, 1.88]},
@@ -1041,7 +1041,7 @@ var COMM = {
     label:'Red Meat', sources:'AHDB + FAO + MLA',
     context:'Species substitution, geographic origin fraud, halal certification abuse, welfare status mislabelling',
     threshold:1.8, norm:1.3,
-    rasffCategories:['red_meat'],
+    rasffCategories:['meat and meat products (other than poultry)'],
     products:{
     'Beef': {unit:'£/kg',sources:'AHDB + FAO',origins:[
         {n:'UK',c:'#2D6B2D',dash:false,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]},
@@ -1080,7 +1080,7 @@ var COMM = {
     label:'Fish & Shellfish', sources:'Seafish + FAO',
     context:'Species substitution, geographic origin fraud, farmed vs wild claims, short-weighting',
     threshold:2.0, norm:1.4,
-    rasffCategories:['fish_shellfish'],
+    rasffCategories:['cephalopods and products thereof','bivalve molluscs and products thereof','crustaceans and products thereof','fish and fish products'],
     products:{
     'Salmon': {unit:'£/kg',sources:'Seafish',origins:[
         {n:'Scotland',c:'#2D6B2D',dash:false,p:[6.47, 6.5, 6.56, 6.55, 6.58, 6.58, 6.52, 6.58, 6.63, 6.68, 6.76, 6.69]},
@@ -1165,7 +1165,7 @@ var COMM = {
     label:'Honey', sources:'FAO + BBKA',
     context:'Sugar syrup adulteration, geographic origin fraud, false monofloral claims, antibiotic contamination',
     threshold:2.5, norm:1.8,
-    rasffCategories:['honey'],
+    rasffCategories:['honey and royal jelly'],
     products:{
     'Blossom honey': {unit:'£/kg',sources:'BBKA + FAO',origins:[
         {n:'UK',c:'#2D6B2D',dash:false,p:[6.07, 6.04, 6.03, 6.1, 6.17, 6.15, 6.14, 6.21, 6.24, 6.24, 6.17, 6.21]},
@@ -1206,7 +1206,7 @@ var COMM = {
     label:'Herbs & Spices', sources:'ITC + FAO',
     context:'Filler species substitution, geographic origin fraud, dye addition, adulteration',
     threshold:8.0, norm:5.6,
-    rasffCategories:['herbs_spices'],
+    rasffCategories:['herbs and spices'],
     products:{
     'Oregano': {unit:'$/kg',sources:'ITC',origins:[
         {n:'Greece',c:'#2D6B2D',dash:false,p:[13.5, 13.33, 13.34, 13.25, 13.28, 13.32, 13.31, 13.39, 13.3, 13.38, 13.43, 13.27]},
@@ -1280,7 +1280,7 @@ var COMM = {
     label:'Bakery & Cereals', sources:'AHDB + FAO',
     context:'Country of origin fraud, adulteration, undeclared ingredients, quality grade fraud',
     threshold:50.0, norm:35.0,
-    rasffCategories:['cereals'],
+    rasffCategories:['cereals and bakery products'],
     products:{
     'Wheat': {unit:'£/tonne',sources:'AHDB + FAO',origins:[
         {n:'UK',c:'#2D6B2D',dash:false,p:[202.28, 204.54, 202.28, 200.18, 201.86, 203.05, 203.91, 202.93, 203.47, 204.01, 204.43, 202.68]},
@@ -1326,7 +1326,7 @@ var COMM = {
     label:'Prepared Dishes', sources:'ONS + FAO',
     context:'Species substitution, undeclared ingredients, false provenance claims, allergen mislabelling',
     threshold:1.5, norm:1.0,
-    rasffCategories:['prepared'],
+    rasffCategories:['prepared dishes and snacks'],
     products:{
     'Ready meals (chilled)': {unit:'£/kg',sources:'ONS',origins:[
         {n:'UK',c:'#2D6B2D',dash:false,p:[4.13, 4.14, 4.1, 4.14, 4.16, 4.15, 4.2, 4.23, 4.2, 4.16, 4.14, 4.11]},
@@ -1360,7 +1360,7 @@ var COMM = {
     label:'Fruit & Vegetables', sources:'DEFRA + FAO',
     context:'Country of origin fraud, organic status fraud, pesticide residue concealment',
     threshold:0.5, norm:0.3,
-    rasffCategories:['fruit_veg'],
+    rasffCategories:['fruits and vegetables'],
     products:{
     'Tomatoes': {unit:'£/kg',sources:'DEFRA + FAO',origins:[
         {n:'UK',c:'#2D6B2D',dash:false,p:[1.71, 1.73, 1.73, 1.73, 1.71, 1.7, 1.69, 1.7, 1.68, 1.7, 1.69, 1.69]},
@@ -1442,7 +1442,7 @@ var COMM = {
     label:'Dairy Products', sources:'AHDB + FAO',
     context:'Adulteration, organic/welfare status fraud, geographic origin fraud',
     threshold:12.0, norm:8.4,
-    rasffCategories:['dairy'],
+    rasffCategories:['milk and milk products'],
     products:{
     'Liquid milk': {unit:'£/100L',sources:'AHDB + DG Agri',origins:[
         {n:'UK',c:'#2D6B2D',dash:false,p:[37.31, 37.44, 37.09, 36.98, 37.22, 37.62, 37.49, 37.05, 36.87, 36.7, 36.79, 37.08]},
@@ -1537,7 +1537,7 @@ var COMM = {
     label:'Dietary & Supplement Foods', sources:'ONS + FAO',
     context:'False nutritional claims, undeclared ingredients, adulteration of supplements',
     threshold:3.0, norm:2.1,
-    rasffCategories:['supplements'],
+    rasffCategories:['diatetic foods, food supplements and fortified foods'],
     products:{
     'Whey protein': {unit:'£/kg',sources:'ONS + FAO',origins:[
         {n:'UK',c:'#2D6B2D',dash:false,p:[16.97, 16.96, 17.03, 16.82, 16.78, 16.94, 16.9, 16.98, 17.14, 17.07, 17.04, 17.08]},
@@ -1579,7 +1579,7 @@ var COMM = {
     label:'Nuts, Seeds & Snacks', sources:'APC + FAO + ITC',
     context:'Geographic origin fraud, weight fraud, quality grade fraud, allergen mislabelling',
     threshold:5.0, norm:3.5,
-    rasffCategories:['nuts'],
+    rasffCategories:['nuts, nut products and seeds'],
     products:{
     'Pistachios': {unit:'$/kg',sources:'APC + FAO',origins:[
         {n:'USA',c:'#2D6B2D',dash:false,p:[12.21, 12.16, 12.29, 12.3, 12.25, 12.1, 11.99, 11.93, 11.9, 11.85, 11.89, 11.86]},
@@ -1635,7 +1635,7 @@ var COMM = {
     label:'Egg & Egg Products', sources:'AHDB',
     context:'Welfare status fraud (caged sold as free range or organic), geographic origin fraud',
     threshold:1.5, norm:1.0,
-    rasffCategories:['eggs'],
+    rasffCategories:['eggs and egg products'],
     products:{
     'Eggs (free range)': {unit:'£/dozen',sources:'AHDB',origins:[
         {n:'UK',c:'#2D6B2D',dash:false,p:[3.1, 3.08, 3.06, 3.05, 3.05, 3.08, 3.08, 3.1, 3.09, 3.08, 3.1, 3.13]},
@@ -1668,7 +1668,7 @@ var COMM = {
     label:'Drinks', sources:'BSDA + FAO',
     context:'False juice content claims, origin fraud, adulteration with cheaper ingredients',
     threshold:0.5, norm:0.3,
-    rasffCategories:['drinks'],
+    rasffCategories:['non-alcholic beverages'],
     products:{
     'Orange juice': {unit:'£/litre',sources:'FAO',origins:[
         {n:'Brazil',c:'#2D6B2D',dash:false,p:[1.2, 1.19, 1.2, 1.21, 1.21, 1.22, 1.21, 1.22, 1.21, 1.21, 1.2, 1.21]},
