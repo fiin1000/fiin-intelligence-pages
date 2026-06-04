@@ -2863,6 +2863,28 @@ function loadData() {
           'drinks':          'non-alcholic beverages'
         };
 
+        // Vet residues first-node mapping
+        var VET_FIRST_NODE = {
+          'poultry meat and poultry meat products': 'Rearing Farm',
+          'poultry':                                'Rearing Farm',
+          'meat and meat products (other than poultry)': 'Farm/Ranch',
+          'fish and fish products':                 'Farm/Fishing Vessel',
+          'cephalopods and products thereof':       'Farm/Fishing Vessel',
+          'crustaceans and products thereof':       'Farm/Fishing Vessel',
+          'bivalve molluscs and products thereof':  'Farm/Fishing Vessel',
+          'honey and royal jelly':                  'Apiary/Hive',
+          'herbs and spices':                       'Growing Region',
+          'cereals and bakery products':            'Arable Farm',
+          'prepared dishes and snacks':             'Ingredient Supply',
+          'fruits and vegetables':                  'Farm/Orchard',
+          'milk and milk products':                 'Dairy Farm',
+          'confectionery':                          'Ingredient Supply',
+          'diatetic foods, food supplements and fortified foods': 'Ingredient Supply',
+          'nuts, nut products and seeds':           'Orchard',
+          'eggs and egg products':                  'Laying Farm',
+          'non-alcholic beverages':                 'Ingredient Supply'
+        };
+
         rasffData = rows.map(function(r) {
           var rawCommodity = (r[0]||'').trim();
           var normCommodity = SHEET_ALIASES[rawCommodity.toLowerCase()] || rawCommodity;
@@ -2870,47 +2892,13 @@ function loadData() {
             commodity: normCommodity,
             title:     (r[1]||'').trim(),
             date:      (r[2]||'').trim(),
-            country:   (r[3]||'').trim(),  // originCountry (col 4 = notifyingCountry, not displayed)
+            country:   (r[3]||'').trim(),
             severity:  (r[5]||'').trim(),
             hazard:    (r[6]||'').trim(),
-            node:      (r[8]||r[7]||'').trim(), // node_override takes priority
+            node:      (r[8]||r[7]||'').trim(),
             ref:       '',
             link:      (r[9]||'').trim()
           };
-        // Free-text title exclusions — any alert mentioning these phrases is excluded
-        var EXCLUDED_TITLE_TERMS = []; // no free-text title exclusions on page (handled in Apps Script)
-
-        // Vet residues first-node mapping — applies when no node_override set
-        var VET_FIRST_NODE = {
-          'poultry meat and poultry meat products':              'Rearing Farm',
-          'poultry':                                             'Rearing Farm',
-          'chicken': 'Rearing Farm', 'turkey': 'Rearing Farm', 'duck': 'Rearing Farm',
-          'meat and meat products (other than poultry)':         'Farm/Ranch',
-          'beef': 'Farm/Ranch', 'lamb': 'Farm/Ranch', 'pork': 'Farm/Ranch',
-          'veal': 'Farm/Ranch', 'venison': 'Farm/Ranch', 'red meat': 'Farm/Ranch',
-          'fish and fish products':                              'Farm/Fishing Vessel',
-          'cephalopods and products thereof':                    'Farm/Fishing Vessel',
-          'crustaceans and products thereof':                    'Farm/Fishing Vessel',
-          'bivalve molluscs and products thereof':               'Farm/Fishing Vessel',
-          'salmon': 'Farm/Fishing Vessel', 'cod': 'Farm/Fishing Vessel',
-          'fish': 'Farm/Fishing Vessel', 'shellfish': 'Farm/Fishing Vessel',
-          'honey and royal jelly':                               'Apiary/Hive',
-          'honey': 'Apiary/Hive',
-          'herbs and spices':                                    'Growing Region',
-          'cereals and bakery products':                         'Grain Farm',
-          'wheat': 'Grain Farm', 'barley': 'Grain Farm', 'oats': 'Grain Farm',
-          'prepared dishes and snacks':                          'Ingredient Supply',
-          'fruits and vegetables':                               'Growing Region',
-          'milk and milk products':                              'Dairy Farm',
-          'milk': 'Dairy Farm', 'dairy': 'Dairy Farm',
-          'confectionery':                                       'Ingredient Supply',
-          'dietetic foods, food supplements and fortified foods': 'Raw Ingredient Supply',
-          'nuts, nut products and seeds':                        'Orchard/Farm',
-          'eggs and egg products':                               'Laying Farm',
-          'eggs': 'Laying Farm', 'egg': 'Laying Farm',
-          'non-alcoholic beverages':                             'Raw Ingredient Supply'
-        };
-
         });
 
         // Apply vet residues first-node override where node is unknown or missing
