@@ -2846,9 +2846,28 @@ function loadData() {
           'pesticide residues'
         ];
 
+        // Normalise short commodity keys from old Apps Script to full RASFF labels
+        var SHEET_ALIASES = {
+          'honey':           'honey and royal jelly',
+          'poultry':         'poultry meat and poultry meat products',
+          'red_meat':        'meat and meat products (other than poultry)',
+          'fish_shellfish':  'fish and fish products',
+          'herbs_spices':    'herbs and spices',
+          'cereals':         'cereals and bakery products',
+          'prepared':        'prepared dishes and snacks',
+          'fruit_veg':       'fruits and vegetables',
+          'dairy':           'milk and milk products',
+          'supplements':     'diatetic foods, food supplements and fortified foods',
+          'nuts':            'nuts, nut products and seeds',
+          'eggs':            'eggs and egg products',
+          'drinks':          'non-alcholic beverages'
+        };
+
         rasffData = rows.map(function(r) {
+          var rawCommodity = (r[0]||'').trim();
+          var normCommodity = SHEET_ALIASES[rawCommodity.toLowerCase()] || rawCommodity;
           return {
-            commodity: (r[0]||'').trim(),
+            commodity: normCommodity,
             title:     (r[1]||'').trim(),
             date:      (r[2]||'').trim(),
             country:   (r[3]||'').trim(),  // originCountry (col 4 = notifyingCountry, not displayed)
@@ -2918,18 +2937,6 @@ function loadData() {
           return true;
         });
         console.log('RASFF filtered rows:', rasffData.length);
-        // DEBUG: dump first honey row to see column positions
-        var honeyRow = rasffData.find(function(r){ return (r.commodity||'').toLowerCase().indexOf('honey') > -1; });
-        if (honeyRow) {
-          console.log('Honey row node value:', JSON.stringify(honeyRow.node));
-          console.log('Honey row full object:', JSON.stringify(honeyRow));
-        }
-        // Also log the raw CSV row for honey
-        var rawHoneyRow = rows.find(function(r){ return (r[0]||'').toLowerCase().indexOf('honey') > -1; });
-        if (rawHoneyRow) {
-          console.log('Raw honey CSV columns:');
-          rawHoneyRow.forEach(function(col, i){ console.log('  [' + i + ']:', JSON.stringify(col)); });
-        }
         if (rasffData.length > 0) {
           // Show unique commodity values in sheet so we can debug matching
           var uniqueComms = {};
