@@ -654,7 +654,7 @@ tr:hover td { background: var(--mist); }
 .intel-pill-g { background: var(--grn-bg); color: var(--grn-tx); }
 .intel-empty  { font-size: 11px; color: var(--muted); font-style: italic; padding: 8px 0; }
 
-/* ── TSG GUIDANCE ── */
+/* ── TSG Quarterly Recommendations ── */
 .tsg-section { margin-bottom: 18px; }
 .tsg-card { background: white; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
 .tsg-header { display: flex; align-items: center; justify-content: space-between; padding: 13px 18px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, #f0f5e8, #e8f2dd); }
@@ -705,8 +705,12 @@ tr:hover td { background: var(--mist); }
 .tsg-resources-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
 @media(max-width:860px){ .tsg-resources-row { grid-template-columns: 1fr; } }
 .tsg-resources-row .tsg-section { margin-bottom: 0; }
-.tsg-resources-row .tsg-card { height: 100%; display: flex; flex-direction: column; }
-.tsg-resources-row .tsg-card #tsg-content { flex: 1; }
+.tsg-resources-row .tsg-card { display: flex; flex-direction: column; }
+#tsg-content { max-height: 112px; overflow-y: auto; }
+#tsg-content::-webkit-scrollbar { width: 5px; }
+#tsg-content::-webkit-scrollbar-track { background: var(--mist); border-radius: 3px; }
+#tsg-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+#tsg-content::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
 /* ── RESOURCES PANEL ── */
 .res-card { background: white; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; height: 100%; }
@@ -785,7 +789,7 @@ tr:hover td { background: var(--mist); }
   <div class="com-body">
     <div class="section-header" style="margin-top:4px;margin-bottom:6px">
       <div class="section-header-label">Category intelligence</div>
-      <div class="section-header-sub" id="cat-section-sub">TSG guidance &nbsp;·&nbsp; Supply chain fraud map &nbsp;·&nbsp; RASFF alerts</div>
+      <div class="section-header-sub" id="cat-section-sub">TSG Quarterly Recommendations &amp; Information &nbsp;·&nbsp; Supply chain fraud map &nbsp;·&nbsp; RASFF alerts</div>
       <div class="section-header-line"></div>
     </div>
     <div class="tsg-resources-row">
@@ -794,16 +798,10 @@ tr:hover td { background: var(--mist); }
         <div class="tsg-card">
           <div class="tsg-header">
             <div class="tsg-header-left">
-              <span class="tsg-badge">TSG guidance</span>
-              <span class="tsg-title" id="tsg-commodity-name">Commodity</span>
-            </div>
-            <span class="tsg-version" id="tsg-version">Placeholder — guidance to be added</span>
-          </div>
-          <div id="tsg-content">
-            <div class="tsg-placeholder">
-              Best practice guidance for this commodity has not yet been added. fiin TSG working group guidance will appear here once published — covering recommended testing methods, key vulnerabilities and suggested sampling strategies.
+              <span class="tsg-badge" id="tsg-commodity-name">TSG Quarterly Recommendations</span>
             </div>
           </div>
+          <div id="tsg-content"></div>
 
         </div>
       </div>
@@ -811,8 +809,7 @@ tr:hover td { background: var(--mist); }
       <div class="res-card" id="res-panel">
         <div class="res-header">
           <div class="res-header-left">
-            <span class="res-badge">Resources</span>
-            <span class="res-title" id="res-title">Commodity Resources</span>
+            <span class="res-badge" id="res-title">fiin Resources</span>
           </div>
         </div>
         <div class="res-body" id="res-body">
@@ -2512,7 +2509,7 @@ function render() {
 
   // Commodity header
   document.getElementById('com-name').textContent    = c.label;
-  document.getElementById('tsg-commodity-name').textContent = c.label + ' — Best Practice Guidance';
+  document.getElementById('tsg-commodity-name').textContent = 'TSG Quarterly Recommendations & Information — ' + c.label;
   document.getElementById('src-label').textContent   = 'Indicative prices only · ' + (prod ? prod.sources : c.sources);
   document.getElementById('chart1-sub').textContent  = curProd + ' · price by supply origin · ' + unit;
   if (document.getElementById('price-chart-title')) document.getElementById('price-chart-title').textContent = curProd + ' — price by origin';
@@ -2522,7 +2519,7 @@ function render() {
   var intelProdEl = document.getElementById('intel-prod-label');
   if (intelProdEl) intelProdEl.textContent = curProd;
   var catSubEl = document.getElementById('cat-section-sub');
-  if (catSubEl) catSubEl.textContent = c.label + ' · TSG guidance · Supply chain fraud map · RASFF alerts (last 6 months)';
+  if (catSubEl) catSubEl.textContent = c.label + ' · TSG Quarterly Recommendations & Information · Supply chain fraud map · RASFF alerts (last 6 months)';
   document.getElementById('com-period').textContent  = lbls[0] + ' – ' + lbls[lbls.length-1];
 
   // Update product sources label
@@ -2694,6 +2691,9 @@ function render() {
 
   // Resources panel
   renderResources();
+
+  // TSG Quarterly Recommendations
+  renderTSG();
 
   // Testing panel
   renderTestingPanel();
@@ -3006,15 +3006,72 @@ function loadData() {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
+// TSG QUARTERLY RECOMMENDATIONS
+// Update bullets each quarter — add/edit entries per commodity key below.
+// Each string in the array becomes one bullet point.
+// ─────────────────────────────────────────────────────────────────────────────
+var TSG_GUIDANCE = {
+  fish_shellfish: [
+    'The EU CATCH digital catch certification system continues to create operational challenges across seafood supply chains following implementation in January 2026, with reports of shipment delays, documentation issues and disruption at European ports. Continued focus on traceability and export documentation is recommended.',
+    'Whitefish supply remains under pressure following further reductions to Barents Sea cod quotas for 2026, now at their lowest level since 1991. Ongoing geopolitical tensions and concerns around quota compliance continue to present risks to stock sustainability and MSC certification.',
+    'Tariffs and restrictions on Russian-origin whitefish continue to create incentives for origin misrepresentation, particularly where Russian-caught fish is processed via third countries such as China before entering European supply chains.',
+    'Cold-water prawn supply remains constrained, with ongoing availability and pricing pressures linked to reduced catch levels and environmental pressures affecting key fisheries.',
+    'Mackerel stocks continue to face sustainability pressures, with ongoing concerns around stock management and quota alignment.',
+    'Declining cod availability and sustained price increases increase the risk of substitution or adulteration with lower-cost whitefish.',
+    'Emerging watch-outs have been identified around the use of chicken and other land-based proteins within salmon feed, which may conflict with some retailer specifications.'
+  ],
+  honey: [
+    'The Honey Working Group has reconvened with new members, led by Steve Brown from Barfoots, to establish a shared understanding of honey authenticity challenges. A subgroup, led by Claire Yates from Co-op, is developing best practice honey supply chain assurance guidance for members.'
+  ]
+};
+
+function renderTSG() {
+  var el = document.getElementById('tsg-content');
+  if (!el) return;
+  var bullets = TSG_GUIDANCE[cur];
+  if (bullets && bullets.length) {
+    el.innerHTML =
+      '<ul style="margin:0;padding:14px 18px 14px 32px;display:flex;flex-direction:column;gap:7px">' +
+      bullets.map(function(b) {
+        return '<li style="font-size:12px;color:var(--ink);line-height:1.65">' + b + '</li>';
+      }).join('') +
+      '</ul>';
+  } else {
+    el.innerHTML =
+      '<div class="tsg-placeholder">TSG Quarterly Recommendations for this commodity have not yet been added. fiin TSG working group guidance will appear here once published.</div>';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // RESOURCES PANEL
 // ─────────────────────────────────────────────────────────────────────────────
 var RESOURCES = {
+  poultry: [
+    { name: 'Meat and Fish Content Calculations Best Practice Guide', ext: 'PDF', icon: 'report' }
+  ],
+  red_meat: [
+    { name: 'Meat and Fish Content Calculations Best Practice Guide', ext: 'PDF', icon: 'report' }
+  ],
+  fish_shellfish: [
+    { name: 'Meat and Fish Content Calculations Best Practice Guide', ext: 'PDF', icon: 'report' }
+  ],
   honey: [
+    { name: 'TSG Supply Chain Assurance Guide',                                  ext: 'PDF', icon: 'report' },
     { name: 'Honey Sub-group methods table',                                    ext: 'PDF', icon: 'table' },
     { name: 'Webinar: new methods for honey authenticity – Cranfield University',ext: 'PDF', icon: 'video' },
     { name: 'Honey glossary',                                                   ext: 'PDF', icon: 'book' },
     { name: "JRC report 'from the hives'",                                      ext: 'PDF', icon: 'report' }
-  ]
+  ],
+  herbs_spices:     [ { name: 'TSG Best Practice Guidance', ext: 'PDF', icon: 'report' } ],
+  bakery_cereals:   [ { name: 'TSG Best Practice Guidance', ext: 'PDF', icon: 'report' } ],
+  prepared_dishes:  [ { name: 'TSG Best Practice Guidance', ext: 'PDF', icon: 'report' } ],
+  fruit_veg:        [ { name: 'TSG Best Practice Guidance', ext: 'PDF', icon: 'report' } ],
+  dairy:            [ { name: 'TSG Best Practice Guidance', ext: 'PDF', icon: 'report' } ],
+  cakes_conf:       [ { name: 'TSG Best Practice Guidance', ext: 'PDF', icon: 'report' } ],
+  diet_foods:       [ { name: 'TSG Best Practice Guidance', ext: 'PDF', icon: 'report' } ],
+  nuts_snacks:      [ { name: 'TSG Best Practice Guidance', ext: 'PDF', icon: 'report' } ],
+  eggs:             [ { name: 'TSG Best Practice Guidance', ext: 'PDF', icon: 'report' } ],
+  drinks:           [ { name: 'TSG Best Practice Guidance', ext: 'PDF', icon: 'report' } ]
 };
 
 var RES_ICONS = {
