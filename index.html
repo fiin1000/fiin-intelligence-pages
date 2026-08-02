@@ -2613,7 +2613,7 @@ var LIVE_DATA = {
       { n:'Australia', usd:11.1715, asOf:'2025 annual' },{ n:'Brazil', usd:6.2011, asOf:'2025 annual' }
     ],
     ukWholesaleGBP: 6.00, ukSource: 'AHDB GB Deadweight Cattle Price — steers & heifers, all grades — last reported w/e 18 Jul 2026', ukAsOf: 'w/e 18 Jul 2026',
-    wholesale: [{ n:'UK', gbp:6.00, asOf:'w/e 18 Jul 2026', source:'AHDB', spec:'deadweight carcass, steers & heifers' }]
+    wholesale: [{ n:'UK', gbp:6.03, prevGbp:6.01, asOf:'w/e 18 Jul 2026', source:'AHDB', spec:'deadweight carcass, steers, GB overall' }]
   },
   'Lamb': {
     benchmarkSeries: { labels:['Feb','Mar','Apr','May','Jun'], usd:[3.731,3.675,3.723,3.733,3.719] },
@@ -2622,8 +2622,8 @@ var LIVE_DATA = {
       { n:'New Zealand', usd:7.3361, asOf:'2025 annual' },{ n:'Iceland', usd:6.8483, asOf:'2025 annual' },
       { n:'Australia', usd:6.3313, asOf:'2025 annual' }
     ],
-    ukWholesaleGBP: 8.00, ukSource: 'AHDB GB Deadweight Sheep Price — SQQ (Standard Quality Quotation), all grades — last reported w/e 23 Jul 2026', ukAsOf: 'w/e 23 Jul 2026',
-    wholesale: [{ n:'UK', gbp:8.00, asOf:'w/e 23 Jul 2026', source:'AHDB', spec:'deadweight carcass, SQQ' }]
+    ukWholesaleGBP: 8.06, ukSource: 'AHDB GB Deadweight Sheep Price — NSL SQQ (Standard Quality Quotation), all grades — last reported w/e 18 Jul 2026', ukAsOf: 'w/e 18 Jul 2026',
+    wholesale: [{ n:'UK', gbp:8.06, prevGbp:8.03, asOf:'w/e 18 Jul 2026', source:'AHDB', spec:'deadweight carcass, NSL SQQ, GB overall' }]
   },
   'Pork': {
     benchmarkSeries: { labels:['Jan','Feb','Mar','Apr','May'], usd:[1.771,1.871,1.955,1.940,1.957] },
@@ -2753,10 +2753,21 @@ function render() {
     // a trend that doesn't exist. A bar of current values is the honest form.
     var wholesaleList = live.wholesale || (live.ukWholesaleGBP ? [{ n:'UK', gbp:live.ukWholesaleGBP, asOf:live.ukAsOf, source:'AHDB' }] : []);
     document.getElementById('chart1-sub').textContent = wholesaleList.length
-      ? curProd + ' — deadweight/farmgate price paid to producers, ' + unit + '. Bars show the most recent reported figure per country — this is not a price trend, each is a single snapshot.'
+      ? curProd + ' — deadweight/farmgate price paid to producers, ' + unit + '. Bars show the most recent reported figure per country.'
       : curProd + ' — no UK or EU wholesale/farmgate figure has been pulled for this product yet.';
-    document.getElementById('chart1-asof').textContent = wholesaleList.length
-      ? wholesaleList.map(function(w){ return w.n + ': ' + w.gbp + ' ' + unit + ', ' + w.asOf + (w.spec ? ' (' + w.spec + ')' : '') + ' — ' + (w.source||''); }).join(' · ')
+    document.getElementById('chart1-asof').innerHTML = wholesaleList.length
+      ? wholesaleList.map(function(w){
+          var line = '<div style="margin-bottom:4px">' + w.n + ': <b>' + w.gbp + ' ' + unit + '</b>, ' + w.asOf + (w.spec ? ' (' + w.spec + ')' : '') + ' — ' + (w.source||'');
+          if (w.prevGbp !== undefined && w.prevGbp !== null) {
+            var pct = Math.round(((w.gbp - w.prevGbp) / w.prevGbp) * 1000) / 10;
+            var up = pct >= 0;
+            var col = up ? '#2A5A10' : '#8B2020';
+            var bg  = up ? '#EAF3DE' : '#FCEBEB';
+            line += ' <span style="display:inline-block;margin-left:6px;padding:1px 6px;border-radius:3px;background:' + bg + ';color:' + col + ';font-weight:600;">' +
+                    (up ? '\u25B2' : '\u25BC') + ' ' + (up ? '+' : '') + pct + '% vs previous week</span>';
+          }
+          return line + '</div>';
+        }).join('')
       : '';
 
     var COVE = ['#eda100','#2a78d6','#eb6834','#1baf7a','#e87ba4','#008300','#4a3aa7'];
