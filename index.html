@@ -18,7 +18,7 @@
   --paper:  #F5F7F2;
   --mist:   #EBF0E5;
   --border: #D4DCC8;
-  --muted:  #7A8F70;
+  --muted:  #56684E;
   --alert-r-bg: #FDF0EF; --alert-r: #8B2020;
   --alert-a-bg: #FDF6EC; --alert-a: #7A4800;
   --alert-g-bg: #EEF6E8; --alert-g: #2A5A10;
@@ -150,6 +150,12 @@ body {
   line-height: 1.2;
   text-transform: capitalize;
 }
+.com-glance { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font-size: 12px; color: #E8F2DD; }
+.com-glance-label { font-family: 'DM Mono', monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--sage); }
+.com-glance-item { display: inline-flex; align-items: center; gap: 6px; }
+.com-glance-item b { font-weight: 600; color: white; }
+.com-glance-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.com-glance-dot.r { background: #F26B6B; } .com-glance-dot.a { background: #F5B942; } .com-glance-dot.g { background: #8DC63F; } .com-glance-dot.n { background: rgba(255,255,255,.35); }
 .com-context { font-size: 11px; color: var(--sage); margin-top: 4px; line-height: 1.5; max-width: 540px; }
 .com-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
 .com-tag {
@@ -241,6 +247,7 @@ input[type=range] { flex: 1; max-width: 140px; accent-color: var(--forest); curs
 .risk-card .card-title { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .risk-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: #E6F1FB; color: #0C447C; font-family: 'DM Mono', monospace; letter-spacing: .03em; }
 .risk-lights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 4px 0 14px; }
+.risk-light:last-child .risk-tip { left: auto; right: -10px; }
 @media (max-width: 700px) { .risk-lights { grid-template-columns: 1fr; } }
 .risk-light { border: 1px solid var(--border); border-radius: 6px; padding: 9px 10px 10px; background: white; border-top-width: 3px; }
 .risk-light.r { border-top-color: #C0392B; }
@@ -250,7 +257,12 @@ input[type=range] { flex: 1; max-width: 140px; accent-color: var(--forest); curs
 .risk-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 .risk-light.r .risk-dot { background: #C0392B; } .risk-light.a .risk-dot { background: #D4820A; } .risk-light.g .risk-dot { background: #4E9A2F; }
 .risk-light-name { font-size: 11px; font-weight: 600; color: var(--ink); }
-.risk-light-status { margin-left: auto; font-size: 9px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.risk-info { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; border: 1px solid var(--muted); color: var(--muted); font-size: 10px; font-weight: 700; font-style: italic; font-family: Georgia, serif; cursor: help; flex-shrink: 0; }
+.risk-info:hover, .risk-info:focus { border-color: var(--pine); color: var(--pine); outline: none; }
+.risk-tip { display: none; position: absolute; top: 20px; left: -10px; z-index: 30; width: 250px; padding: 9px 11px; border-radius: 6px; background: var(--ink); color: #F2F5EE; font: 400 11.5px/1.5 'DM Sans', sans-serif; font-style: normal; box-shadow: 0 4px 14px rgba(0,0,0,.25); }
+.risk-tip b { color: white; font-weight: 600; }
+.risk-info:hover .risk-tip, .risk-info:focus .risk-tip { display: block; }
+.risk-light-status { margin-left: auto; font-size: 10px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
 .risk-light.r .risk-light-status { color: #A02828; } .risk-light.a .risk-light-status { color: #7A4800; }
 .risk-light-text { font-size: 11px; line-height: 1.45; color: var(--ink); }
 .risk-light-text b { font-weight: 600; }
@@ -368,7 +380,7 @@ tr:hover td { background: var(--mist); }
 }
 .src-badge {
   font-family: 'DM Mono', monospace;
-  font-size: 9px;
+  font-size: 10px;
   padding: 2px 7px;
   border-radius: 3px;
 }
@@ -407,7 +419,7 @@ tr:hover td { background: var(--mist); }
 .rasff-head-left { display: flex; align-items: center; gap: 8px; }
 .rasff-title-text { font-size: 12px; font-weight: 600; color: white; }
 .rasff-badge {
-  font-size: 9px;
+  font-size: 10px;
   font-family: 'DM Mono', monospace;
   color: var(--lime);
   border: 1px solid rgba(141,198,63,.4);
@@ -424,7 +436,7 @@ tr:hover td { background: var(--mist); }
 .rasff-item-head { display: flex; align-items: flex-start; gap: 8px; justify-content: space-between; }
 .rasff-item-title { font-size: 11px; font-weight: 600; color: var(--ink); line-height: 1.4; flex: 1; }
 .rasff-sev {
-  font-size: 9px;
+  font-size: 10px;
   font-family: 'DM Mono', monospace;
   padding: 2px 7px;
   border-radius: 3px;
@@ -535,7 +547,7 @@ tr:hover td { background: var(--mist); }
   min-width: 18px;
   height: 18px;
   border-radius: 9px;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   font-family: 'DM Mono', monospace;
   display: flex;
@@ -619,7 +631,7 @@ tr:hover td { background: var(--mist); }
   border-bottom: 1px solid rgba(255,255,255,.1);
 }
 .sc-tip-section-head {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: .07em;
@@ -633,10 +645,10 @@ tr:hover td { background: var(--mist); }
 .sc-tip-risk.med::before  { content: '●'; color: #ffb347; }
 .sc-tip-item { padding: 3px 13px 3px 13px; border-bottom: 0.5px solid rgba(255,255,255,.08); font-size: 10px; }
 .sc-tip-item:last-child { border-bottom: none; }
-.sc-tip-meta { font-size: 9px; opacity: .55; margin-bottom: 1px; }
+.sc-tip-meta { font-size: 10px; opacity: .55; margin-bottom: 1px; }
 .sc-tip-divider { border-top: 1px solid rgba(255,255,255,.1); margin: 4px 0 2px; }
 .sc-tip-empty { padding: 4px 13px 6px; font-size: 10px; opacity: .45; font-style: italic; }
-.sc-tip-footer { padding: 5px 13px 8px; font-size: 9px; opacity: .35; border-top: 1px solid rgba(255,255,255,.08); }
+.sc-tip-footer { padding: 5px 13px 8px; font-size: 10px; opacity: .35; border-top: 1px solid rgba(255,255,255,.08); }
 
 /* ── MARKET INTELLIGENCE ── */
 .intel-section { margin-bottom: 18px; }
@@ -650,7 +662,7 @@ tr:hover td { background: var(--mist); }
 .intel-group { padding: 8px 0 6px; border-bottom: 0.5px solid var(--border); }
 .intel-group:last-child { border-bottom: none; }
 .intel-group-head { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
-.intel-group-count { font-size: 9px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.intel-group-count { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
 .intel-item  { display: flex; gap: 8px; align-items: flex-start; padding: 4px 0; }
 .intel-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
 .intel-dot-r { background: #8B2020; }
@@ -658,7 +670,7 @@ tr:hover td { background: var(--mist); }
 .intel-dot-b { background: #185FA5; }
 .intel-dot-g { background: #2D6B2D; }
 .intel-body  { min-width: 0; flex: 1; overflow-wrap: anywhere; word-break: break-word; }
-.intel-theme  { display: inline-block; font-size: 9px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .05em; padding: 1px 6px; border-radius: 3px; }
+.intel-theme  { display: inline-block; font-size: 10px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .05em; padding: 1px 6px; border-radius: 3px; }
 .intel-theme-r { background: var(--alert-r-bg); color: var(--alert-r); }
 .intel-theme-a { background: var(--alert-a-bg); color: var(--alert-a); }
 .intel-theme-b { background: var(--blue-bg); color: var(--blue); }
@@ -666,7 +678,7 @@ tr:hover td { background: var(--mist); }
 a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
 .intel-detail   { font-size: 11px; color: var(--sub); line-height: 1.5; }
 .intel-src      { font-size: 10px; color: var(--muted); margin-top: 1px; font-style: italic; }
-.intel-trade    { font-style: normal; font-size: 9px; font-weight: 600; color: var(--pine); text-transform: uppercase; letter-spacing: .04em; }
+.intel-trade    { font-style: normal; font-size: 10px; font-weight: 600; color: var(--pine); text-transform: uppercase; letter-spacing: .04em; }
 .intel-more     { background: none; border: none; padding: 2px 0 0 14px; font: inherit; font-size: 10.5px; font-weight: 500; color: var(--pine); cursor: pointer; }
 .intel-more:hover { text-decoration: underline; }
 .intel-fraud {
@@ -676,7 +688,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
   border-bottom-left-radius: 0; border-top-left-radius: 0;
 }
 .intel-fraud-label {
-  font-size: 9px; font-weight: 600; color: #7A4800;
+  font-size: 10px; font-weight: 600; color: #7A4800;
   text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px;
   font-family: 'DM Mono', monospace;
 }
@@ -694,7 +706,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
 .tsg-card { background: white; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
 .tsg-header { display: flex; align-items: center; justify-content: space-between; padding: 13px 18px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, #f0f5e8, #e8f2dd); }
 .tsg-header-left { display: flex; align-items: center; gap: 10px; }
-.tsg-badge { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; background: var(--pine); color: white; padding: 3px 9px; border-radius: 10px; font-family: 'DM Mono', monospace; }
+.tsg-badge { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; background: var(--pine); color: white; padding: 3px 9px; border-radius: 10px; font-family: 'DM Mono', monospace; }
 .tsg-title { font-size: 13px; font-weight: 600; color: var(--forest); }
 .tsg-version { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
 .tsg-body { padding: 16px 18px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
@@ -718,15 +730,15 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
 .tp-head{background:var(--forest);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .tp-head-left{display:flex;align-items:center;gap:8px}
 .tp-head-title{font-size:12px;font-weight:600;color:white}
-.tp-soon{font-size:9px;font-family:'DM Mono',monospace;color:var(--lime);border:1px solid rgba(141,198,63,.4);padding:2px 7px;border-radius:3px}
+.tp-soon{font-size:10px;font-family:'DM Mono',monospace;color:var(--lime);border:1px solid rgba(141,198,63,.4);padding:2px 7px;border-radius:3px}
 .tp-period{font-size:10px;color:var(--sage);font-family:'DM Mono',monospace}
 .tp-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid var(--border);flex-shrink:0}
 .tp-kpi{padding:5px 12px;border-right:1px solid var(--border)}
 .tp-kpi:last-child{border-right:none}
-.tp-kpi-label{font-size:9px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.tp-kpi-label{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
 .tp-kpi-value{font-size:14px;font-weight:700;color:var(--forest);line-height:1}
 .tp-kpi-value.red{color:var(--alert-r)}
-.tp-kpi-sub{font-size:9px;color:var(--muted);margin-top:1px}
+.tp-kpi-sub{font-size:10px;color:var(--muted);margin-top:1px}
 .tp-chart-area{flex:1;padding:12px 14px 8px;position:relative}
 .tp-chart-title{font-size:11px;font-weight:600;color:var(--ink);margin-bottom:2px}
 .tp-chart-sub{font-size:10px;color:var(--muted);margin-bottom:8px}
@@ -741,7 +753,11 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
 @media(max-width:860px){ .tsg-resources-row { grid-template-columns: 1fr; } }
 .tsg-resources-row .tsg-section { margin-bottom: 0; }
 .tsg-resources-row .tsg-card { display: flex; flex-direction: column; }
-#tsg-content { max-height: 112px; overflow-y: auto; }
+#tsg-content { position: relative; }
+#tsg-content.clamped { max-height: 190px; overflow: hidden; }
+#tsg-content.clamped::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 48px; background: linear-gradient(rgba(255,255,255,0), #fff); pointer-events: none; }
+.tsg-more { display: block; width: 100%; text-align: left; background: #fff; border: none; border-top: 1px solid var(--border); padding: 8px 18px; font: inherit; font-size: 12px; font-weight: 600; color: var(--pine); cursor: pointer; }
+.tsg-more:hover { text-decoration: underline; }
 #tsg-content::-webkit-scrollbar { width: 5px; }
 #tsg-content::-webkit-scrollbar-track { background: var(--mist); border-radius: 3px; }
 #tsg-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
@@ -751,7 +767,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
 .res-card { background: white; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; height: 100%; }
 .res-header { display: flex; align-items: center; justify-content: space-between; padding: 13px 18px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, #f0f5e8, #e8f2dd); }
 .res-header-left { display: flex; align-items: center; gap: 10px; }
-.res-badge { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; background: var(--pine); color: white; padding: 3px 9px; border-radius: 10px; font-family: 'DM Mono', monospace; }
+.res-badge { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; background: var(--pine); color: white; padding: 3px 9px; border-radius: 10px; font-family: 'DM Mono', monospace; }
 .res-title { font-size: 13px; font-weight: 600; color: var(--forest); }
 .res-body { padding: 10px 14px; max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; }
 .res-body::-webkit-scrollbar { width: 5px; }
@@ -764,15 +780,15 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
 .res-file:hover { background: var(--mist); border-color: var(--pine); }
 .res-file-icon { flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
 .res-file-name { flex: 1; line-height: 1.35; }
-.res-file-ext { font-size: 9px; font-family: 'DM Mono', monospace; color: var(--muted); background: var(--mist); padding: 1px 5px; border-radius: 3px; flex-shrink: 0; }
+.res-file-ext { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--muted); background: var(--mist); padding: 1px 5px; border-radius: 3px; flex-shrink: 0; }
 .res-footer { padding: 9px 18px; background: var(--mist); border-top: 1px solid var(--border); font-size: 10px; color: var(--muted); display: flex; align-items: center; justify-content: space-between; }
 
 .sc-node { cursor: help; }
 
 /* ── TESTING PANEL SPLIT LAYOUT ── */
-.tp-content { display: grid; grid-template-columns: 1fr 1fr; gap: 0; height: 190px; }
+.tp-content { display: grid; grid-template-columns: 1fr 1fr; gap: 0; height: 250px; }
 @media(max-width:800px){ .tp-content { grid-template-columns: 1fr; height: auto; } }
-.tp-chart-area { padding: 10px 14px 8px; border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+.tp-chart-area { padding: 10px 14px 12px; border-right: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
 .tp-fiin-area { padding: 10px 14px 8px; display: flex; flex-direction: column; min-height: 0; }
 .tp-fiin-title { font-size: 11px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
 .tp-fiin-sub { font-size: 10px; color: var(--muted); margin-bottom: 8px; }
@@ -784,7 +800,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
 .tp-results::-webkit-scrollbar-track { background: var(--mist); }
 .tp-results::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 .tp-result-item { font-size: 11px; color: var(--ink); padding: 5px 8px; border-left: 3px solid #D4820A; background: var(--alert-a-bg); border-radius: 0 4px 4px 0; line-height: 1.4; flex-shrink: 0; }
-.tp-result-meta { font-size: 9px; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 2px; }
+.tp-result-meta { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 2px; }
 </style>
 
 <style id="pw-style">
@@ -886,6 +902,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
   <div class="com-header" id="com-header" style="margin-top:6px">
     <div>
       <div class="com-name" id="com-name"></div>
+      <div class="com-glance" id="com-glance"></div>
 
     </div>
     <div class="com-meta">
@@ -956,9 +973,9 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
         <div class="tp-head">
           <div class="tp-head-left">
             <span class="tp-head-title">fiin member testing data</span>
-            <span class="tp-soon">coming soon</span>
+            <span class="tp-soon">Example data</span>
           </div>
-          <span class="tp-period" id="testing-period">Q1 2024 – Q1 2025</span>
+          <span class="tp-period" id="testing-period">Not real results · real member data to follow</span>
         </div>
         <div class="tp-kpis">
           <div class="tp-kpi"><div class="tp-kpi-label">Items Tested</div><div class="tp-kpi-value">—</div><div class="tp-kpi-sub">awaiting data</div></div>
@@ -969,7 +986,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
         <div class="tp-content">
           <div class="tp-chart-area">
             <div class="tp-chart-title">Tests performed vs anomalies detected</div>
-            <div class="tp-chart-sub">Quarterly · illustrative placeholder</div>
+            <div class="tp-chart-sub">Quarterly · example data, not real results</div>
             <div style="position:relative;flex:1;min-height:0"><canvas id="testingChart"></canvas></div>
             <div class="tp-legend" style="margin-top:6px">
               <span class="tp-leg-item"><span class="tp-leg-swatch" style="background:#8DC63F"></span>Tests performed</span>
@@ -978,14 +995,13 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
             </div>
           </div>
           <div class="tp-fiin-area" id="tp-fiin-area">
-            <div class="tp-fiin-title">fiin member data <span style="font-size:9px;font-weight:400;color:var(--muted)">(mock)</span></div>
+            <div class="tp-fiin-title">fiin member data <span style="font-size:10px;font-weight:400;color:var(--muted)">(example data)</span></div>
             <div class="tp-fiin-sub">Anonymised authenticity concerns</div>
             <div class="tp-results" id="tp-results"></div>
           </div>
         </div>
         <div class="tp-footer">
           <span>fiin member testing programme &nbsp;·&nbsp; member use only</span>
-          <span style="color:var(--pine);cursor:pointer">Connect data →</span>
         </div>
       </div>
     </div>
@@ -1024,14 +1040,11 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
 
 
           <div class="explainer">
-            <strong>How to read this:</strong> The three lights compare what UK importers paid per kg
-            (HMRC customs data) across countries and over the last two years.
-            <strong>Price swing</strong> flags unusual price moves; <strong>Origin shift</strong> flags a country
-            suddenly supplying much more, or becoming much cheaper; <strong>Price gap</strong> flags an origin far
-            cheaper than the UK average. <span style="color:#A02828;font-weight:600">Red</span> and
-            <span style="color:#7A4800;font-weight:600">amber</span> are prompts to check suppliers, specifications
-            and testing — not proof of fraud. Figures are averages across grades and arrive about two months after
-            the month ends. <strong>RASFF alerts</strong> below cover the whole category, not just this product.
+            <strong>How to read this:</strong> hover over or tap the <b>i</b> on each light for what it checks and
+            when it turns red or amber. <span style="color:#A02828;font-weight:600">Red</span> and
+            <span style="color:#7A4800;font-weight:600">amber</span> are prompts to check suppliers, specifications and testing,
+            not proof of fraud. Prices are averages across grades and arrive about two months after the month ends.
+            RASFF alerts on the supply chain map above cover the whole category, not just this product.
           </div>
 
         </div>
@@ -1739,7 +1752,7 @@ function renderSupplyChain() {
 
       var fiinItems = FIIN_DUMMY[scKey(cur)] || [];
       if (fiinItems.length) {
-        html += '<div style="padding:2px 13px 1px;font-size:9px;opacity:.5;font-family:DM Mono,monospace;text-transform:uppercase;letter-spacing:.06em">fiin (mock) data</div>';
+        html += '<div style="padding:2px 13px 1px;font-size:10px;opacity:.5;font-family:DM Mono,monospace;text-transform:uppercase;letter-spacing:.06em">fiin example data</div>';
         html += fiinItems.slice(0, 2).map(function(txt) {
           return '<div class="sc-tip-item">' + txt + '</div>';
         }).join('');
@@ -1747,7 +1760,7 @@ function renderSupplyChain() {
 
 
       if (count > 0) {
-        html += '<div style="padding:4px 13px 1px;font-size:9px;opacity:.5;font-family:DM Mono,monospace;text-transform:uppercase;letter-spacing:.06em">RASFF data — ' + count + ' alert' + (count!==1?'s':'') + '</div>';
+        html += '<div style="padding:4px 13px 1px;font-size:10px;opacity:.5;font-family:DM Mono,monospace;text-transform:uppercase;letter-spacing:.06em">RASFF data — ' + count + ' alert' + (count!==1?'s':'') + '</div>';
         html += alerts.map(function(a) {
           return '<div class="sc-tip-item"><div class="sc-tip-meta">' + a.d + '</div>' + a.t + (a.t.length >= 90 ? '&hellip;' : '') + '</div>';
         }).join('');
@@ -1756,7 +1769,7 @@ function renderSupplyChain() {
         html += '<div class="sc-tip-empty">No RASFF alerts at this stage</div>';
       }
 
-      html += '<div class="sc-tip-footer">fiin TSG · RASFF/European Commission · placeholder guidance</div>';
+      html += '<div class="sc-tip-footer">fiin TSG · RASFF/European Commission</div>';
       tip.innerHTML = html;
       tip.style.display = 'flex';
       positionTip(e);
@@ -1933,6 +1946,19 @@ function fmtMonth(m) {
   return d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
 }
 
+// Plain-English explanation behind each light's i (thresholds read from RISK)
+var RISK_HELP = {};
+function buildRiskHelp() {
+  var p = function(x){ return Math.round(x * 100) + '%'; };
+  RISK_HELP['Price swing'] = 'Compares the UK import price over the last 3 months with its 2-year average, and how much it has swung in the last 6 months. ' +
+    '<b>Red:</b> ' + p(RISK.swingRed) + '+ change or ' + p(RISK.rangeRed) + '+ swing. <b>Amber:</b> ' + p(RISK.swingAmber) + '+ or ' + p(RISK.rangeAmber) + '+. Sharp moves raise the incentive to cut corners.';
+  RISK_HELP['Origin shift'] = 'Flags a country suddenly supplying a bigger share of UK imports, or becoming much cheaper than other origins. ' +
+    '<b>Red:</b> share up ' + RISK.shiftRed + '+ points, a new major source, or ' + p(RISK.cheaperRed) + '+ relatively cheaper. <b>Amber:</b> ' + RISK.shiftAmber + '+ points or ' + p(RISK.cheaperAmber) + '+.';
+  RISK_HELP['Price gap'] = 'Flags an origin with at least ' + p(RISK.minShare) + ' of UK volume whose price is far below the UK average. ' +
+    '<b>Red:</b> ' + p(RISK.gapRed) + '+ below. <b>Amber:</b> ' + p(RISK.gapAmber) + '+ below. Large gaps can signal substitution, dilution or a lower grade sold as premium.';
+}
+buildRiskHelp();
+
 function computeRiskSignals(prodName, t) {
   var M = t.months, n = M.length;
   var last3 = M.slice(-3), last6 = M.slice(-6), prev12 = M.slice(Math.max(0, n - 18), n - 6);
@@ -2050,6 +2076,7 @@ function renderTradeRisk() {
   document.getElementById('risk-lights').innerHTML = sig.lights.map(function(l) {
     return '<div class="risk-light ' + l.level + '">' +
       '<div class="risk-light-head"><span class="risk-dot"></span><span class="risk-light-name">' + l.name + '</span>' +
+      '<span class="risk-info" tabindex="0" role="button" aria-label="How ' + l.name + ' works">i<span class="risk-tip" role="tooltip">' + RISK_HELP[l.name] + '</span></span>' +
       '<span class="risk-light-status">' + l.status + '</span></div>' +
       '<div class="risk-light-text">' + l.text + '</div></div>';
   }).join('');
@@ -2094,6 +2121,53 @@ function renderTradeRisk() {
     (t.updated ? ' Updated ' + escHtml(t.updated) + '.' : '');
 }
 
+// ── At-a-glance strip under the category name ───────────────────────────────
+function renderGlance() {
+  var el = document.getElementById('com-glance');
+  if (!el || !COMM[cur]) return;
+  var parts = [];
+  // Price signals: distinct HMRC datasets in this category with a red or amber light
+  if (tradeLoaded) {
+    var seen = [], red = 0, amber = 0, covered = 0;
+    Object.keys(COMM[cur].products).forEach(function(p) {
+      var hit = tradeFor(p);
+      if (!hit || seen.indexOf(hit.t) > -1) return;
+      seen.push(hit.t); covered++;
+      try {
+        var lv = computeRiskSignals(p, hit.t).lights.map(function(l){ return l.level; });
+        if (lv.indexOf('r') > -1) red++; else if (lv.indexOf('a') > -1) amber++;
+      } catch (e) {}
+    });
+    if (covered) parts.push(glanceItem(red ? 'r' : amber ? 'a' : 'g',
+      red || amber ? '<b>' + (red ? red + ' red' : '') + (red && amber ? ', ' : '') + (amber ? amber + ' amber' : '') + '</b> price signal' + (red + amber === 1 ? '' : 's')
+                   : '<b>No</b> red or amber price signals'));
+  }
+  // RASFF alerts in the last 30 days for this category
+  if (rasffData.length || RASFF_CSV_URL) {
+    var cats = (COMM[cur].rasffCategories || []).map(function(c){ return c.toLowerCase(); });
+    var since = Date.now() - 30 * 864e5, n = 0;
+    rasffData.forEach(function(r) {
+      if (cats.indexOf((r.commodity || '').toLowerCase()) === -1) return;
+      var d = parseNewsDate(r.date);
+      if (d && d.getTime() >= since) n++;
+    });
+    parts.push(glanceItem(n ? 'a' : 'n', '<b>' + n + '</b> RASFF alert' + (n === 1 ? '' : 's') + ' in 30 days'));
+  }
+  // Fraud & integrity news in the last 30 days (category + its products)
+  if (newsLoaded) {
+    var keys = [newsKey(cur)].concat(Object.keys(COMM[cur].products).map(newsKey)), heads = {};
+    keys.forEach(function(k) {
+      (newsData[k] || []).forEach(function(it) { if (it.theme === 'Fraud & integrity') heads[(it.headline || '').toLowerCase().slice(0, 70)] = true; });
+    });
+    var f = Object.keys(heads).length;
+    parts.push(glanceItem(f ? 'r' : 'n', '<b>' + f + '</b> fraud &amp; integrity stor' + (f === 1 ? 'y' : 'ies')));
+  }
+  el.innerHTML = parts.length ? '<span class="com-glance-label">At a glance</span>' + parts.join('') : '';
+}
+function glanceItem(dot, html) {
+  return '<span class="com-glance-item"><span class="com-glance-dot ' + dot + '"></span>' + html + '</span>';
+}
+
 // ── Render market intelligence section ──────────────────────────────────────
 function renderNews() {
   var section = document.getElementById('intel-section');
@@ -2125,6 +2199,7 @@ function renderNews() {
     items.innerHTML = '<div class="intel-empty">' + (newsLoaded || !NEWS_CSV_URL
       ? 'No supply chain news in the Sheet for ' + escHtml(prodKey) + ' in the last 30 days.'
       : 'Loading market news&hellip;') + '</div>';
+    try { renderGlance(); } catch (e) {}
     return;
   }
 
@@ -2159,6 +2234,7 @@ function renderNews() {
   }).join('');
 
   // Fraud signal removed
+  try { renderGlance(); } catch (e) { console.error('Glance error:', e); }
 }
 // ─────────────────────────────────────────────────────────────────────────────
 // STATE
@@ -2431,7 +2507,9 @@ function render() {
   if (intelProdEl) intelProdEl.textContent = curProd;
   var catSubEl = document.getElementById('cat-section-sub');
   if (catSubEl) catSubEl.textContent = c.label + ' · TSG Quarterly Recommendations & Information · Supply chain fraud map · RASFF alerts (last 6 months)';
-  document.getElementById('com-period').textContent  = lbls[0] + ' – ' + lbls[lbls.length-1];
+  var latestM = '';
+  Object.keys(c.products).forEach(function(p){ var h = tradeFor(p); if (h) { var m = h.t.months[h.t.months.length - 1]; if (m > latestM) latestM = m; } });
+  document.getElementById('com-period').textContent = latestM ? 'Latest HMRC prices: ' + fmtMonth(latestM) : '';
 
   } catch (e) {
     console.error('Header update error:', e);
@@ -2445,6 +2523,9 @@ function render() {
 
   // Price risk signals (HMRC)
   try { renderTradeRisk(); } catch (e) { console.error('Price risk card error:', e); }
+
+  // At-a-glance strip
+  try { renderGlance(); } catch (e) { console.error('Glance error:', e); }
 
   // Supply chain map
   renderSupplyChain();
@@ -2696,6 +2777,7 @@ function loadData() {
         }
         renderRasff();
         renderSupplyChain();
+        try { renderGlance(); } catch (e) {}
       })
       .catch(function(e){
         console.error('RASFF fetch error:', e);
@@ -2789,7 +2871,7 @@ function loadData() {
   if (TRADE_CSV_URL) {
     fetch(TRADE_CSV_URL)
       .then(function(r){ return r.text(); })
-      .then(function(txt) { loadTradeCsv(txt); tradeLoaded = true; rebuildProductDropdown(); renderTradeRisk(); })
+      .then(function(txt) { loadTradeCsv(txt); tradeLoaded = true; rebuildProductDropdown(); render(); })
       .catch(function(e){ console.error('Trade data fetch error:', e); tradeLoaded = true; renderTradeRisk(); });
   }
 
@@ -2934,7 +3016,22 @@ function renderTSG() {
         return '<li style="font-size:12px;color:var(--ink);line-height:1.65">' + b + '</li>';
       }).join('') +
       '</ul>';
+    // Long guidance: show the start, with "Read more" to open the rest
+    var old = el.parentNode.querySelector('.tsg-more'); if (old) old.remove();
+    el.classList.remove('clamped');
+    if (el.scrollHeight > 210) {
+      el.classList.add('clamped');
+      var btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'tsg-more'; btn.textContent = 'Read more \u25BE';
+      btn.addEventListener('click', function() {
+        var open = el.classList.toggle('clamped') === false;
+        btn.textContent = open ? 'Show less \u25B4' : 'Read more \u25BE';
+      });
+      el.parentNode.insertBefore(btn, el.nextSibling);
+    }
   } else {
+    var old2 = el.parentNode.querySelector('.tsg-more'); if (old2) old2.remove();
+    el.classList.remove('clamped');
     el.innerHTML =
       '<div class="tsg-placeholder">TSG Quarterly Recommendations for this commodity have not yet been added. fiin TSG working group guidance will appear here once published.</div>';
   }
@@ -3047,7 +3144,7 @@ function renderTestingPanel() {
   var data = FIIN_TESTING[testKey];
 
   if (!data) {
-    rEl.innerHTML = '<div style="font-size:11px;color:var(--muted);font-style:italic;padding:4px 0">No mock data for this category yet.</div>';
+    rEl.innerHTML = '<div style="font-size:11px;color:var(--muted);font-style:italic;padding:4px 0">No example data for this category.</div>';
     return;
   }
 
