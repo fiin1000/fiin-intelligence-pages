@@ -1061,7 +1061,7 @@ var RASFF_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR68kbziTvB
 
 // Paste your published news tab CSV URL below when ready
 // In Google Sheets: File → Share → Publish to web → news tab → CSV → Publish → copy URL
-var NEWS_CSV_URL = null;
+var NEWS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR68kbziTvBGmuCrsqLB8m_MbCKs6JrSidcoLtiybXwZHkyvaGwCtslyJtPeiN5pJCyMAbE-LydRyO1/pub?gid=2074929046&single=true&output=csv';
 // var NEWS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/YOUR_PUBLISHED_ID/pub?gid=YOUR_GID&single=true&output=csv';
 
 var FRAUD_CSV_URL = null;
@@ -2519,16 +2519,19 @@ function renderNews() {
   // BUILTIN_NEWS may be keyed by old commodity name or new product name — try both
   var builtinKey = BUILTIN_NEWS[prodKey] ? prodKey : (BUILTIN_NEWS[cur] ? cur : null);
   var builtinData = builtinKey ? BUILTIN_NEWS[builtinKey] : null;
-  var commNews  = (newsData[prodKey] && newsData[prodKey].length) ? newsData[prodKey]
-                : (newsData[cur]     && newsData[cur].length)     ? newsData[cur]
-                : (builtinData ? builtinData.items : []);
+  var liveNews  = (newsData[newsKey(prodKey)] && newsData[newsKey(prodKey)].length) ? newsData[newsKey(prodKey)]
+                : (newsData[newsKey(cur)]     && newsData[newsKey(cur)].length)     ? newsData[newsKey(cur)]
+                : null;
+  var commNews  = liveNews || (builtinData ? builtinData.items : []);
   var commFraud = fraudData[prodKey] || fraudData[cur] || (builtinData ? builtinData.fraud : '');
-  var isLive    = !!(newsData[prodKey] && newsData[prodKey].length) || !!(newsData[cur] && newsData[cur].length);
+  var isLive    = !!liveNews;
 
   section.style.display = 'block';
 
-  meta.textContent = isLive ? 'Live · updated daily via Apps Script'
-    : NEWS_CSV_URL ? 'Loading...' : 'Built-in intelligence · connect Sheet for live updates';
+  meta.textContent = isLive ? 'Live from Sheet' + (newsUpdated ? ' · updated ' + newsUpdated : '')
+    : !NEWS_CSV_URL ? 'Built-in intelligence · connect Sheet for live updates'
+    : !newsLoaded   ? 'Loading...'
+    : 'No live news for this product yet · showing built-in intelligence';
 
   // Pills
 
@@ -2564,6 +2567,20 @@ var tChartImport = null;
 var sChart  = null;
 var rasffData = [];
 var newsData  = {};
+var newsUpdated = '';   // latest value from the sheet's "updated" column
+var newsLoaded  = false;
+
+// Normalise a news sheet key so "Beef", "beef ", "Red meat" and "red_meat" all match page keys
+function newsKey(s) {
+  return (s || '').toString().trim().toLowerCase().replace(/[\s\-\/&]+/g, '_').replace(/_+/g, '_');
+}
+// Map the sheet's risk column to the page's dot colours (r = red, a = amber, b = blue)
+function riskCode(s) {
+  var v = (s || '').toString().trim().toLowerCase();
+  if (/^(r|red|high|alert|serious)/.test(v)) return 'r';
+  if (/^(a|amber|med|medium|warn)/.test(v))  return 'a';
+  return 'b';
+}
 var fraudData = {};
 var PERIODS = ['6 months', '12 months', '24 months'];
 
@@ -2616,20 +2633,29 @@ function sevClass(s) {
   return 'sev-' + l;
 }
 
+// Quote-aware CSV parser. Handles line breaks inside quoted cells (common in
+// news detail text) and escaped quotes (""). Skips the first row as a header.
 function parseCSV(txt) {
-  var rows = [], lines = txt.trim().split('\n');
-  for (var i = 1; i < lines.length; i++) {
-    var cols = [], inQ = false, cur2 = '';
-    for (var c = 0; c < lines[i].length; c++) {
-      var ch = lines[i][c];
-      if (ch === '"') { inQ = !inQ; }
-      else if (ch === ',' && !inQ) { cols.push(cur2.trim()); cur2 = ''; }
-      else cur2 += ch;
-    }
-    cols.push(cur2.trim());
-    if (cols.length) rows.push(cols);
+  var rows = [], cols = [], cell = '', inQ = false;
+  txt = (txt || '').replace(/^﻿/, '').trim();
+  for (var c = 0; c < txt.length; c++) {
+    var ch = txt[c];
+    if (inQ) {
+      if (ch === '"') {
+        if (txt[c + 1] === '"') { cell += '"'; c++; }
+        else inQ = false;
+      } else cell += ch;
+    } else if (ch === '"') { inQ = true; }
+    else if (ch === ',') { cols.push(cell.trim()); cell = ''; }
+    else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && txt[c + 1] === '\n') c++;
+      cols.push(cell.trim()); cell = '';
+      rows.push(cols); cols = [];
+    } else cell += ch;
   }
-  return rows;
+  cols.push(cell.trim());
+  rows.push(cols);
+  return rows.slice(1).filter(function(r){ return r.some(function(v){ return v !== ''; }); });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -3116,7 +3142,8 @@ function renderRasff() {
   }
 
   bdg.textContent = 'via Sheet ✓';
-  count.textContent = items.length + ' alert' + (items.length!==1?'s':'');
+  count.textContent = items.length + ' alert' + (items.length!==1?'s':'') +
+    (items[0].date ? ' · latest ' + items[0].date : '');
 
   body.innerHTML = items.map(function(r) {
     var sc = sevClass(r.severity);
@@ -3167,6 +3194,9 @@ function loadData() {
           'pathogenic micro-organisms',
           'pesticide residues'
         ];
+        // Alerts whose title contains any of these (lower-case) phrases are hidden.
+        // Was referenced but never defined, which crashed the RASFF load. Add terms as needed.
+        var EXCLUDED_TITLE_TERMS = [];
 
         // Normalise short commodity keys from old Apps Script to full RASFF labels
         var SHEET_ALIASES = {
@@ -3261,6 +3291,7 @@ function loadData() {
       .catch(function(e){
         console.error('RASFF fetch error:', e);
         renderRasff();
+        try { renderSupplyChain(); } catch (e2) { console.error('Supply chain render error:', e2); }
       });
   }
 
@@ -3271,20 +3302,26 @@ function loadData() {
         var rows = parseCSV(txt);
         // columns: commodity, headline, detail, source, risk_level, updated
         newsData = {};
+        newsUpdated = '';
         rows.forEach(function(r) {
-          var comm = (r[0]||'').trim();
+          var comm = newsKey(r[0]);
           if (!comm || comm === '_none') return;
+          if (!(r[1]||'').trim()) return; // skip rows with no headline
           if (!newsData[comm]) newsData[comm] = [];
+          var upd = (r[5]||'').trim();
+          if (upd && (!newsUpdated || new Date(upd) > new Date(newsUpdated))) newsUpdated = upd;
           newsData[comm].push({
             headline:   (r[1]||'').trim(),
             detail:     (r[2]||'').trim(),
             source:     (r[3]||'').trim(),
-            risk_level: (r[4]||'b').trim()
+            risk_level: riskCode(r[4])
           });
         });
+        console.log('News rows loaded for:', JSON.stringify(Object.keys(newsData)), 'latest update:', newsUpdated);
+        newsLoaded = true;
         renderNews();
       })
-      .catch(function(){ renderNews(); });
+      .catch(function(e){ console.error('News fetch error:', e); newsLoaded = true; renderNews(); });
   }
 
   if (FRAUD_CSV_URL) {
