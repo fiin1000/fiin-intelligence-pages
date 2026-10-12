@@ -1857,7 +1857,7 @@ function renderNews() {
 
   meta.textContent = !NEWS_CSV_URL ? 'News sheet not connected'
     : !newsLoaded ? 'Loading...'
-    : 'Live from Sheet' + (newsUpdated ? ' · latest item ' + fmtNewsDate(newsUpdated) : '');
+    : 'Live from Sheet' + (newsUpdated ? ' · newest article ' + fmtNewsDate(newsUpdated) : '');
 
   // Pills
 
@@ -1876,7 +1876,7 @@ function renderNews() {
           '<div class="intel-headline">' + escHtml(n.headline) + '</div>' +
           (n.detail ? '<div class="intel-detail">' + escHtml(n.detail) + '</div>' : '') +
           '<div class="intel-src">' + escHtml(meta) +
-            (n.url ? (meta ? ' &nbsp;' : '') + '<a class="intel-link" href="' + escHtml(n.url) + '" target="_blank" rel="noopener">Read more →</a>' : '') +
+            (n.url || n.findUrl ? (meta ? ' &nbsp;' : '') + '<a class="intel-link" href="' + escHtml(n.url || n.findUrl) + '" target="_blank" rel="noopener">' + (n.url ? 'Read more →' : 'Find article →') + '</a>' : '') +
           '</div>' +
         '</div>' +
       '</div>';
@@ -1901,6 +1901,9 @@ var newsLoaded  = false;
 // Normalise a news sheet key so "Beef", "beef ", "Red meat" and "red_meat" all match page keys
 function newsKey(s) {
   return (s || '').toString().trim().toLowerCase().replace(/[\s\-\/&]+/g, '_').replace(/_+/g, '_');
+}
+function decodeEntities(v) {
+  var t = document.createElement('textarea'); t.innerHTML = v || ''; return t.value;
 }
 var NEWS_MAX_ITEMS = 10; // most recent items shown per product
 function escHtml(v) {
@@ -2588,17 +2591,40 @@ function loadData() {
         newsUpdated = '';
         rows.forEach(function(r) {
           var comm = newsKey(cell(r, C.comm));
-          var head = cell(r, C.head);
+          var head = decodeEntities(cell(r, C.head));
           if (!comm || comm === '_none' || !head) return;
           var detail = cell(r, C.detail), url = cell(r, C.url), src = cell(r, C.source);
-          // Never show a bare link as the paragraph or source text — turn it into the "Read more" link
+          var artDate = '';
+          // Google News RSS: source arrives as "Publisher · 8 Apr 2026" — split out the article date
+          var sm = src.match(/^(.*?)\s*[·|]\s*(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}|\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{4})\s*$/);
+          if (sm) { src = sm[1].trim(); artDate = sm[2]; }
+          // Google News RSS: detail is an (often HTML-escaped, truncated) link, not a paragraph
+          var dRaw = decodeEntities(detail);
+          if (/<a\s|<\/?[a-z][^>]*>/i.test(dRaw)) {
+            var hm = dRaw.match(/href="([^"]+)"/i);
+            if (hm && !url) url = hm[1];
+            detail = '';
+          }
+          // A link cut short by the sheet ("...") won't open — don't use it
+          if (url && /(\.\.\.|…)$/.test(url)) url = '';
+          if (url && !/^https?:\/\//i.test(url)) url = '';
+          // Headlines from Google News end with " - Publisher": drop the repeat
+          if (src) {
+            var tail = ' - ' + src;
+            if (head.slice(-tail.length).toLowerCase() === tail.toLowerCase()) head = head.slice(0, -tail.length);
+          }
+          head = head.replace(/\s+-\s+[^-]{2,60}$/, function(m){ return src && m.toLowerCase().indexOf(src.toLowerCase().split(' ')[0]) > -1 ? '' : m; });
+          // Never show a bare link as the paragraph or source text
           if (isUrl(detail)) { if (!url) url = detail; detail = ''; }
           if (isUrl(src))    { if (!url) url = src;    src = ''; }
           if (!src && url) { try { src = new URL(url).hostname.replace(/^www\./, ''); } catch (e) {} }
-          var dateStr = cell(r, C.date), d = parseNewsDate(dateStr);
+          // No working link: search for the headline instead
+          var findUrl = url ? '' : 'https://news.google.com/search?q=' + encodeURIComponent('"' + head + '"');
+          // Prefer the article's own date over the sheet's "updated" (fetch) date
+          var dateStr = artDate || cell(r, C.date), d = parseNewsDate(dateStr);
           if (d && (!newsUpdated || d > parseNewsDate(newsUpdated))) newsUpdated = dateStr;
           if (!newsData[comm]) newsData[comm] = [];
-          newsData[comm].push({ headline: head, detail: detail, source: src, url: url,
+          newsData[comm].push({ headline: head, detail: detail, source: src, url: url, findUrl: findUrl,
                                 date: dateStr, ts: d ? d.getTime() : 0, risk_level: riskCode(cell(r, C.risk)) });
         });
         // Newest first
