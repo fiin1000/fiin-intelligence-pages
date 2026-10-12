@@ -843,8 +843,8 @@ tr:hover td { background: var(--mist); }
   <div class="setup-notice" id="setup-notice">
     <strong>Data connection required.</strong> Paste your Google Sheet CSV URLs into the
     <code>PRICE_CSV_URL</code> and <code>RASFF_CSV_URL</code> variables at the top of this
-    page's &lt;script&gt; block, then re-upload to GitHub. The page works with built-in
-    indicative prices until then.
+    page's &lt;script&gt; block, then re-upload to GitHub. Price panels stay empty until
+    then.
   </div>
 
 
@@ -923,7 +923,7 @@ tr:hover td { background: var(--mist); }
             <span class="tp-head-title">fiin member testing data</span>
             <span class="tp-soon">coming soon</span>
           </div>
-          <span class="tp-period" id="testing-period">Q1 2024 – Q1 2025</span>
+          <span class="tp-period" id="testing-period"></span>
         </div>
         <div class="tp-kpis">
           <div class="tp-kpi"><div class="tp-kpi-label">Items Tested</div><div class="tp-kpi-value">—</div><div class="tp-kpi-sub">awaiting data</div></div>
@@ -934,16 +934,11 @@ tr:hover td { background: var(--mist); }
         <div class="tp-content">
           <div class="tp-chart-area">
             <div class="tp-chart-title">Tests performed vs anomalies detected</div>
-            <div class="tp-chart-sub">Quarterly · illustrative placeholder</div>
-            <div style="position:relative;flex:1;min-height:0"><canvas id="testingChart"></canvas></div>
-            <div class="tp-legend" style="margin-top:6px">
-              <span class="tp-leg-item"><span class="tp-leg-swatch" style="background:#8DC63F"></span>Tests performed</span>
-              <span class="tp-leg-item"><span class="tp-leg-swatch" style="background:#1A5FA5"></span>Anomalies</span>
-              <span class="tp-leg-item"><span class="tp-leg-swatch" style="background:#C84040"></span>Auth. concerns</span>
-            </div>
+            <div class="tp-chart-sub">Quarterly</div>
+            <div style="flex:1;min-height:0;display:flex;align-items:center;font-size:11px;color:var(--muted);font-style:italic">Awaiting fiin member testing data.</div>
           </div>
           <div class="tp-fiin-area" id="tp-fiin-area">
-            <div class="tp-fiin-title">fiin member data <span style="font-size:9px;font-weight:400;color:var(--muted)">(mock)</span></div>
+            <div class="tp-fiin-title">fiin member data</div>
             <div class="tp-fiin-sub">Anonymised authenticity concerns</div>
             <div class="tp-results" id="tp-results"></div>
           </div>
@@ -1016,8 +1011,8 @@ tr:hover td { background: var(--mist); }
 
           <div class="explainer">
             <strong>How to read this:</strong> Every figure above states its exact source and the date
-            it was last reported. <strong>Live</strong> means a real number pulled and dated this
-            session; <strong>Sourced</strong> means a legitimate source is confirmed but a current
+            it was last reported. <strong>Live</strong> means a dated figure loaded from fiin's
+            connected Sheets; <strong>Sourced</strong> means a legitimate source is confirmed but a current
             figure hasn't been pulled yet — treat it as a status, not a price; <strong>Not tracked</strong>
             means no reliable source exists. <strong>RASFF alerts</strong> below reflect EU/UK
             enforcement notifications for the whole category, not just this product.
@@ -1077,31 +1072,10 @@ var COMM = {
     threshold:1.0, norm:0.7,
     rasffCategories:['poultry meat and poultry meat products'],
     products:{
-    'Chicken': {unit:'£/kg',sources:'AHDB + EU Agri-food API + HMRC',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[1.98, 1.96, 1.97, 1.96, 1.97, 1.96, 1.94, 1.93, 1.92, 1.9, 1.88, 1.88]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[1.63, 1.65, 1.67, 1.65, 1.64, 1.62, 1.64, 1.65, 1.64, 1.64, 1.65, 1.64]},
-        {n:'Brazil',c:'#C84040',dash:true,p:[1.01, 1.01, 1.01, 1.01, 1.01, 1.01, 1.01, 1.02, 1.0, 1.0, 1.01, 1.01]},
-        {n:'Thailand',c:'#7A4800',dash:true,p:[0.98, 0.98, 0.98, 0.97, 0.97, 0.97, 0.98, 0.97, 0.97, 0.96, 0.95, 0.96]},
-        {n:'Ukraine',c:'#5B2D8E',dash:true,p:[0.89, 0.88, 0.89, 0.89, 0.89, 0.89, 0.89, 0.9, 0.9, 0.9, 0.89, 0.88]}
-      ]},
-    'Turkey': {unit:'£/kg',sources:'EU Agri-food API + HMRC',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[1.95, 1.93, 1.92, 1.93, 1.94, 1.94, 1.95, 1.96, 1.96, 1.97, 1.99, 1.98]},
-        {n:'Brazil',c:'#C84040',dash:true,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]},
-        {n:'Hungary',c:'#7A4800',dash:true,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]}
-      ]},
-    'Duck': {unit:'£/kg',sources:'AHDB + FAO',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[2.58, 2.61, 2.61, 2.61, 2.63, 2.63, 2.62, 2.61, 2.6, 2.63, 2.6, 2.63]},
-        {n:'China',c:'#C84040',dash:true,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
-        {n:'Hungary',c:'#7A4800',dash:true,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]}
-      ]},
-    'Goose': {unit:'£/kg',sources:'AHDB + FAO',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[4.45, 4.5, 4.54, 4.5, 4.55, 4.61, 4.62, 4.67, 4.7, 4.67, 4.69, 4.7]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[3.64, 3.62, 3.66, 3.62, 3.59, 3.56, 3.6, 3.56, 3.59, 3.55, 3.52, 3.54]},
-        {n:'Poland',c:'#C84040',dash:true,p:[3.01, 3.0, 2.96, 2.95, 2.97, 2.97, 2.97, 2.95, 2.94, 2.93, 2.9, 2.89]},
-        {n:'Hungary',c:'#7A4800',dash:true,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]}
-      ]}
+    'Chicken': {unit:'£/kg',sources:'AHDB + EU Agri-food API + HMRC'},
+    'Turkey': {unit:'£/kg',sources:'EU Agri-food API + HMRC'},
+    'Duck': {unit:'£/kg',sources:'AHDB + FAO'},
+    'Goose': {unit:'£/kg',sources:'AHDB + FAO'}
   }
   },
   red_meat: {
@@ -1110,37 +1084,11 @@ var COMM = {
     threshold:1.8, norm:1.3,
     rasffCategories:['meat and meat products (other than poultry)'],
     products:{
-    'Beef': {unit:'£/kg',sources:'AHDB + HMRC',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]},
-        {n:'Ireland',c:'#1A5FA5',dash:false,p:[4.18, 4.15, 4.13, 4.1, 4.11, 4.13, 4.09, 4.09, 4.14, 4.11, 4.15, 4.18]},
-        {n:'Brazil',c:'#C84040',dash:true,p:[2.81, 2.81, 2.78, 2.79, 2.8, 2.79, 2.79, 2.77, 2.76, 2.75, 2.74, 2.74]},
-        {n:'Argentina',c:'#7A4800',dash:true,p:[2.61, 2.61, 2.61, 2.6, 2.59, 2.57, 2.54, 2.54, 2.57, 2.59, 2.57, 2.56]},
-        {n:'Australia',c:'#5B2D8E',dash:true,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]}
-      ]},
-    'Lamb': {unit:'£/kg',sources:'AHDB + HMRC',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[5.42, 5.37, 5.33, 5.32, 5.31, 5.36, 5.32, 5.25, 5.31, 5.36, 5.31, 5.38]},
-        {n:'New Zealand',c:'#1A5FA5',dash:false,p:[4.02, 4.02, 4.03, 4.01, 4.03, 4.05, 4.0, 4.01, 4.04, 4.08, 4.07, 4.05]},
-        {n:'Australia',c:'#C84040',dash:true,p:[4.1, 4.12, 4.07, 4.12, 4.08, 4.05, 4.02, 4.02, 3.98, 4.0, 3.98, 4.03]},
-        {n:'Iceland',c:'#7A4800',dash:true,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]}
-      ]},
-    'Pork': {unit:'£/kg',sources:'AHDB + EU Agri-food API + HMRC',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[2.33, 2.35, 2.37, 2.4, 2.4, 2.4, 2.42, 2.45, 2.48, 2.47, 2.47, 2.49]},
-        {n:'Denmark',c:'#1A5FA5',dash:false,p:[1.62, 1.62, 1.63, 1.63, 1.64, 1.62, 1.62, 1.6, 1.61, 1.6, 1.61, 1.61]},
-        {n:'EU',c:'#C84040',dash:true,p:[1.83, 1.82, 1.84, 1.85, 1.84, 1.85, 1.87, 1.89, 1.9, 1.92, 1.93, 1.94]},
-        {n:'Germany',c:'#7A4800',dash:true,p:[1.75, 1.73, 1.73, 1.74, 1.74, 1.77, 1.77, 1.75, 1.75, 1.75, 1.76, 1.75]},
-        {n:'Netherlands',c:'#5B2D8E',dash:true,p:[1.71, 1.73, 1.73, 1.73, 1.71, 1.7, 1.69, 1.7, 1.68, 1.7, 1.69, 1.69]}
-      ]},
-    'Veal': {unit:'£/kg',sources:'FAO',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[6.47, 6.5, 6.56, 6.55, 6.58, 6.58, 6.52, 6.58, 6.63, 6.68, 6.76, 6.69]},
-        {n:'Netherlands',c:'#1A5FA5',dash:false,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]},
-        {n:'France',c:'#C84040',dash:true,p:[5.26, 5.2, 5.25, 5.24, 5.19, 5.18, 5.22, 5.27, 5.23, 5.22, 5.24, 5.3]},
-        {n:'Poland',c:'#7A4800',dash:true,p:[4.15, 4.18, 4.16, 4.11, 4.13, 4.15, 4.1, 4.08, 4.13, 4.08, 4.11, 4.07]}
-      ]},
-    'Venison': {unit:'£/kg',sources:'FAO',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[8.03, 8.12, 8.03, 8.02, 8.03, 7.99, 7.89, 7.84, 7.78, 7.87, 7.88, 7.94]},
-        {n:'New Zealand',c:'#1A5FA5',dash:false,p:[5.55, 5.54, 5.57, 5.51, 5.55, 5.54, 5.56, 5.51, 5.45, 5.39, 5.42, 5.45]},
-        {n:'Germany',c:'#C84040',dash:true,p:[6.16, 6.16, 6.17, 6.22, 6.15, 6.19, 6.19, 6.16, 6.09, 6.05, 5.99, 5.95]}
-      ]}
+    'Beef': {unit:'£/kg',sources:'AHDB + HMRC'},
+    'Lamb': {unit:'£/kg',sources:'AHDB + HMRC'},
+    'Pork': {unit:'£/kg',sources:'AHDB + EU Agri-food API + HMRC'},
+    'Veal': {unit:'£/kg',sources:'FAO'},
+    'Venison': {unit:'£/kg',sources:'FAO'}
   }
   },
   fish_shellfish: {
@@ -1149,83 +1097,19 @@ var COMM = {
     threshold:2.0, norm:1.4,
     rasffCategories:['cephalopods and products thereof','bivalve molluscs and products thereof','crustaceans and products thereof','fish and fish products'],
     products:{
-    'Salmon': {unit:'£/kg',sources:'Marine Scotland + SSB Norway + HMRC',origins:[
-        {n:'Scotland',c:'#2D6B2D',dash:false,p:[6.47, 6.5, 6.56, 6.55, 6.58, 6.58, 6.52, 6.58, 6.63, 6.68, 6.76, 6.69]},
-        {n:'Norway',c:'#1A5FA5',dash:false,p:[6.11, 6.08, 6.03, 6.05, 6.01, 5.96, 5.93, 5.86, 5.93, 5.86, 5.84, 5.82]},
-        {n:'Chile',c:'#C84040',dash:true,p:[4.66, 4.64, 4.61, 4.63, 4.65, 4.6, 4.57, 4.54, 4.54, 4.51, 4.46, 4.42]},
-        {n:'Canada',c:'#7A4800',dash:true,p:[5.26, 5.2, 5.25, 5.24, 5.19, 5.18, 5.22, 5.27, 5.23, 5.22, 5.24, 5.3]}
-      ]},
-    'Cod': {unit:'£/kg',sources:'MMO + SSB Norway + HMRC',origins:[
-        {n:'Iceland',c:'#2D6B2D',dash:false,p:[8.57, 8.57, 8.56, 8.56, 8.55, 8.5, 8.41, 8.32, 8.28, 8.22, 8.25, 8.21]},
-        {n:'Norway',c:'#1A5FA5',dash:false,p:[7.74, 7.8, 7.87, 7.96, 7.9, 7.96, 8.05, 8.03, 8.05, 7.97, 7.99, 7.99]},
-        {n:'Russia',c:'#C84040',dash:true,p:[5.26, 5.2, 5.25, 5.24, 5.19, 5.18, 5.22, 5.27, 5.23, 5.22, 5.24, 5.3]},
-        {n:'Pacific pollock (sub)',c:'#7A4800',dash:true,p:[4.12, 4.13, 4.09, 4.13, 4.15, 4.14, 4.19, 4.22, 4.19, 4.15, 4.13, 4.1]},
-        {n:'Pangasius (sub)',c:'#5B2D8E',dash:true,p:[2.66, 2.68, 2.7, 2.71, 2.74, 2.72, 2.71, 2.71, 2.68, 2.65, 2.66, 2.69]}
-      ]},
-    'Haddock': {unit:'£/kg',sources:'MMO + HMRC',origins:[
-        {n:'Iceland',c:'#2D6B2D',dash:false,p:[6.82, 6.88, 6.82, 6.87, 6.87, 6.88, 6.96, 7.0, 7.0, 6.97, 7.02, 6.96]},
-        {n:'Norway',c:'#1A5FA5',dash:false,p:[6.16, 6.16, 6.17, 6.22, 6.15, 6.19, 6.19, 6.16, 6.09, 6.05, 5.99, 5.95]},
-        {n:'UK North Sea',c:'#C84040',dash:true,p:[7.41, 7.33, 7.39, 7.34, 7.26, 7.19, 7.24, 7.2, 7.16, 7.17, 7.15, 7.09]}
-      ]},
-    'Tuna (skipjack)': {unit:'£/kg',sources:'HMRC (import price only)',origins:[
-        {n:'Papua New Guinea',c:'#2D6B2D',dash:false,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
-        {n:'Ecuador',c:'#1A5FA5',dash:false,p:[2.58, 2.61, 2.61, 2.61, 2.63, 2.63, 2.62, 2.61, 2.6, 2.63, 2.6, 2.63]},
-        {n:'Maldives',c:'#C84040',dash:true,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
-        {n:'Philippines',c:'#7A4800',dash:true,p:[2.49, 2.52, 2.52, 2.5, 2.47, 2.45, 2.43, 2.42, 2.42, 2.45, 2.44, 2.45]}
-      ]},
-    'Tuna (yellowfin)': {unit:'£/kg',sources:'HMRC (import price only)',origins:[
-        {n:'Indian Ocean',c:'#2D6B2D',dash:false,p:[4.45, 4.5, 4.54, 4.5, 4.55, 4.61, 4.62, 4.67, 4.7, 4.67, 4.69, 4.7]},
-        {n:'Pacific',c:'#1A5FA5',dash:false,p:[4.15, 4.18, 4.16, 4.11, 4.13, 4.15, 4.1, 4.08, 4.13, 4.08, 4.11, 4.07]},
-        {n:'Atlantic',c:'#C84040',dash:true,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]}
-      ]},
-    'Prawns (warm water)': {unit:'£/kg',sources:'HMRC (import price only)',origins:[
-        {n:'Ecuador',c:'#2D6B2D',dash:false,p:[5.26, 5.2, 5.25, 5.24, 5.19, 5.18, 5.22, 5.27, 5.23, 5.22, 5.24, 5.3]},
-        {n:'India',c:'#1A5FA5',dash:false,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]},
-        {n:'Vietnam',c:'#C84040',dash:true,p:[4.65, 4.68, 4.71, 4.7, 4.72, 4.69, 4.68, 4.72, 4.7, 4.75, 4.78, 4.79]},
-        {n:'Thailand',c:'#7A4800',dash:true,p:[4.95, 4.95, 4.94, 4.95, 4.99, 5.02, 5.07, 5.05, 5.02, 5.06, 5.04, 5.03]},
-        {n:'Indonesia',c:'#5B2D8E',dash:true,p:[4.36, 4.31, 4.29, 4.27, 4.24, 4.19, 4.2, 4.2, 4.22, 4.23, 4.2, 4.19]}
-      ]},
-    'Prawns (cold water)': {unit:'£/kg',sources:'HMRC (import price only)',origins:[
-        {n:'Iceland',c:'#2D6B2D',dash:false,p:[8.17, 8.1, 8.06, 7.99, 8.06, 8.07, 8.12, 8.09, 8.1, 8.11, 8.06, 8.06]},
-        {n:'Greenland',c:'#1A5FA5',dash:false,p:[7.74, 7.8, 7.87, 7.96, 7.9, 7.96, 8.05, 8.03, 8.05, 7.97, 7.99, 7.99]},
-        {n:'Canada',c:'#C84040',dash:true,p:[8.57, 8.57, 8.56, 8.56, 8.55, 8.5, 8.41, 8.32, 8.28, 8.22, 8.25, 8.21]},
-        {n:'Norway',c:'#7A4800',dash:true,p:[8.03, 8.12, 8.03, 8.02, 8.03, 7.99, 7.89, 7.84, 7.78, 7.87, 7.88, 7.94]}
-      ]},
-    'Crab': {unit:'£/kg',sources:'MMO + HMRC',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[9.1, 9.04, 9.09, 9.13, 9.18, 9.23, 9.12, 9.11, 9.12, 9.13, 9.22, 9.27]},
-        {n:'Canada',c:'#1A5FA5',dash:false,p:[7.47, 7.4, 7.35, 7.37, 7.44, 7.37, 7.4, 7.43, 7.38, 7.36, 7.34, 7.26]},
-        {n:'Russia',c:'#C84040',dash:true,p:[6.82, 6.88, 6.82, 6.87, 6.87, 6.88, 6.96, 7.0, 7.0, 6.97, 7.02, 6.96]},
-        {n:'China',c:'#7A4800',dash:true,p:[5.26, 5.2, 5.25, 5.24, 5.19, 5.18, 5.22, 5.27, 5.23, 5.22, 5.24, 5.3]}
-      ]},
-    'Squid': {unit:'£/kg',sources:'MMO + HMRC',origins:[
-        {n:'Falkland Islands',c:'#2D6B2D',dash:false,p:[4.15, 4.18, 4.16, 4.11, 4.13, 4.15, 4.1, 4.08, 4.13, 4.08, 4.11, 4.07]},
-        {n:'Peru',c:'#1A5FA5',dash:false,p:[3.64, 3.62, 3.66, 3.62, 3.59, 3.56, 3.6, 3.56, 3.59, 3.55, 3.52, 3.54]},
-        {n:'China',c:'#C84040',dash:true,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
-        {n:'Morocco',c:'#7A4800',dash:true,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]}
-      ]},
-    'Scallops': {unit:'£/kg',sources:'MMO + Marine Scotland + HMRC',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[12.14, 12.17, 12.05, 12.13, 12.17, 12.08, 12.0, 12.13, 12.25, 12.24, 12.13, 12.04]},
-        {n:'Canada',c:'#1A5FA5',dash:false,p:[9.43, 9.48, 9.55, 9.52, 9.61, 9.54, 9.44, 9.32, 9.31, 9.24, 9.33, 9.32]},
-        {n:'Peru',c:'#C84040',dash:true,p:[7.24, 7.18, 7.23, 7.29, 7.28, 7.21, 7.12, 7.14, 7.13, 7.15, 7.12, 7.08]},
-        {n:'China',c:'#7A4800',dash:true,p:[5.8, 5.77, 5.82, 5.89, 5.91, 5.93, 5.92, 5.89, 5.96, 6.03, 5.99, 6.04]}
-      ]},
-    'Mussels': {unit:'£/kg',sources:'Marine Scotland + HMRC',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
-        {n:'Netherlands',c:'#1A5FA5',dash:false,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
-        {n:'Spain',c:'#C84040',dash:true,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]},
-        {n:'Chile',c:'#7A4800',dash:true,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]}
-      ]},
-    'Oysters': {unit:'£/kg',sources:'Marine Scotland + HMRC',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[4.45, 4.5, 4.54, 4.5, 4.55, 4.61, 4.62, 4.67, 4.7, 4.67, 4.69, 4.7]},
-        {n:'France',c:'#1A5FA5',dash:false,p:[3.84, 3.82, 3.83, 3.83, 3.87, 3.86, 3.89, 3.91, 3.93, 3.9, 3.9, 3.92]},
-        {n:'Ireland',c:'#C84040',dash:true,p:[3.64, 3.62, 3.66, 3.62, 3.59, 3.56, 3.6, 3.56, 3.59, 3.55, 3.52, 3.54]},
-        {n:'Australia',c:'#7A4800',dash:true,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]}
-      ]},
-    'Mackerel': {unit:'£/kg',sources:'MMO + HMRC',origins:[
-        {n:'UK North Sea',c:'#2D6B2D',dash:false,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
-        {n:'Norway',c:'#1A5FA5',dash:false,p:[1.58, 1.58, 1.57, 1.57, 1.58, 1.58, 1.58, 1.59, 1.6, 1.6, 1.59, 1.58]},
-        {n:'Iceland',c:'#C84040',dash:true,p:[1.71, 1.73, 1.73, 1.73, 1.71, 1.7, 1.69, 1.7, 1.68, 1.7, 1.69, 1.69]}
-      ]}
+    'Salmon': {unit:'£/kg',sources:'Marine Scotland + SSB Norway + HMRC'},
+    'Cod': {unit:'£/kg',sources:'MMO + SSB Norway + HMRC'},
+    'Haddock': {unit:'£/kg',sources:'MMO + HMRC'},
+    'Tuna (skipjack)': {unit:'£/kg',sources:'HMRC (import price only)'},
+    'Tuna (yellowfin)': {unit:'£/kg',sources:'HMRC (import price only)'},
+    'Prawns (warm water)': {unit:'£/kg',sources:'HMRC (import price only)'},
+    'Prawns (cold water)': {unit:'£/kg',sources:'HMRC (import price only)'},
+    'Crab': {unit:'£/kg',sources:'MMO + HMRC'},
+    'Squid': {unit:'£/kg',sources:'MMO + HMRC'},
+    'Scallops': {unit:'£/kg',sources:'MMO + Marine Scotland + HMRC'},
+    'Mussels': {unit:'£/kg',sources:'Marine Scotland + HMRC'},
+    'Oysters': {unit:'£/kg',sources:'Marine Scotland + HMRC'},
+    'Mackerel': {unit:'£/kg',sources:'MMO + HMRC'}
   }
   },
   honey: {
@@ -1234,39 +1118,12 @@ var COMM = {
     threshold:2.5, norm:1.8,
     rasffCategories:['honey and royal jelly'],
     products:{
-    'Blossom honey': {unit:'£/kg',sources:'USDA National Honey Report + HMRC',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[6.07, 6.04, 6.03, 6.1, 6.17, 6.15, 6.14, 6.21, 6.24, 6.24, 6.17, 6.21]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[5.16, 5.15, 5.2, 5.21, 5.15, 5.18, 5.18, 5.23, 5.27, 5.23, 5.18, 5.12]},
-        {n:'Argentina',c:'#C84040',dash:true,p:[4.46, 4.41, 4.39, 4.34, 4.34, 4.33, 4.37, 4.33, 4.34, 4.37, 4.42, 4.41]},
-        {n:'Mexico',c:'#7A4800',dash:true,p:[3.84, 3.82, 3.83, 3.83, 3.87, 3.86, 3.89, 3.91, 3.93, 3.9, 3.9, 3.92]},
-        {n:'China',c:'#5B2D8E',dash:true,p:[2.43, 2.43, 2.42, 2.44, 2.47, 2.48, 2.51, 2.52, 2.54, 2.58, 2.6, 2.59]}
-      ]},
-    'Manuka honey': {unit:'£/kg',sources:'FAO',origins:[
-        {n:'New Zealand',c:'#2D6B2D',dash:false,p:[34.92, 34.92, 35.17, 35.4, 35.71, 35.59, 35.94, 35.62, 35.3, 35.58, 35.56, 35.19]},
-        {n:'Australia',c:'#1A5FA5',dash:false,p:[17.94, 17.74, 17.66, 17.71, 17.89, 17.87, 17.71, 17.67, 17.77, 17.77, 17.91, 17.79]}
-      ]},
-    'Acacia honey': {unit:'£/kg',sources:'FAO',origins:[
-        {n:'Hungary',c:'#2D6B2D',dash:false,p:[8.57, 8.57, 8.56, 8.56, 8.55, 8.5, 8.41, 8.32, 8.28, 8.22, 8.25, 8.21]},
-        {n:'Romania',c:'#1A5FA5',dash:false,p:[7.74, 7.8, 7.87, 7.96, 7.9, 7.96, 8.05, 8.03, 8.05, 7.97, 7.99, 7.99]},
-        {n:'China',c:'#C84040',dash:true,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]}
-      ]},
-    'Heather honey': {unit:'£/kg',sources:'BBKA',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[9.1, 9.04, 9.09, 9.13, 9.18, 9.23, 9.12, 9.11, 9.12, 9.13, 9.22, 9.27]},
-        {n:'Germany',c:'#1A5FA5',dash:false,p:[7.47, 7.4, 7.35, 7.37, 7.44, 7.37, 7.4, 7.43, 7.38, 7.36, 7.34, 7.26]},
-        {n:'Netherlands',c:'#C84040',dash:true,p:[6.82, 6.88, 6.82, 6.87, 6.87, 6.88, 6.96, 7.0, 7.0, 6.97, 7.02, 6.96]}
-      ]},
-    'Clover honey': {unit:'£/kg',sources:'FAO',origins:[
-        {n:'Canada',c:'#2D6B2D',dash:false,p:[5.55, 5.54, 5.57, 5.51, 5.55, 5.54, 5.56, 5.51, 5.45, 5.39, 5.42, 5.45]},
-        {n:'USA',c:'#1A5FA5',dash:false,p:[5.26, 5.2, 5.25, 5.24, 5.19, 5.18, 5.22, 5.27, 5.23, 5.22, 5.24, 5.3]},
-        {n:'Argentina',c:'#C84040',dash:true,p:[3.84, 3.82, 3.83, 3.83, 3.87, 3.86, 3.89, 3.91, 3.93, 3.9, 3.9, 3.92]},
-        {n:'China',c:'#7A4800',dash:true,p:[2.43, 2.43, 2.42, 2.44, 2.47, 2.48, 2.51, 2.52, 2.54, 2.58, 2.6, 2.59]}
-      ]},
-    'Blended honey': {unit:'£/kg',sources:'FAO',origins:[
-        {n:'China blend',c:'#2D6B2D',dash:false,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
-        {n:'SE Asia blend',c:'#1A5FA5',dash:false,p:[2.09, 2.1, 2.12, 2.11, 2.09, 2.07, 2.06, 2.03, 2.01, 2.02, 2.02, 2.03]},
-        {n:'South America blend',c:'#C84040',dash:true,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
-        {n:'EU blend',c:'#7A4800',dash:true,p:[3.53, 3.56, 3.55, 3.57, 3.58, 3.62, 3.65, 3.62, 3.62, 3.64, 3.69, 3.69]}
-      ]}
+    'Blossom honey': {unit:'£/kg',sources:'USDA National Honey Report + HMRC'},
+    'Manuka honey': {unit:'£/kg',sources:'FAO'},
+    'Acacia honey': {unit:'£/kg',sources:'FAO'},
+    'Heather honey': {unit:'£/kg',sources:'BBKA'},
+    'Clover honey': {unit:'£/kg',sources:'FAO'},
+    'Blended honey': {unit:'£/kg',sources:'FAO'}
   }
   },
   herbs_spices: {
@@ -1275,72 +1132,17 @@ var COMM = {
     threshold:8.0, norm:5.6,
     rasffCategories:['herbs and spices'],
     products:{
-    'Oregano': {unit:'$/kg',sources:'ITC',origins:[
-        {n:'Greece',c:'#2D6B2D',dash:false,p:[13.5, 13.33, 13.34, 13.25, 13.28, 13.32, 13.31, 13.39, 13.3, 13.38, 13.43, 13.27]},
-        {n:'Turkey',c:'#1A5FA5',dash:false,p:[8.2, 8.3, 8.26, 8.32, 8.24, 8.32, 8.25, 8.28, 8.34, 8.24, 8.26, 8.28]},
-        {n:'Morocco',c:'#C84040',dash:true,p:[5.09, 5.11, 5.11, 5.05, 5.04, 4.98, 5.0, 4.99, 5.04, 5.05, 5.07, 5.06]},
-        {n:'China',c:'#7A4800',dash:true,p:[3.71, 3.72, 3.68, 3.72, 3.68, 3.69, 3.7, 3.68, 3.73, 3.71, 3.7, 3.74]}
-      ]},
-    'Black pepper': {unit:'$/kg',sources:'Spices Board India + HMRC',origins:[
-        {n:'Vietnam',c:'#2D6B2D',dash:false,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]},
-        {n:'Indonesia',c:'#1A5FA5',dash:false,p:[5.26, 5.2, 5.25, 5.24, 5.19, 5.18, 5.22, 5.27, 5.23, 5.22, 5.24, 5.3]},
-        {n:'India',c:'#C84040',dash:true,p:[6.47, 6.5, 6.56, 6.55, 6.58, 6.58, 6.52, 6.58, 6.63, 6.68, 6.76, 6.69]},
-        {n:'Brazil',c:'#7A4800',dash:true,p:[4.15, 4.18, 4.16, 4.11, 4.13, 4.15, 4.1, 4.08, 4.13, 4.08, 4.11, 4.07]}
-      ]},
-    'Cumin': {unit:'$/kg',sources:'Spices Board India + HMRC',origins:[
-        {n:'India',c:'#2D6B2D',dash:false,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
-        {n:'Turkey',c:'#1A5FA5',dash:false,p:[3.84, 3.82, 3.83, 3.83, 3.87, 3.86, 3.89, 3.91, 3.93, 3.9, 3.9, 3.92]},
-        {n:'Syria',c:'#C84040',dash:true,p:[3.53, 3.56, 3.55, 3.57, 3.58, 3.62, 3.65, 3.62, 3.62, 3.64, 3.69, 3.69]},
-        {n:'China',c:'#7A4800',dash:true,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]}
-      ]},
-    'Paprika': {unit:'$/kg',sources:'HMRC (import price only)',origins:[
-        {n:'Spain',c:'#2D6B2D',dash:false,p:[5.55, 5.54, 5.57, 5.51, 5.55, 5.54, 5.56, 5.51, 5.45, 5.39, 5.42, 5.45]},
-        {n:'Hungary',c:'#1A5FA5',dash:false,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]},
-        {n:'China',c:'#C84040',dash:true,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
-        {n:'Peru',c:'#7A4800',dash:true,p:[3.01, 3.0, 2.96, 2.95, 2.97, 2.97, 2.97, 2.95, 2.94, 2.93, 2.9, 2.89]}
-      ]},
-    'Turmeric': {unit:'$/kg',sources:'Spices Board India + HMRC',origins:[
-        {n:'India',c:'#2D6B2D',dash:false,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
-        {n:'Bangladesh',c:'#1A5FA5',dash:false,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]},
-        {n:'Myanmar',c:'#C84040',dash:true,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
-        {n:'China',c:'#7A4800',dash:true,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]}
-      ]},
-    'Chilli': {unit:'$/kg',sources:'Spices Board India + HMRC',origins:[
-        {n:'India',c:'#2D6B2D',dash:false,p:[3.53, 3.56, 3.55, 3.57, 3.58, 3.62, 3.65, 3.62, 3.62, 3.64, 3.69, 3.69]},
-        {n:'China',c:'#1A5FA5',dash:false,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
-        {n:'Mexico',c:'#C84040',dash:true,p:[3.98, 3.96, 3.99, 3.99, 4.02, 4.02, 4.06, 4.1, 4.1, 4.15, 4.12, 4.1]},
-        {n:'Peru',c:'#7A4800',dash:true,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]}
-      ]},
-    'Coriander': {unit:'$/kg',sources:'Spices Board India + HMRC',origins:[
-        {n:'India',c:'#2D6B2D',dash:false,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
-        {n:'Morocco',c:'#1A5FA5',dash:false,p:[1.58, 1.58, 1.57, 1.57, 1.58, 1.58, 1.58, 1.59, 1.6, 1.6, 1.59, 1.58]},
-        {n:'Bulgaria',c:'#C84040',dash:true,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
-        {n:'China',c:'#7A4800',dash:true,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]}
-      ]},
-    'Cinnamon': {unit:'$/kg',sources:'HMRC (import price only)',origins:[
-        {n:'Sri Lanka',c:'#2D6B2D',dash:false,p:[8.57, 8.57, 8.56, 8.56, 8.55, 8.5, 8.41, 8.32, 8.28, 8.22, 8.25, 8.21]},
-        {n:'Indonesia',c:'#1A5FA5',dash:false,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
-        {n:'China (cassia)',c:'#C84040',dash:true,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
-        {n:'Vietnam',c:'#7A4800',dash:true,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]}
-      ]},
-    'Basil': {unit:'$/kg',sources:'ITC + FAO',origins:[
-        {n:'Egypt',c:'#2D6B2D',dash:false,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
-        {n:'India',c:'#1A5FA5',dash:false,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]},
-        {n:'Italy',c:'#C84040',dash:true,p:[6.47, 6.5, 6.56, 6.55, 6.58, 6.58, 6.52, 6.58, 6.63, 6.68, 6.76, 6.69]},
-        {n:'China',c:'#7A4800',dash:true,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]}
-      ]},
-    'Rosemary': {unit:'$/kg',sources:'ITC + FAO',origins:[
-        {n:'Spain',c:'#2D6B2D',dash:false,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]},
-        {n:'Morocco',c:'#1A5FA5',dash:false,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
-        {n:'Tunisia',c:'#C84040',dash:true,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
-        {n:'Albania',c:'#7A4800',dash:true,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]}
-      ]},
-    'Saffron': {unit:'$/kg',sources:'HMRC (import price only)',origins:[
-        {n:'Iran',c:'#2D6B2D',dash:false,p:[1199.24, 1203.96, 1208.97, 1198.16, 1183.51, 1179.81, 1173.14, 1182.25, 1187.88, 1190.89, 1192.62, 1197.43]},
-        {n:'Spain',c:'#1A5FA5',dash:false,p:[3504.26, 3526.21, 3548.01, 3580.39, 3561.23, 3602.68, 3608.69, 3631.01, 3654.15, 3693.35, 3672.5, 3660.25]},
-        {n:'Afghanistan',c:'#C84040',dash:true,p:[899.17, 896.32, 888.22, 896.36, 885.3, 885.36, 894.18, 884.81, 886.01, 888.59, 878.39, 875.74]},
-        {n:'Morocco',c:'#7A4800',dash:true,p:[1001.79, 1000.0, 1001.96, 994.59, 1002.39, 1010.49, 1014.37, 1005.75, 1006.27, 1001.94, 995.68, 1006.95]}
-      ]}
+    'Oregano': {unit:'$/kg',sources:'ITC'},
+    'Black pepper': {unit:'$/kg',sources:'Spices Board India + HMRC'},
+    'Cumin': {unit:'$/kg',sources:'Spices Board India + HMRC'},
+    'Paprika': {unit:'$/kg',sources:'HMRC (import price only)'},
+    'Turmeric': {unit:'$/kg',sources:'Spices Board India + HMRC'},
+    'Chilli': {unit:'$/kg',sources:'Spices Board India + HMRC'},
+    'Coriander': {unit:'$/kg',sources:'Spices Board India + HMRC'},
+    'Cinnamon': {unit:'$/kg',sources:'HMRC (import price only)'},
+    'Basil': {unit:'$/kg',sources:'ITC + FAO'},
+    'Rosemary': {unit:'$/kg',sources:'ITC + FAO'},
+    'Saffron': {unit:'$/kg',sources:'HMRC (import price only)'}
   }
   },
   bakery_cereals: {
@@ -1349,44 +1151,12 @@ var COMM = {
     threshold:50.0, norm:35.0,
     rasffCategories:['cereals and bakery products'],
     products:{
-    'Wheat': {unit:'£/tonne',sources:'AHDB + EU Agri-food API + HMRC',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[202.28, 204.54, 202.28, 200.18, 201.86, 203.05, 203.91, 202.93, 203.47, 204.01, 204.43, 202.68]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[182.03, 181.0, 183.06, 181.62, 183.24, 184.05, 183.54, 182.66, 182.44, 181.88, 183.55, 182.97]},
-        {n:'US',c:'#C84040',dash:true,p:[173.13, 172.24, 173.74, 172.94, 174.93, 175.01, 177.14, 176.52, 177.67, 176.37, 177.84, 177.17]},
-        {n:'Ukraine',c:'#7A4800',dash:true,p:[143.92, 142.64, 143.52, 143.94, 144.81, 146.41, 146.94, 147.66, 147.29, 146.72, 145.73, 146.63]},
-        {n:'Canada',c:'#5B2D8E',dash:true,p:[187.8, 186.64, 186.94, 187.26, 187.76, 187.82, 188.82, 190.67, 191.23, 191.41, 192.64, 194.96]}
-      ]},
-    'Rice': {unit:'£/tonne',sources:'EU Agri-food API + HMRC',origins:[
-        {n:'Thailand',c:'#2D6B2D',dash:false,p:[479.63, 482.58, 478.88, 480.82, 481.9, 476.68, 473.45, 471.0, 476.37, 473.18, 473.43, 476.13]},
-        {n:'Vietnam',c:'#1A5FA5',dash:false,p:[420.26, 423.3, 420.19, 418.83, 420.59, 421.75, 422.83, 427.11, 423.46, 423.66, 427.84, 431.02]},
-        {n:'India',c:'#C84040',dash:true,p:[390.67, 394.79, 390.15, 390.39, 391.14, 391.83, 396.16, 396.7, 394.75, 395.51, 393.84, 394.99]},
-        {n:'Pakistan',c:'#7A4800',dash:true,p:[363.78, 367.61, 368.99, 366.87, 365.8, 369.88, 372.77, 374.8, 370.68, 366.84, 365.7, 368.41]},
-        {n:'USA',c:'#5B2D8E',dash:true,p:[519.35, 513.85, 510.12, 512.01, 506.86, 506.17, 510.29, 509.01, 514.39, 509.43, 504.6, 510.69]}
-      ]},
-    'Oats': {unit:'£/tonne',sources:'AHDB + HMRC',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[180.38, 181.92, 183.01, 181.64, 181.99, 182.78, 182.44, 182.2, 180.91, 182.16, 181.21, 179.21]},
-        {n:'Sweden',c:'#1A5FA5',dash:false,p:[165.83, 164.94, 163.43, 164.37, 165.72, 164.11, 163.75, 162.84, 163.21, 165.16, 167.21, 167.64]},
-        {n:'Finland',c:'#C84040',dash:true,p:[168.37, 167.62, 168.28, 167.74, 168.51, 169.19, 170.12, 169.52, 170.15, 169.01, 169.74, 168.85]},
-        {n:'Canada',c:'#7A4800',dash:true,p:[154.29, 154.06, 154.66, 153.11, 151.22, 152.36, 152.7, 152.49, 153.72, 154.77, 155.92, 154.75]}
-      ]},
-    'Barley': {unit:'£/tonne',sources:'AHDB + EU Agri-food API + HMRC',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[168.37, 167.62, 168.28, 167.74, 168.51, 169.19, 170.12, 169.52, 170.15, 169.01, 169.74, 168.85]},
-        {n:'France',c:'#1A5FA5',dash:false,p:[157.48, 158.02, 157.95, 159.1, 160.17, 162.02, 163.13, 161.85, 161.11, 161.74, 160.46, 160.38]},
-        {n:'Ukraine',c:'#C84040',dash:true,p:[129.32, 129.14, 128.66, 127.84, 127.14, 127.7, 129.07, 128.99, 130.44, 131.78, 132.12, 131.68]},
-        {n:'Australia',c:'#7A4800',dash:true,p:[146.23, 147.55, 148.94, 150.09, 150.61, 151.73, 151.42, 151.49, 150.89, 151.62, 150.8, 149.32]}
-      ]},
-    'Maize': {unit:'£/tonne',sources:'EU Agri-food API + HMRC',origins:[
-        {n:'USA',c:'#2D6B2D',dash:false,p:[196.85, 196.62, 194.69, 194.92, 195.39, 192.97, 191.56, 191.07, 190.14, 189.22, 187.2, 186.85]},
-        {n:'Ukraine',c:'#1A5FA5',dash:false,p:[161.66, 162.64, 164.28, 162.94, 163.53, 164.2, 164.9, 166.85, 165.53, 164.88, 166.84, 166.56]},
-        {n:'Brazil',c:'#C84040',dash:true,p:[154.29, 154.06, 154.66, 153.11, 151.22, 152.36, 152.7, 152.49, 153.72, 154.77, 155.92, 154.75]},
-        {n:'Argentina',c:'#7A4800',dash:true,p:[150.26, 150.75, 151.64, 151.9, 150.45, 149.05, 149.32, 149.47, 149.34, 150.07, 148.92, 148.53]}
-      ]},
-    'Rye': {unit:'£/tonne',sources:'EU Agri-food API + HMRC',origins:[
-        {n:'Germany',c:'#2D6B2D',dash:false,p:[173.7, 174.76, 172.84, 174.19, 175.32, 174.98, 176.64, 177.85, 176.88, 178.09, 177.08, 176.97]},
-        {n:'Poland',c:'#1A5FA5',dash:false,p:[154.29, 154.06, 154.66, 153.11, 151.22, 152.36, 152.7, 152.49, 153.72, 154.77, 155.92, 154.75]},
-        {n:'Russia',c:'#C84040',dash:true,p:[129.32, 129.14, 128.66, 127.84, 127.14, 127.7, 129.07, 128.99, 130.44, 131.78, 132.12, 131.68]},
-        {n:'Belarus',c:'#7A4800',dash:true,p:[124.0, 122.82, 121.35, 120.01, 119.17, 118.26, 119.01, 119.21, 118.74, 118.67, 118.37, 118.2]}
-      ]}
+    'Wheat': {unit:'£/tonne',sources:'AHDB + EU Agri-food API + HMRC'},
+    'Rice': {unit:'£/tonne',sources:'EU Agri-food API + HMRC'},
+    'Oats': {unit:'£/tonne',sources:'AHDB + HMRC'},
+    'Barley': {unit:'£/tonne',sources:'AHDB + EU Agri-food API + HMRC'},
+    'Maize': {unit:'£/tonne',sources:'EU Agri-food API + HMRC'},
+    'Rye': {unit:'£/tonne',sources:'EU Agri-food API + HMRC'}
   }
   },
   prepared_dishes: {
@@ -1395,32 +1165,11 @@ var COMM = {
     threshold:1.5, norm:1.0,
     rasffCategories:['prepared dishes and snacks'],
     products:{
-    'Ready meals (chilled)': {unit:'£/kg',sources:'ONS',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[4.13, 4.14, 4.1, 4.14, 4.16, 4.15, 4.2, 4.23, 4.2, 4.16, 4.14, 4.11]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[3.36, 3.4, 3.41, 3.41, 3.41, 3.43, 3.39, 3.4, 3.4, 3.36, 3.39, 3.42]},
-        {n:'Non-EU',c:'#C84040',dash:true,p:[2.29, 2.28, 2.28, 2.29, 2.31, 2.33, 2.34, 2.36, 2.36, 2.35, 2.35, 2.37]}
-      ]},
-    'Ready meals (frozen)': {unit:'£/kg',sources:'ONS',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
-        {n:'Non-EU',c:'#C84040',dash:true,p:[1.58, 1.58, 1.57, 1.57, 1.58, 1.58, 1.58, 1.59, 1.6, 1.6, 1.59, 1.58]}
-      ]},
-    'Soups': {unit:'£/kg',sources:'ONS',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[1.2, 1.19, 1.2, 1.21, 1.21, 1.22, 1.21, 1.22, 1.21, 1.21, 1.2, 1.21]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[0.96, 0.96, 0.97, 0.97, 0.98, 0.97, 0.97, 0.96, 0.95, 0.94, 0.94, 0.93]},
-        {n:'Non-EU',c:'#C84040',dash:true,p:[0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.66, 0.65, 0.65, 0.65]}
-      ]},
-    'Pasta sauces': {unit:'£/kg',sources:'ONS + FAO',origins:[
-        {n:'Italy',c:'#2D6B2D',dash:false,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
-        {n:'Non-EU',c:'#C84040',dash:true,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]}
-      ]},
-    'Ethnic ready meals': {unit:'£/kg',sources:'ONS + FAO',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[3.53, 3.56, 3.55, 3.57, 3.58, 3.62, 3.65, 3.62, 3.62, 3.64, 3.69, 3.69]},
-        {n:'India',c:'#1A5FA5',dash:false,p:[1.98, 1.96, 1.97, 1.96, 1.97, 1.96, 1.94, 1.93, 1.92, 1.9, 1.88, 1.88]},
-        {n:'China',c:'#C84040',dash:true,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
-        {n:'Thailand',c:'#7A4800',dash:true,p:[1.88, 1.89, 1.91, 1.9, 1.89, 1.92, 1.9, 1.92, 1.93, 1.96, 1.93, 1.96]}
-      ]}
+    'Ready meals (chilled)': {unit:'£/kg',sources:'ONS'},
+    'Ready meals (frozen)': {unit:'£/kg',sources:'ONS'},
+    'Soups': {unit:'£/kg',sources:'ONS'},
+    'Pasta sauces': {unit:'£/kg',sources:'ONS + FAO'},
+    'Ethnic ready meals': {unit:'£/kg',sources:'ONS + FAO'}
   }
   },
   fruit_veg: {
@@ -1429,80 +1178,18 @@ var COMM = {
     threshold:0.5, norm:0.3,
     rasffCategories:['fruits and vegetables'],
     products:{
-    'Tomatoes': {unit:'£/kg',sources:'EU Agri-food API + HMRC',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[1.71, 1.73, 1.73, 1.73, 1.71, 1.7, 1.69, 1.7, 1.68, 1.7, 1.69, 1.69]},
-        {n:'Spain',c:'#1A5FA5',dash:false,p:[1.08, 1.08, 1.08, 1.07, 1.07, 1.09, 1.09, 1.09, 1.1, 1.09, 1.09, 1.1]},
-        {n:'Morocco',c:'#C84040',dash:true,p:[0.75, 0.75, 0.74, 0.73, 0.73, 0.74, 0.74, 0.74, 0.74, 0.74, 0.75, 0.75]},
-        {n:'Netherlands',c:'#7A4800',dash:true,p:[1.2, 1.19, 1.2, 1.21, 1.21, 1.22, 1.21, 1.22, 1.21, 1.21, 1.2, 1.21]},
-        {n:'Non-EU',c:'#5B2D8E',dash:true,p:[0.55, 0.54, 0.54, 0.54, 0.55, 0.55, 0.55, 0.55, 0.54, 0.55, 0.56, 0.56]}
-      ]},
-    'Apples': {unit:'£/kg',sources:'EU Agri-food API + HMRC',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[0.89, 0.88, 0.89, 0.89, 0.89, 0.89, 0.89, 0.9, 0.9, 0.9, 0.89, 0.88]},
-        {n:'France',c:'#1A5FA5',dash:false,p:[0.71, 0.7, 0.7, 0.7, 0.71, 0.7, 0.7, 0.7, 0.71, 0.71, 0.7, 0.7]},
-        {n:'Poland',c:'#C84040',dash:true,p:[0.54, 0.55, 0.55, 0.55, 0.55, 0.56, 0.55, 0.55, 0.56, 0.56, 0.56, 0.56]},
-        {n:'South Africa',c:'#7A4800',dash:true,p:[0.6, 0.6, 0.59, 0.6, 0.6, 0.6, 0.6, 0.61, 0.61, 0.61, 0.61, 0.61]},
-        {n:'Chile',c:'#5B2D8E',dash:true,p:[0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.66, 0.65, 0.65, 0.65]}
-      ]},
-    'Strawberries': {unit:'£/kg',sources:'DEFRA + FAO',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
-        {n:'Spain',c:'#1A5FA5',dash:false,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
-        {n:'Morocco',c:'#C84040',dash:true,p:[1.58, 1.58, 1.57, 1.57, 1.58, 1.58, 1.58, 1.59, 1.6, 1.6, 1.59, 1.58]},
-        {n:'Egypt',c:'#7A4800',dash:true,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]}
-      ]},
-    'Blueberries': {unit:'£/kg',sources:'DEFRA + FAO',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[4.45, 4.5, 4.54, 4.5, 4.55, 4.61, 4.62, 4.67, 4.7, 4.67, 4.69, 4.7]},
-        {n:'Spain',c:'#1A5FA5',dash:false,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
-        {n:'Peru',c:'#C84040',dash:true,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]},
-        {n:'South Africa',c:'#7A4800',dash:true,p:[2.58, 2.61, 2.61, 2.61, 2.63, 2.63, 2.62, 2.61, 2.6, 2.63, 2.6, 2.63]}
-      ]},
-    'Avocado': {unit:'£/kg',sources:'FAO',origins:[
-        {n:'Spain',c:'#2D6B2D',dash:false,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
-        {n:'Peru',c:'#1A5FA5',dash:false,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]},
-        {n:'South Africa',c:'#C84040',dash:true,p:[1.51, 1.53, 1.52, 1.51, 1.51, 1.49, 1.48, 1.49, 1.48, 1.49, 1.51, 1.5]},
-        {n:'Kenya',c:'#7A4800',dash:true,p:[1.3, 1.29, 1.3, 1.31, 1.32, 1.3, 1.29, 1.29, 1.3, 1.31, 1.31, 1.31]},
-        {n:'Colombia',c:'#5B2D8E',dash:true,p:[1.2, 1.19, 1.2, 1.21, 1.21, 1.22, 1.21, 1.22, 1.21, 1.21, 1.2, 1.21]}
-      ]},
-    'Broccoli': {unit:'£/kg',sources:'DEFRA + FAO',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[0.96, 0.96, 0.97, 0.97, 0.98, 0.97, 0.97, 0.96, 0.95, 0.94, 0.94, 0.93]},
-        {n:'Spain',c:'#1A5FA5',dash:false,p:[0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.66, 0.65, 0.65, 0.65]},
-        {n:'Italy',c:'#C84040',dash:true,p:[0.71, 0.7, 0.7, 0.7, 0.71, 0.7, 0.7, 0.7, 0.71, 0.71, 0.7, 0.7]}
-      ]},
-    'Peppers': {unit:'£/kg',sources:'DEFRA + FAO',origins:[
-        {n:'Spain',c:'#2D6B2D',dash:false,p:[1.11, 1.11, 1.12, 1.11, 1.11, 1.1, 1.11, 1.09, 1.09, 1.09, 1.07, 1.08]},
-        {n:'Netherlands',c:'#1A5FA5',dash:false,p:[1.2, 1.19, 1.2, 1.21, 1.21, 1.22, 1.21, 1.22, 1.21, 1.21, 1.2, 1.21]},
-        {n:'Morocco',c:'#C84040',dash:true,p:[0.75, 0.75, 0.74, 0.74, 0.75, 0.75, 0.75, 0.75, 0.76, 0.76, 0.76, 0.77]},
-        {n:'Israel',c:'#7A4800',dash:true,p:[0.89, 0.88, 0.89, 0.89, 0.89, 0.89, 0.89, 0.9, 0.9, 0.9, 0.89, 0.88]}
-      ]},
-    'Garlic': {unit:'£/kg',sources:'FAO',origins:[
-        {n:'Spain',c:'#2D6B2D',dash:false,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
-        {n:'China',c:'#1A5FA5',dash:false,p:[0.89, 0.88, 0.89, 0.89, 0.89, 0.89, 0.89, 0.9, 0.9, 0.9, 0.89, 0.88]},
-        {n:'Argentina',c:'#C84040',dash:true,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]},
-        {n:'Egypt',c:'#7A4800',dash:true,p:[1.11, 1.11, 1.12, 1.11, 1.11, 1.1, 1.11, 1.09, 1.09, 1.09, 1.07, 1.08]}
-      ]},
-    'Onions': {unit:'£/kg',sources:'DEFRA + FAO',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[0.45, 0.45, 0.44, 0.44, 0.44, 0.43, 0.43, 0.42, 0.42, 0.42, 0.42, 0.42]},
-        {n:'Netherlands',c:'#1A5FA5',dash:false,p:[0.35, 0.35, 0.35, 0.36, 0.36, 0.36, 0.36, 0.36, 0.37, 0.37, 0.37, 0.37]},
-        {n:'Spain',c:'#C84040',dash:true,p:[0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4]},
-        {n:'New Zealand',c:'#7A4800',dash:true,p:[0.54, 0.55, 0.55, 0.55, 0.55, 0.56, 0.55, 0.55, 0.56, 0.56, 0.56, 0.56]}
-      ]},
-    'Potatoes': {unit:'£/kg',sources:'DEFRA + FAO',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[0.28, 0.27, 0.28, 0.27, 0.27, 0.27, 0.27, 0.27, 0.27, 0.27, 0.27, 0.26]},
-        {n:'Netherlands',c:'#1A5FA5',dash:false,p:[0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22, 0.22]},
-        {n:'Egypt',c:'#C84040',dash:true,p:[0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.17, 0.18, 0.17]},
-        {n:'France',c:'#7A4800',dash:true,p:[0.25, 0.25, 0.25, 0.25, 0.25, 0.26, 0.25, 0.26, 0.25, 0.25, 0.25, 0.25]}
-      ]},
-    'Bananas': {unit:'£/kg',sources:'EU Agri-food API + HMRC',origins:[
-        {n:'Colombia',c:'#2D6B2D',dash:false,p:[0.54, 0.55, 0.55, 0.55, 0.55, 0.56, 0.55, 0.55, 0.56, 0.56, 0.56, 0.56]},
-        {n:'Ecuador',c:'#1A5FA5',dash:false,p:[0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.49, 0.5, 0.49, 0.49, 0.49]},
-        {n:'Costa Rica',c:'#C84040',dash:true,p:[0.53, 0.52, 0.52, 0.52, 0.53, 0.53, 0.53, 0.53, 0.54, 0.53, 0.53, 0.53]},
-        {n:'Cameroon',c:'#7A4800',dash:true,p:[0.45, 0.45, 0.44, 0.44, 0.44, 0.43, 0.43, 0.42, 0.42, 0.42, 0.42, 0.42]}
-      ]},
-    'Oranges': {unit:'£/kg',sources:'EU Agri-food API + HMRC',origins:[
-        {n:'Spain',c:'#2D6B2D',dash:false,p:[0.6, 0.6, 0.59, 0.6, 0.6, 0.6, 0.6, 0.61, 0.61, 0.61, 0.61, 0.61]},
-        {n:'South Africa',c:'#1A5FA5',dash:false,p:[0.54, 0.55, 0.55, 0.55, 0.55, 0.56, 0.55, 0.55, 0.56, 0.56, 0.56, 0.56]},
-        {n:'Egypt',c:'#C84040',dash:true,p:[0.45, 0.45, 0.44, 0.44, 0.44, 0.43, 0.43, 0.42, 0.42, 0.42, 0.42, 0.42]},
-        {n:'Morocco',c:'#7A4800',dash:true,p:[0.42, 0.42, 0.41, 0.41, 0.41, 0.42, 0.42, 0.42, 0.41, 0.41, 0.41, 0.41]}
-      ]}
+    'Tomatoes': {unit:'£/kg',sources:'EU Agri-food API + HMRC'},
+    'Apples': {unit:'£/kg',sources:'EU Agri-food API + HMRC'},
+    'Strawberries': {unit:'£/kg',sources:'DEFRA + FAO'},
+    'Blueberries': {unit:'£/kg',sources:'DEFRA + FAO'},
+    'Avocado': {unit:'£/kg',sources:'FAO'},
+    'Broccoli': {unit:'£/kg',sources:'DEFRA + FAO'},
+    'Peppers': {unit:'£/kg',sources:'DEFRA + FAO'},
+    'Garlic': {unit:'£/kg',sources:'FAO'},
+    'Onions': {unit:'£/kg',sources:'DEFRA + FAO'},
+    'Potatoes': {unit:'£/kg',sources:'DEFRA + FAO'},
+    'Bananas': {unit:'£/kg',sources:'EU Agri-food API + HMRC'},
+    'Oranges': {unit:'£/kg',sources:'EU Agri-food API + HMRC'}
   }
   },
   dairy: {
@@ -1511,51 +1198,14 @@ var COMM = {
     threshold:12.0, norm:8.4,
     rasffCategories:['milk and milk products'],
     products:{
-    'Liquid milk': {unit:'£/100L',sources:'AHDB + EU Agri-food API',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[37.31, 37.44, 37.09, 36.98, 37.22, 37.62, 37.49, 37.05, 36.87, 36.7, 36.79, 37.08]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[32.98, 33.17, 33.58, 33.31, 33.52, 33.23, 33.36, 33.21, 33.46, 33.15, 33.44, 33.73]},
-        {n:'New Zealand (equiv)',c:'#C84040',dash:true,p:[25.54, 25.45, 25.13, 25.32, 25.22, 25.19, 24.95, 24.88, 24.88, 24.68, 24.37, 24.35]}
-      ]},
-    'Cheddar': {unit:'£/kg',sources:'AHDB + EU Agri-food API',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[4.15, 4.18, 4.16, 4.11, 4.13, 4.15, 4.1, 4.08, 4.13, 4.08, 4.11, 4.07]},
-        {n:'Ireland',c:'#1A5FA5',dash:false,p:[3.64, 3.62, 3.66, 3.62, 3.59, 3.56, 3.6, 3.56, 3.59, 3.55, 3.52, 3.54]},
-        {n:'New Zealand',c:'#C84040',dash:true,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
-        {n:'EU',c:'#7A4800',dash:true,p:[3.84, 3.82, 3.83, 3.83, 3.87, 3.86, 3.89, 3.91, 3.93, 3.9, 3.9, 3.92]}
-      ]},
-    'Mozzarella': {unit:'£/kg',sources:'FAO',origins:[
-        {n:'Italy',c:'#2D6B2D',dash:false,p:[5.26, 5.2, 5.25, 5.24, 5.19, 5.18, 5.22, 5.27, 5.23, 5.22, 5.24, 5.3]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[3.84, 3.82, 3.83, 3.83, 3.87, 3.86, 3.89, 3.91, 3.93, 3.9, 3.9, 3.92]},
-        {n:'USA',c:'#C84040',dash:true,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
-        {n:'Argentina',c:'#7A4800',dash:true,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]}
-      ]},
-    'Butter': {unit:'£/kg',sources:'AHDB + EU Agri-food API',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[5.8, 5.77, 5.82, 5.89, 5.91, 5.93, 5.92, 5.89, 5.96, 6.03, 5.99, 6.04]},
-        {n:'Ireland',c:'#1A5FA5',dash:false,p:[5.26, 5.2, 5.25, 5.24, 5.19, 5.18, 5.22, 5.27, 5.23, 5.22, 5.24, 5.3]},
-        {n:'New Zealand',c:'#C84040',dash:true,p:[4.15, 4.18, 4.16, 4.11, 4.13, 4.15, 4.1, 4.08, 4.13, 4.08, 4.11, 4.07]},
-        {n:'EU',c:'#7A4800',dash:true,p:[5.04, 5.09, 5.1, 5.07, 5.11, 5.09, 5.13, 5.11, 5.12, 5.15, 5.09, 5.07]}
-      ]},
-    'Cream': {unit:'£/kg',sources:'AHDB',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
-        {n:'Ukraine',c:'#C84040',dash:true,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]}
-      ]},
-    'Skimmed milk powder': {unit:'£/kg',sources:'EU Agri-food API + HMRC',origins:[
-        {n:'EU',c:'#2D6B2D',dash:false,p:[2.58, 2.61, 2.61, 2.61, 2.63, 2.63, 2.62, 2.61, 2.6, 2.63, 2.6, 2.63]},
-        {n:'New Zealand',c:'#1A5FA5',dash:false,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]},
-        {n:'USA',c:'#C84040',dash:true,p:[2.49, 2.52, 2.52, 2.5, 2.47, 2.45, 2.43, 2.42, 2.42, 2.45, 2.44, 2.45]},
-        {n:'Australia',c:'#7A4800',dash:true,p:[2.43, 2.43, 2.42, 2.44, 2.47, 2.48, 2.51, 2.52, 2.54, 2.58, 2.6, 2.59]}
-      ]},
-    'Whole milk powder': {unit:'£/kg',sources:'EU Agri-food API + HMRC',origins:[
-        {n:'New Zealand',c:'#2D6B2D',dash:false,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[2.9, 2.89, 2.89, 2.85, 2.84, 2.84, 2.81, 2.79, 2.8, 2.81, 2.82, 2.81]},
-        {n:'USA',c:'#C84040',dash:true,p:[3.01, 3.0, 2.96, 2.95, 2.97, 2.97, 2.97, 2.95, 2.94, 2.93, 2.9, 2.89]},
-        {n:'Australia',c:'#7A4800',dash:true,p:[2.86, 2.85, 2.85, 2.82, 2.81, 2.84, 2.81, 2.81, 2.78, 2.79, 2.8, 2.78]}
-      ]},
-    'Yoghurt': {unit:'£/kg',sources:'AHDB + FAO',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]},
-        {n:'Turkey',c:'#C84040',dash:true,p:[1.2, 1.19, 1.2, 1.21, 1.21, 1.22, 1.21, 1.22, 1.21, 1.21, 1.2, 1.21]}
-      ]}
+    'Liquid milk': {unit:'£/100L',sources:'AHDB + EU Agri-food API'},
+    'Cheddar': {unit:'£/kg',sources:'AHDB + EU Agri-food API'},
+    'Mozzarella': {unit:'£/kg',sources:'FAO'},
+    'Butter': {unit:'£/kg',sources:'AHDB + EU Agri-food API'},
+    'Cream': {unit:'£/kg',sources:'AHDB'},
+    'Skimmed milk powder': {unit:'£/kg',sources:'EU Agri-food API + HMRC'},
+    'Whole milk powder': {unit:'£/kg',sources:'EU Agri-food API + HMRC'},
+    'Yoghurt': {unit:'£/kg',sources:'AHDB + FAO'}
   }
   },
   cakes_conf: {
@@ -1564,40 +1214,12 @@ var COMM = {
     threshold:1.0, norm:0.7,
     rasffCategories:['confectionery'],
     products:{
-    'Chocolate (dark)': {unit:'£/kg',sources:'ONS + FAO',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[5.13, 5.18, 5.14, 5.1, 5.05, 5.06, 5.07, 5.09, 5.11, 5.09, 5.07, 5.12]},
-        {n:'Belgium',c:'#1A5FA5',dash:false,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]},
-        {n:'EU',c:'#C84040',dash:true,p:[4.36, 4.37, 4.41, 4.43, 4.41, 4.42, 4.37, 4.31, 4.3, 4.27, 4.23, 4.27]},
-        {n:'Non-EU',c:'#7A4800',dash:true,p:[3.06, 3.02, 3.0, 3.02, 3.0, 3.02, 3.04, 3.04, 3.02, 3.04, 3.07, 3.07]}
-      ]},
-    'Chocolate (milk)': {unit:'£/kg',sources:'ONS + FAO',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]},
-        {n:'Belgium',c:'#1A5FA5',dash:false,p:[4.45, 4.5, 4.54, 4.5, 4.55, 4.61, 4.62, 4.67, 4.7, 4.67, 4.69, 4.7]},
-        {n:'EU',c:'#C84040',dash:true,p:[4.13, 4.14, 4.1, 4.14, 4.16, 4.15, 4.2, 4.23, 4.2, 4.16, 4.14, 4.11]},
-        {n:'Non-EU',c:'#7A4800',dash:true,p:[2.9, 2.89, 2.89, 2.85, 2.84, 2.84, 2.81, 2.79, 2.8, 2.81, 2.82, 2.81]}
-      ]},
-    'Cocoa powder': {unit:'£/kg',sources:'HMRC (import price only)',origins:[
-        {n:'Netherlands',c:'#2D6B2D',dash:false,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
-        {n:'Ivory Coast',c:'#1A5FA5',dash:false,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]},
-        {n:'Ghana',c:'#C84040',dash:true,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]}
-      ]},
-    'Sugar confectionery': {unit:'£/kg',sources:'ONS + FAO',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[3.84, 3.82, 3.83, 3.83, 3.87, 3.86, 3.89, 3.91, 3.93, 3.9, 3.9, 3.92]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[3.01, 3.0, 2.96, 2.95, 2.97, 2.97, 2.97, 2.95, 2.94, 2.93, 2.9, 2.89]},
-        {n:'China',c:'#C84040',dash:true,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
-        {n:'Turkey',c:'#7A4800',dash:true,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]}
-      ]},
-    'Biscuits': {unit:'£/kg',sources:'ONS',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[2.42, 2.4, 2.42, 2.41, 2.42, 2.42, 2.43, 2.42, 2.41, 2.39, 2.41, 2.41]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
-        {n:'Non-EU',c:'#C84040',dash:true,p:[1.2, 1.19, 1.2, 1.21, 1.21, 1.22, 1.21, 1.22, 1.21, 1.21, 1.2, 1.21]}
-      ]},
-    'Cakes': {unit:'£/kg',sources:'ONS + FAO',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[4.15, 4.18, 4.16, 4.11, 4.13, 4.15, 4.1, 4.08, 4.13, 4.08, 4.11, 4.07]},
-        {n:'France',c:'#1A5FA5',dash:false,p:[3.64, 3.62, 3.66, 3.62, 3.59, 3.56, 3.6, 3.56, 3.59, 3.55, 3.52, 3.54]},
-        {n:'EU',c:'#C84040',dash:true,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
-        {n:'Non-EU',c:'#7A4800',dash:true,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]}
-      ]}
+    'Chocolate (dark)': {unit:'£/kg',sources:'ONS + FAO'},
+    'Chocolate (milk)': {unit:'£/kg',sources:'ONS + FAO'},
+    'Cocoa powder': {unit:'£/kg',sources:'HMRC (import price only)'},
+    'Sugar confectionery': {unit:'£/kg',sources:'ONS + FAO'},
+    'Biscuits': {unit:'£/kg',sources:'ONS'},
+    'Cakes': {unit:'£/kg',sources:'ONS + FAO'}
   }
   },
   diet_foods: {
@@ -1606,40 +1228,12 @@ var COMM = {
     threshold:3.0, norm:2.1,
     rasffCategories:['diatetic foods, food supplements and fortified foods'],
     products:{
-    'Whey protein': {unit:'£/kg',sources:'ONS + FAO',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[16.97, 16.96, 17.03, 16.82, 16.78, 16.94, 16.9, 16.98, 17.14, 17.07, 17.04, 17.08]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[13.01, 13.17, 13.09, 13.02, 12.95, 12.98, 12.99, 12.95, 13.04, 13.09, 13.17, 13.28]},
-        {n:'USA',c:'#C84040',dash:true,p:[11.4, 11.41, 11.33, 11.26, 11.12, 11.12, 11.23, 11.16, 11.25, 11.11, 11.15, 11.09]},
-        {n:'Non-EU',c:'#7A4800',dash:true,p:[8.41, 8.33, 8.29, 8.23, 8.26, 8.33, 8.36, 8.44, 8.52, 8.59, 8.59, 8.48]}
-      ]},
-    'Vitamin supplements': {unit:'£/kg',sources:'ONS + FAO',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[21.91, 22.06, 21.99, 21.99, 22.15, 22.0, 21.91, 21.7, 21.83, 21.65, 21.72, 21.73]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[15.81, 15.82, 15.91, 16.01, 16.03, 16.16, 16.13, 16.09, 15.93, 15.97, 15.88, 15.99]},
-        {n:'China',c:'#C84040',dash:true,p:[7.47, 7.4, 7.35, 7.37, 7.44, 7.37, 7.4, 7.43, 7.38, 7.36, 7.34, 7.26]},
-        {n:'India',c:'#7A4800',dash:true,p:[6.82, 6.88, 6.82, 6.87, 6.87, 6.88, 6.96, 7.0, 7.0, 6.97, 7.02, 6.96]}
-      ]},
-    'Sports nutrition bars': {unit:'£/kg',sources:'ONS',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[8.57, 8.57, 8.56, 8.56, 8.55, 8.5, 8.41, 8.32, 8.28, 8.22, 8.25, 8.21]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[6.16, 6.16, 6.17, 6.22, 6.15, 6.19, 6.19, 6.16, 6.09, 6.05, 5.99, 5.95]},
-        {n:'USA',c:'#C84040',dash:true,p:[5.8, 5.77, 5.82, 5.89, 5.91, 5.93, 5.92, 5.89, 5.96, 6.03, 5.99, 6.04]},
-        {n:'Non-EU',c:'#7A4800',dash:true,p:[3.53, 3.56, 3.55, 3.57, 3.58, 3.62, 3.65, 3.62, 3.62, 3.64, 3.69, 3.69]}
-      ]},
-    'Meal replacements': {unit:'£/kg',sources:'ONS',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[12.14, 12.17, 12.05, 12.13, 12.17, 12.08, 12.0, 12.13, 12.25, 12.24, 12.13, 12.04]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[9.1, 9.04, 9.09, 9.13, 9.18, 9.23, 9.12, 9.11, 9.12, 9.13, 9.22, 9.27]},
-        {n:'Non-EU',c:'#C84040',dash:true,p:[5.55, 5.54, 5.57, 5.51, 5.55, 5.54, 5.56, 5.51, 5.45, 5.39, 5.42, 5.45]}
-      ]},
-    'Infant formula': {unit:'£/kg',sources:'ONS + FAO',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[17.94, 17.74, 17.66, 17.71, 17.89, 17.87, 17.71, 17.67, 17.77, 17.77, 17.91, 17.79]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[13.88, 13.9, 14.02, 14.14, 14.05, 14.14, 14.24, 14.27, 14.24, 14.28, 14.13, 14.18]},
-        {n:'New Zealand',c:'#C84040',dash:true,p:[12.14, 12.17, 12.05, 12.13, 12.17, 12.08, 12.0, 12.13, 12.25, 12.24, 12.13, 12.04]},
-        {n:'China',c:'#7A4800',dash:true,p:[9.1, 9.04, 9.09, 9.13, 9.18, 9.23, 9.12, 9.11, 9.12, 9.13, 9.22, 9.27]}
-      ]},
-    'Gluten-free products': {unit:'£/kg',sources:'ONS',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[5.55, 5.54, 5.57, 5.51, 5.55, 5.54, 5.56, 5.51, 5.45, 5.39, 5.42, 5.45]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[4.15, 4.18, 4.16, 4.11, 4.13, 4.15, 4.1, 4.08, 4.13, 4.08, 4.11, 4.07]},
-        {n:'Non-EU',c:'#C84040',dash:true,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]}
-      ]}
+    'Whey protein': {unit:'£/kg',sources:'ONS + FAO'},
+    'Vitamin supplements': {unit:'£/kg',sources:'ONS + FAO'},
+    'Sports nutrition bars': {unit:'£/kg',sources:'ONS'},
+    'Meal replacements': {unit:'£/kg',sources:'ONS'},
+    'Infant formula': {unit:'£/kg',sources:'ONS + FAO'},
+    'Gluten-free products': {unit:'£/kg',sources:'ONS'}
   }
   },
   nuts_snacks: {
@@ -1648,54 +1242,14 @@ var COMM = {
     threshold:5.0, norm:3.5,
     rasffCategories:['nuts, nut products and seeds'],
     products:{
-    'Pistachios': {unit:'$/kg',sources:'USDA NASS + HMRC',origins:[
-        {n:'USA',c:'#2D6B2D',dash:false,p:[12.21, 12.16, 12.29, 12.3, 12.25, 12.1, 11.99, 11.93, 11.9, 11.85, 11.89, 11.86]},
-        {n:'Turkey',c:'#1A5FA5',dash:false,p:[9.59, 9.58, 9.61, 9.52, 9.6, 9.71, 9.59, 9.6, 9.63, 9.52, 9.44, 9.38]},
-        {n:'Iran',c:'#C84040',dash:true,p:[7.01, 7.07, 7.13, 7.16, 7.12, 7.09, 7.17, 7.19, 7.17, 7.18, 7.15, 7.1]},
-        {n:'China',c:'#7A4800',dash:true,p:[6.34, 6.27, 6.28, 6.22, 6.29, 6.34, 6.42, 6.48, 6.5, 6.49, 6.49, 6.53]}
-      ]},
-    'Cashews': {unit:'$/kg',sources:'HMRC (import price only)',origins:[
-        {n:'Vietnam',c:'#2D6B2D',dash:false,p:[8.57, 8.57, 8.56, 8.56, 8.55, 8.5, 8.41, 8.32, 8.28, 8.22, 8.25, 8.21]},
-        {n:'India',c:'#1A5FA5',dash:false,p:[7.74, 7.8, 7.87, 7.96, 7.9, 7.96, 8.05, 8.03, 8.05, 7.97, 7.99, 7.99]},
-        {n:'Brazil',c:'#C84040',dash:true,p:[7.24, 7.18, 7.23, 7.29, 7.28, 7.21, 7.12, 7.14, 7.13, 7.15, 7.12, 7.08]},
-        {n:'Ivory Coast',c:'#7A4800',dash:true,p:[6.47, 6.5, 6.56, 6.55, 6.58, 6.58, 6.52, 6.58, 6.63, 6.68, 6.76, 6.69]}
-      ]},
-    'Almonds': {unit:'$/kg',sources:'USDA NASS + HMRC',origins:[
-        {n:'USA',c:'#2D6B2D',dash:false,p:[7.24, 7.18, 7.23, 7.29, 7.28, 7.21, 7.12, 7.14, 7.13, 7.15, 7.12, 7.08]},
-        {n:'Spain',c:'#1A5FA5',dash:false,p:[6.47, 6.5, 6.56, 6.55, 6.58, 6.58, 6.52, 6.58, 6.63, 6.68, 6.76, 6.69]},
-        {n:'Australia',c:'#C84040',dash:true,p:[5.8, 5.77, 5.82, 5.89, 5.91, 5.93, 5.92, 5.89, 5.96, 6.03, 5.99, 6.04]},
-        {n:'Iran',c:'#7A4800',dash:true,p:[4.79, 4.83, 4.8, 4.82, 4.82, 4.85, 4.9, 4.88, 4.83, 4.87, 4.93, 4.88]}
-      ]},
-    'Walnuts': {unit:'$/kg',sources:'USDA NASS + HMRC',origins:[
-        {n:'USA',c:'#2D6B2D',dash:false,p:[5.8, 5.77, 5.82, 5.89, 5.91, 5.93, 5.92, 5.89, 5.96, 6.03, 5.99, 6.04]},
-        {n:'China',c:'#1A5FA5',dash:false,p:[4.15, 4.18, 4.16, 4.11, 4.13, 4.15, 4.1, 4.08, 4.13, 4.08, 4.11, 4.07]},
-        {n:'Ukraine',c:'#C84040',dash:true,p:[3.84, 3.82, 3.83, 3.83, 3.87, 3.86, 3.89, 3.91, 3.93, 3.9, 3.9, 3.92]},
-        {n:'Chile',c:'#7A4800',dash:true,p:[4.45, 4.5, 4.54, 4.5, 4.55, 4.61, 4.62, 4.67, 4.7, 4.67, 4.69, 4.7]}
-      ]},
-    'Hazelnuts': {unit:'$/kg',sources:'USDA NASS + HMRC',origins:[
-        {n:'Turkey',c:'#2D6B2D',dash:false,p:[8.57, 8.57, 8.56, 8.56, 8.55, 8.5, 8.41, 8.32, 8.28, 8.22, 8.25, 8.21]},
-        {n:'Italy',c:'#1A5FA5',dash:false,p:[9.24, 9.3, 9.25, 9.26, 9.2, 9.12, 9.23, 9.22, 9.32, 9.3, 9.19, 9.22]},
-        {n:'Georgia',c:'#C84040',dash:true,p:[6.82, 6.88, 6.82, 6.87, 6.87, 6.88, 6.96, 7.0, 7.0, 6.97, 7.02, 6.96]},
-        {n:'Azerbaijan',c:'#7A4800',dash:true,p:[6.47, 6.5, 6.56, 6.55, 6.58, 6.58, 6.52, 6.58, 6.63, 6.68, 6.76, 6.69]}
-      ]},
-    'Peanuts': {unit:'$/kg',sources:'USDA NASS + HMRC',origins:[
-        {n:'Argentina',c:'#2D6B2D',dash:false,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]},
-        {n:'USA',c:'#1A5FA5',dash:false,p:[1.58, 1.58, 1.57, 1.57, 1.58, 1.58, 1.58, 1.59, 1.6, 1.6, 1.59, 1.58]},
-        {n:'China',c:'#C84040',dash:true,p:[1.2, 1.19, 1.2, 1.21, 1.21, 1.22, 1.21, 1.22, 1.21, 1.21, 1.2, 1.21]},
-        {n:'India',c:'#7A4800',dash:true,p:[1.3, 1.29, 1.3, 1.31, 1.32, 1.3, 1.29, 1.29, 1.3, 1.31, 1.31, 1.31]}
-      ]},
-    'Sunflower seeds': {unit:'$/kg',sources:'EU Agri-food API + HMRC',origins:[
-        {n:'Ukraine',c:'#2D6B2D',dash:false,p:[1.2, 1.19, 1.2, 1.21, 1.21, 1.22, 1.21, 1.22, 1.21, 1.21, 1.2, 1.21]},
-        {n:'Russia',c:'#1A5FA5',dash:false,p:[1.11, 1.11, 1.12, 1.11, 1.11, 1.1, 1.11, 1.09, 1.09, 1.09, 1.07, 1.08]},
-        {n:'Argentina',c:'#C84040',dash:true,p:[1.14, 1.13, 1.14, 1.13, 1.13, 1.12, 1.14, 1.14, 1.13, 1.12, 1.13, 1.14]},
-        {n:'EU',c:'#7A4800',dash:true,p:[1.3, 1.29, 1.3, 1.31, 1.32, 1.3, 1.29, 1.29, 1.3, 1.31, 1.31, 1.31]}
-      ]},
-    'Pumpkin seeds': {unit:'$/kg',sources:'HMRC (import price only)',origins:[
-        {n:'China',c:'#2D6B2D',dash:false,p:[3.2, 3.21, 3.2, 3.19, 3.18, 3.15, 3.15, 3.17, 3.16, 3.17, 3.17, 3.17]},
-        {n:'Ukraine',c:'#1A5FA5',dash:false,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
-        {n:'Austria',c:'#C84040',dash:true,p:[3.53, 3.56, 3.55, 3.57, 3.58, 3.62, 3.65, 3.62, 3.62, 3.64, 3.69, 3.69]},
-        {n:'India',c:'#7A4800',dash:true,p:[2.58, 2.61, 2.61, 2.61, 2.63, 2.63, 2.62, 2.61, 2.6, 2.63, 2.6, 2.63]}
-      ]}
+    'Pistachios': {unit:'$/kg',sources:'USDA NASS + HMRC'},
+    'Cashews': {unit:'$/kg',sources:'HMRC (import price only)'},
+    'Almonds': {unit:'$/kg',sources:'USDA NASS + HMRC'},
+    'Walnuts': {unit:'$/kg',sources:'USDA NASS + HMRC'},
+    'Hazelnuts': {unit:'$/kg',sources:'USDA NASS + HMRC'},
+    'Peanuts': {unit:'$/kg',sources:'USDA NASS + HMRC'},
+    'Sunflower seeds': {unit:'$/kg',sources:'EU Agri-food API + HMRC'},
+    'Pumpkin seeds': {unit:'$/kg',sources:'HMRC (import price only)'}
   }
   },
   eggs: {
@@ -1704,31 +1258,11 @@ var COMM = {
     threshold:1.5, norm:1.0,
     rasffCategories:['eggs and egg products'],
     products:{
-    'Eggs (free range)': {unit:'£/dozen',sources:'AHDB + EU Agri-food API',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[3.1, 3.08, 3.06, 3.05, 3.05, 3.08, 3.08, 3.1, 3.09, 3.08, 3.1, 3.13]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
-        {n:'Non-EU',c:'#C84040',dash:true,p:[1.58, 1.58, 1.57, 1.57, 1.58, 1.58, 1.58, 1.59, 1.6, 1.6, 1.59, 1.58]}
-      ]},
-    'Eggs (barn/caged)': {unit:'£/dozen',sources:'AHDB + EU Agri-food API',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[1.75, 1.75, 1.73, 1.72, 1.71, 1.7, 1.72, 1.71, 1.72, 1.71, 1.72, 1.72]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[1.53, 1.54, 1.54, 1.55, 1.55, 1.53, 1.53, 1.54, 1.54, 1.54, 1.55, 1.53]},
-        {n:'Non-EU',c:'#C84040',dash:true,p:[1.05, 1.06, 1.07, 1.06, 1.06, 1.06, 1.07, 1.06, 1.05, 1.06, 1.05, 1.05]}
-      ]},
-    'Liquid whole egg': {unit:'£/kg',sources:'AHDB + FAO',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[2.79, 2.8, 2.83, 2.83, 2.82, 2.82, 2.82, 2.84, 2.84, 2.85, 2.88, 2.9]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[2.21, 2.2, 2.19, 2.17, 2.17, 2.17, 2.18, 2.16, 2.19, 2.18, 2.17, 2.16]},
-        {n:'Ukraine',c:'#C84040',dash:true,p:[1.58, 1.58, 1.57, 1.57, 1.58, 1.58, 1.58, 1.59, 1.6, 1.6, 1.59, 1.58]}
-      ]},
-    'Dried egg powder': {unit:'£/kg',sources:'FAO',origins:[
-        {n:'EU',c:'#2D6B2D',dash:false,p:[8.57, 8.57, 8.56, 8.56, 8.55, 8.5, 8.41, 8.32, 8.28, 8.22, 8.25, 8.21]},
-        {n:'Ukraine',c:'#1A5FA5',dash:false,p:[6.82, 6.88, 6.82, 6.87, 6.87, 6.88, 6.96, 7.0, 7.0, 6.97, 7.02, 6.96]},
-        {n:'India',c:'#C84040',dash:true,p:[5.55, 5.54, 5.57, 5.51, 5.55, 5.54, 5.56, 5.51, 5.45, 5.39, 5.42, 5.45]}
-      ]},
-    'Egg albumen (dried)': {unit:'£/kg',sources:'FAO',origins:[
-        {n:'EU',c:'#2D6B2D',dash:false,p:[10.45, 10.48, 10.47, 10.43, 10.51, 10.61, 10.53, 10.6, 10.68, 10.66, 10.78, 10.81]},
-        {n:'India',c:'#1A5FA5',dash:false,p:[7.74, 7.8, 7.87, 7.96, 7.9, 7.96, 8.05, 8.03, 8.05, 7.97, 7.99, 7.99]},
-        {n:'China',c:'#C84040',dash:true,p:[6.47, 6.5, 6.56, 6.55, 6.58, 6.58, 6.52, 6.58, 6.63, 6.68, 6.76, 6.69]}
-      ]}
+    'Eggs (free range)': {unit:'£/dozen',sources:'AHDB + EU Agri-food API'},
+    'Eggs (barn/caged)': {unit:'£/dozen',sources:'AHDB + EU Agri-food API'},
+    'Liquid whole egg': {unit:'£/kg',sources:'AHDB + FAO'},
+    'Dried egg powder': {unit:'£/kg',sources:'FAO'},
+    'Egg albumen (dried)': {unit:'£/kg',sources:'FAO'}
   }
   },
   drinks: {
@@ -1737,40 +1271,12 @@ var COMM = {
     threshold:0.5, norm:0.3,
     rasffCategories:['non-alcholic beverages'],
     products:{
-    'Orange juice': {unit:'£/litre',sources:'HMRC (import price only)',origins:[
-        {n:'Brazil',c:'#2D6B2D',dash:false,p:[1.2, 1.19, 1.2, 1.21, 1.21, 1.22, 1.21, 1.22, 1.21, 1.21, 1.2, 1.21]},
-        {n:'USA',c:'#1A5FA5',dash:false,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]},
-        {n:'Spain',c:'#C84040',dash:true,p:[1.58, 1.58, 1.57, 1.57, 1.58, 1.58, 1.58, 1.59, 1.6, 1.6, 1.59, 1.58]},
-        {n:'South Africa',c:'#7A4800',dash:true,p:[1.11, 1.11, 1.12, 1.11, 1.11, 1.1, 1.11, 1.09, 1.09, 1.09, 1.07, 1.08]}
-      ]},
-    'Apple juice': {unit:'£/litre',sources:'HMRC (import price only)',origins:[
-        {n:'Poland',c:'#2D6B2D',dash:false,p:[0.54, 0.55, 0.55, 0.55, 0.55, 0.56, 0.55, 0.55, 0.56, 0.56, 0.56, 0.56]},
-        {n:'Germany',c:'#1A5FA5',dash:false,p:[0.6, 0.6, 0.59, 0.6, 0.6, 0.6, 0.6, 0.61, 0.61, 0.61, 0.61, 0.61]},
-        {n:'China',c:'#C84040',dash:true,p:[0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4]},
-        {n:'Argentina',c:'#7A4800',dash:true,p:[0.45, 0.45, 0.44, 0.44, 0.44, 0.43, 0.43, 0.42, 0.42, 0.42, 0.42, 0.42]}
-      ]},
-    'Mineral water': {unit:'£/litre',sources:'BSDA',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[0.35, 0.35, 0.35, 0.36, 0.36, 0.36, 0.36, 0.36, 0.37, 0.37, 0.37, 0.37]},
-        {n:'France',c:'#1A5FA5',dash:false,p:[0.28, 0.27, 0.28, 0.27, 0.27, 0.27, 0.27, 0.27, 0.27, 0.27, 0.27, 0.26]},
-        {n:'Italy',c:'#C84040',dash:true,p:[0.3, 0.3, 0.3, 0.3, 0.29, 0.29, 0.29, 0.29, 0.3, 0.3, 0.3, 0.3]},
-        {n:'Germany',c:'#7A4800',dash:true,p:[0.25, 0.25, 0.25, 0.25, 0.25, 0.26, 0.25, 0.26, 0.25, 0.25, 0.25, 0.25]}
-      ]},
-    'Energy drinks': {unit:'£/litre',sources:'BSDA',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]},
-        {n:'Non-EU',c:'#C84040',dash:true,p:[0.89, 0.88, 0.89, 0.89, 0.89, 0.89, 0.89, 0.9, 0.9, 0.9, 0.89, 0.88]}
-      ]},
-    'Soft drinks': {unit:'£/litre',sources:'BSDA',origins:[
-        {n:'UK',c:'#2D6B2D',dash:false,p:[0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.66, 0.65, 0.65, 0.65]},
-        {n:'EU',c:'#1A5FA5',dash:false,p:[0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.49, 0.5, 0.49, 0.49, 0.49]},
-        {n:'Non-EU',c:'#C84040',dash:true,p:[0.35, 0.35, 0.35, 0.36, 0.36, 0.36, 0.36, 0.36, 0.37, 0.37, 0.37, 0.37]}
-      ]},
-    'Coconut water': {unit:'£/litre',sources:'FAO',origins:[
-        {n:'Thailand',c:'#2D6B2D',dash:false,p:[1.78, 1.79, 1.8, 1.78, 1.78, 1.77, 1.75, 1.73, 1.74, 1.72, 1.71, 1.69]},
-        {n:'Philippines',c:'#1A5FA5',dash:false,p:[1.58, 1.58, 1.57, 1.57, 1.58, 1.58, 1.58, 1.59, 1.6, 1.6, 1.59, 1.58]},
-        {n:'Brazil',c:'#C84040',dash:true,p:[1.41, 1.4, 1.39, 1.39, 1.37, 1.38, 1.36, 1.35, 1.36, 1.37, 1.37, 1.38]},
-        {n:'Sri Lanka',c:'#7A4800',dash:true,p:[1.51, 1.53, 1.52, 1.51, 1.51, 1.49, 1.48, 1.49, 1.48, 1.49, 1.51, 1.5]}
-      ]}
+    'Orange juice': {unit:'£/litre',sources:'HMRC (import price only)'},
+    'Apple juice': {unit:'£/litre',sources:'HMRC (import price only)'},
+    'Mineral water': {unit:'£/litre',sources:'BSDA'},
+    'Energy drinks': {unit:'£/litre',sources:'BSDA'},
+    'Soft drinks': {unit:'£/litre',sources:'BSDA'},
+    'Coconut water': {unit:'£/litre',sources:'FAO'}
   }
   },
 };
@@ -1868,277 +1374,8 @@ var KNOWN_RISKS = {
   }
 };
 
-// ── Dummy fiin data per category ───────────────────────────────────────────────
-// Placeholder until live fiin testing data is connected
-var FIIN_DUMMY = {
-  poultry:       ['Q1 2026: Authenticity anomaly detected in processed poultry products — species confirmation pending (4 samples)', 'Q4 2025: Welfare status irregularity flagged in 2 of 18 samples labelled free-range'],
-  red_meat:      ['Q1 2026: Species confirmation testing of beef mince — 3 samples flagged for possible pork presence', 'Q4 2025: Origin verification — 2 samples inconsistent with declared country of origin'],
-  fish_shellfish:['Q1 2026: DNA barcoding — 6 samples sold as cod confirmed as pollock or pangasius', 'Q4 2025: Smoked salmon — 2 samples mislabelled as Scottish, confirmed Norwegian origin'],
-  honey:         ['Q1 2026: NMR profiling — 4 samples positive for sugar syrup adulteration', 'Q4 2025: Pollen analysis — 3 samples origin inconsistent with label claim'],
-  herbs_spices:  ['Q1 2026: Dye screening — 2 paprika samples positive for Sudan red', 'Q4 2025: Oregano authenticity — 5 samples contained >30% non-oregano plant material'],
-  dairy:         ['Q1 2026: PDO verification — 2 Parmigiano-Reggiano samples failed authenticity testing', 'Q4 2025: Adulteration screen — 1 sample positive for non-dairy protein addition'],
-  nuts:          ['Q1 2026: Pistachio origin verification — 3 samples labelled Iranian confirmed US origin', 'Q4 2025: Nut species ID — 2 premium nut products contained undeclared cheaper species'],
-  eggs:          ['Q1 2026: Welfare status testing — 4 free-range samples failed expected isotope profile', 'Q4 2025: Date integrity check — 2 samples flagged for potential re-dating'],
-  fruit_veg:     ['Q1 2026: Pesticide screen — 3 imported strawberry samples above MRL', 'Q4 2025: Organic certification — 2 samples inconsistent with organic pesticide profile'],
-  cereals:       ['Q1 2026: Basmati authenticity — 4 samples contained non-basmati rice varieties', 'Q4 2025: Gluten-free verification — 2 products exceeded permitted gluten thresholds']
-};
-
-// Quarterly summary + individual anonymised results for testing panel
-var FIIN_TESTING = {
-  poultry: {
-    quarterly: [
-      { q:'Q1 2026', concerns: 4 },
-      { q:'Q4 2025', concerns: 2 },
-      { q:'Q3 2025', concerns: 3 },
-      { q:'Q2 2025', concerns: 1 }
-    ],
-    results: [
-      { q:'Q1 2026', text:'Processed poultry product labelled as chicken breast — DNA profiling detected turkey content at approximately 35%. Product description inconsistent with species composition.' },
-      { q:'Q1 2026', text:'Cooked sliced poultry product claimed as free-range — isotope ratio analysis inconsistent with outdoor-reared profile. Barn-reared signature detected.' },
-      { q:'Q1 2026', text:'Ready-meal ingredient declared as British-reared chicken — stable isotope data indicates likely non-UK origin.' },
-      { q:'Q1 2026', text:'Frozen poultry pieces — water content above permitted threshold, consistent with undeclared water injection.' },
-      { q:'Q4 2025', text:'Chicken portions labelled organic — pesticide residue screen returned results inconsistent with organic production standards.' },
-      { q:'Q4 2025', text:'Processed poultry spread — species-specific PCR identified duck content not declared on label.' },
-      { q:'Q3 2025', text:'Whole chicken labelled free-range — foot pad condition scoring on retained samples inconsistent with outdoor access claim.' },
-      { q:'Q3 2025', text:'Diced chicken product — nitrogen content analysis suggests protein enhancement not disclosed on ingredient list.' },
-      { q:'Q3 2025', text:'Poultry mince — collagen:protein ratio elevated, indicative of mechanically separated meat present but undeclared.' }
-    ]
-  },
-  red_meat: {
-    quarterly: [
-      { q:'Q1 2026', concerns: 3 },
-      { q:'Q4 2025', concerns: 2 },
-      { q:'Q3 2025', concerns: 4 },
-      { q:'Q2 2025', concerns: 2 }
-    ],
-    results: [
-      { q:'Q1 2026', text:'Beef mince product — real-time PCR detected porcine DNA above quantification threshold. Not consistent with cross-contamination levels.' },
-      { q:'Q1 2026', text:'Premium beef burger patties declared as Irish Angus — isotope profiling inconsistent with Irish pasture-fed origin. South American profile indicated.' },
-      { q:'Q1 2026', text:'Lamb kebab product — species identification testing confirmed predominantly beef composition with minor lamb content.' },
-      { q:'Q4 2025', text:'Diced beef labelled as British — stable isotope analysis returned origin profile inconsistent with UK grass-fed production.' },
-      { q:'Q4 2025', text:'Halal-certified minced beef — DNA screen detected porcine traces above the 0.1% reporting threshold.' },
-      { q:'Q3 2025', text:'Veal escalope — stable isotope data suggests older animal than veal classification permits.' },
-      { q:'Q3 2025', text:'Beef steak product with breed claim — authentication testing unable to confirm declared breed. Generic bovine profile returned.' },
-      { q:'Q3 2025', text:'Minced lamb — quantitative PCR indicates approximately 40% bovine content, undeclared on label.' },
-      { q:'Q3 2025', text:'Pork sausages — country of origin declared as British; isotope data inconsistent with UK pig production profile.' }
-    ]
-  },
-  fish_shellfish: {
-    quarterly: [
-      { q:'Q1 2026', concerns: 6 },
-      { q:'Q4 2025', concerns: 3 },
-      { q:'Q3 2025', concerns: 5 },
-      { q:'Q2 2025', concerns: 2 }
-    ],
-    results: [
-      { q:'Q1 2026', text:'Retail cod fillet — DNA barcoding identified Pacific pollock. Species substitution confirmed; labelling non-compliant.' },
-      { q:'Q1 2026', text:'Smoked salmon labelled Scottish — isotope analysis indicates Norwegian origin. Premium origin claim unsubstantiated.' },
-      { q:'Q1 2026', text:'Breaded fish product declared as haddock — cytochrome b sequencing returned blue whiting match.' },
-      { q:'Q1 2026', text:'Frozen prawns declared warm-water species from Ecuador — DNA profiling indicates mixed-origin product inconsistent with single-origin claim.' },
-      { q:'Q1 2026', text:'Tuna steak labelled yellowfin — species testing confirmed skipjack. Price differential between species creates substitution incentive.' },
-      { q:'Q1 2026', text:'Crab meat product — species verification identified substitution with swimming crab where brown crab was declared.' },
-      { q:'Q4 2025', text:'Sea bass fillets — DNA testing identified bream content. Two species with similar appearance and significant price differential.' },
-      { q:'Q4 2025', text:'Farmed salmon declared as wild-caught — fatty acid profiling inconsistent with wild capture; farmed signature confirmed.' },
-      { q:'Q3 2025', text:'Squid rings declared Falkland Islands origin — DNA and isotope data suggest South-East Asian sourcing.' }
-    ]
-  },
-  honey: {
-    quarterly: [
-      { q:'Q1 2026', concerns: 4 },
-      { q:'Q4 2025', concerns: 3 },
-      { q:'Q3 2025', concerns: 2 },
-      { q:'Q2 2025', concerns: 5 }
-    ],
-    results: [
-      { q:'Q1 2026', text:'Blossom honey labelled UK origin — NMR profiling returned marker profile inconsistent with British flora. Central European signature indicated.' },
-      { q:'Q1 2026', text:'Acacia honey — pollen analysis detected species inconsistent with acacia monofloral claim. Mixed flora product.' },
-      { q:'Q1 2026', text:'Honey product — NMR screening positive for C4 sugar syrup addition. Adulteration confirmed above 7% threshold.' },
-      { q:'Q1 2026', text:'Manuka honey with UMF claim — methylglyoxal content significantly below stated activity rating. Label claim unsubstantiated.' },
-      { q:'Q4 2025', text:'Blended honey declared as EU/non-EU mix — pollen and isotope data indicate higher proportion of non-EU honey than label states.' },
-      { q:'Q4 2025', text:'Heather honey — pollen count below minimum threshold required to support monofloral classification.' },
-      { q:'Q4 2025', text:'Organic honey — residue screening detected antibiotic traces (chloramphenicol) inconsistent with organic certification.' },
-      { q:'Q3 2025', text:'Clover honey — isotope data suggests rice syrup adulteration not detectable by standard refractometry.' },
-      { q:'Q3 2025', text:'Premium honey product with geographic indication — pollen profile does not match declared region of production.' },
-      { q:'Q2 2025', text:'Imported honey relabelled as UK-produced — geographic marker profiling confirmed overseas origin.' }
-    ]
-  },
-  herbs_spices: {
-    quarterly: [
-      { q:'Q1 2026', concerns: 2 },
-      { q:'Q4 2025', concerns: 5 },
-      { q:'Q3 2025', concerns: 3 },
-      { q:'Q2 2025', concerns: 4 }
-    ],
-    results: [
-      { q:'Q1 2026', text:'Ground paprika — dye screening returned positive result for Sudan Red I. Non-permitted colourant confirmed.' },
-      { q:'Q1 2026', text:'Dried oregano — microscopic and DNA analysis confirmed presence of olive leaf and myrtle at approximately 40% of total composition.' },
-      { q:'Q4 2025', text:'Ground cumin — foreign seed material identified including grass seed species, comprising approximately 15% of sample weight.' },
-      { q:'Q4 2025', text:'Saffron threads — spectroscopic analysis confirmed artificial colourant addition (tartrazine) to enhance colour score.' },
-      { q:'Q4 2025', text:'Black pepper — near-infrared profiling detected papaya seed adulteration at estimated 20% substitution level.' },
-      { q:'Q4 2025', text:'Turmeric powder — lead chromate detected on colourimetric screening. Toxic adulterant used to enhance yellow colour.' },
-      { q:'Q4 2025', text:'Ground coriander — species authentication confirmed substitution with a proportion of spent/exhausted coriander material.' },
-      { q:'Q3 2025', text:'Dried basil — country of origin declared Italy; isotope and metabolite profiling inconsistent with Italian-grown herb.' },
-      { q:'Q3 2025', text:'Chilli flakes — Sudan dye IV detected. Product recalled by submitting member.' }
-    ]
-  },
-  dairy: {
-    quarterly: [
-      { q:'Q1 2026', concerns: 2 },
-      { q:'Q4 2025', concerns: 1 },
-      { q:'Q3 2025', concerns: 3 },
-      { q:'Q2 2025', concerns: 2 }
-    ],
-    results: [
-      { q:'Q1 2026', text:'Hard cheese with PDO designation — DNA profiling of milk source inconsistent with protected designation requirements. Non-qualifying breed detected.' },
-      { q:'Q1 2026', text:'Organic whole milk — pesticide residue screen returned results above thresholds consistent with organic production.' },
-      { q:'Q4 2025', text:'Cream cheese — non-milk protein (soy) detected by ELISA. Undeclared ingredient and potential allergen.' },
-      { q:'Q3 2025', text:'Butter with provenance claim — fatty acid profile inconsistent with stated pasture-fed, single-origin claim.' },
-      { q:'Q3 2025', text:'Mozzarella declared buffalo milk — real-time PCR quantification indicates predominantly bovine milk composition.' },
-      { q:'Q3 2025', text:'Skimmed milk powder — reconstituted milk solids detected; product not labelled as reconstituted.' },
-      { q:'Q2 2025', text:'Infant formula — declared nutrient levels not confirmed on independent analysis. Protein content below stated specification.' },
-      { q:'Q2 2025', text:'Greek-style yoghurt — total solids content inconsistent with authentic strained yoghurt. Thickener addition suspected.' }
-    ]
-  },
-  eggs: {
-    quarterly: [
-      { q:'Q1 2026', concerns: 4 },
-      { q:'Q4 2025', concerns: 2 },
-      { q:'Q3 2025', concerns: 1 },
-      { q:'Q2 2025', concerns: 3 }
-    ],
-    results: [
-      { q:'Q1 2026', text:'Free-range eggs — stable isotope analysis of egg content inconsistent with outdoor-reared hens. Indoor profile indicated across 4 samples.' },
-      { q:'Q1 2026', text:'Organic eggs — carotenoid profile and isotope data inconsistent with organic feed and outdoor access requirements.' },
-      { q:'Q1 2026', text:'Dried egg albumen declared EU origin — isotope profiling suggests non-EU sourcing, inconsistent with label.' },
-      { q:'Q1 2026', text:'Free-range liquid whole egg — yolk colour and fatty acid profile below expected range for genuine free-range production.' },
-      { q:'Q4 2025', text:'Barn eggs sold as free-range — flock density indicators from submitted documentation inconsistent with free-range stocking requirements.' },
-      { q:'Q4 2025', text:'Eggs with British Lion mark — traceability documentation review identified gap in chain of custody from stated farm.' },
-      { q:'Q3 2025', text:'Organic eggs — residue screening detected coccidiostat not permitted in organic production.' },
-      { q:'Q2 2025', text:'Free-range eggs — omega-3 fatty acid levels significantly below expected profile for genuinely free-range birds.' }
-    ]
-  },
-  fruit_veg: {
-    quarterly: [
-      { q:'Q1 2026', concerns: 3 },
-      { q:'Q4 2025', concerns: 2 },
-      { q:'Q3 2025', concerns: 4 },
-      { q:'Q2 2025', concerns: 1 }
-    ],
-    results: [
-      { q:'Q1 2026', text:'Strawberries declared organic — multi-residue pesticide screen detected fungicide residues inconsistent with organic production.' },
-      { q:'Q1 2026', text:'Tomatoes labelled British-grown — stable isotope profiling inconsistent with UK production. Southern European origin indicated.' },
-      { q:'Q1 2026', text:'Bagged salad leaves with organic claim — chlormequat residue detected above organic threshold.' },
-      { q:'Q4 2025', text:'Garlic declared Spanish origin — DNA variety testing and isotope data suggest Chinese origin.' },
-      { q:'Q4 2025', text:'Blueberries with provenance claim — multi-element profiling inconsistent with declared country of cultivation.' },
-      { q:'Q3 2025', text:'Avocados declared country of origin — documentary and isotope review raised inconsistency with declared source.' },
-      { q:'Q3 2025', text:'Apples with variety claim — DNA fingerprinting confirmed mislabelled variety.' },
-      { q:'Q3 2025', text:'Organic peppers — imidacloprid detected above MRL. Pesticide not permitted in organic production.' }
-    ]
-  },
-  bakery_cereals: {
-    quarterly: [
-      { q:'Q1 2026', concerns: 2 },
-      { q:'Q4 2025', concerns: 3 },
-      { q:'Q3 2025', concerns: 2 },
-      { q:'Q2 2025', concerns: 1 }
-    ],
-    results: [
-      { q:'Q1 2026', text:'Basmati rice — DNA varietal profiling confirmed mixture of non-basmati long-grain varieties. Estimated 30% non-compliant content.' },
-      { q:'Q1 2026', text:'Gluten-free bread — ELISA testing confirmed gluten content above 20ppm threshold. Non-compliant for declared gluten-free claim.' },
-      { q:'Q4 2025', text:'Wheat flour with origin claim — isotope data inconsistent with declared country of production.' },
-      { q:'Q4 2025', text:'Sourdough loaf with fermentation claim — acidity and microbiological profile inconsistent with genuine long-fermentation sourdough process.' },
-      { q:'Q4 2025', text:'Oat product declared gluten-free — avenin profiling indicates cross-contamination above permitted threshold.' },
-      { q:'Q3 2025', text:'Rye bread — rye content analysis returned proportion significantly below typical rye bread composition. Wheat substitution indicated.' },
-      { q:'Q3 2025', text:'Organic oats — chlorpyrifos residue detected. Pesticide non-compliant with organic certification standards.' }
-    ]
-  },
-  prepared_dishes: {
-    quarterly: [
-      { q:'Q1 2026', concerns: 3 },
-      { q:'Q4 2025', concerns: 2 },
-      { q:'Q3 2025', concerns: 2 },
-      { q:'Q2 2025', concerns: 1 }
-    ],
-    results: [
-      { q:'Q1 2026', text:'Chicken tikka ready meal — species testing confirmed duck content in addition to chicken. Undeclared species.' },
-      { q:'Q1 2026', text:'Beef lasagne — quantitative PCR returned porcine content above 1%. Not declared on label.' },
-      { q:'Q1 2026', text:'Seafood pasta — species authentication identified substitution of premium shellfish with lower-value species.' },
-      { q:'Q4 2025', text:'Vegetarian ready meal — allergen screen detected egg traces above 10ppm. Not declared.' },
-      { q:'Q4 2025', text:'Premium soup with provenance ingredient claim — mass balance review inconsistent with declared inclusion level.' },
-      { q:'Q3 2025', text:'Ethnic cuisine ready meal — declared meat species inconsistent with PCR results.' },
-      { q:'Q3 2025', text:'Chilled pasta sauce — microbiological testing indicated time-temperature abuse inconsistent with chill chain documentation.' }
-    ]
-  },
-  cakes_conf: {
-    quarterly: [
-      { q:'Q1 2026', concerns: 1 },
-      { q:'Q4 2025', concerns: 2 },
-      { q:'Q3 2025', concerns: 1 },
-      { q:'Q2 2025', concerns: 2 }
-    ],
-    results: [
-      { q:'Q1 2026', text:'Dark chocolate with origin claim — cocoa bean isotope profiling inconsistent with declared single-origin provenance.' },
-      { q:'Q4 2025', text:'Confectionery with nut claim — allergen ELISA detected undeclared peanut traces above reporting threshold.' },
-      { q:'Q4 2025', text:'Premium chocolate declared high cocoa content — independent analysis confirmed cocoa solid content below label claim.' },
-      { q:'Q3 2025', text:'Cake with butter claim — fatty acid profiling detected partial replacement with non-dairy fat, undeclared.' },
-      { q:'Q2 2025', text:'Sugar confectionery with natural colour claim — synthetic dye detected inconsistent with natural colourant declaration.' },
-      { q:'Q2 2025', text:'Cocoa powder declared single origin — elemental fingerprinting inconsistent with declared country of cultivation.' }
-    ]
-  },
-  diet_foods: {
-    quarterly: [
-      { q:'Q1 2026', concerns: 3 },
-      { q:'Q4 2025', concerns: 2 },
-      { q:'Q3 2025', concerns: 2 },
-      { q:'Q2 2025', concerns: 1 }
-    ],
-    results: [
-      { q:'Q1 2026', text:'Whey protein supplement — nitrogen spiking detected (glycine addition). Declared protein content not reflective of true whey protein level.' },
-      { q:'Q1 2026', text:'Vitamin D supplement — independent potency testing returned values 40% below label claim.' },
-      { q:'Q1 2026', text:'Protein bar — undeclared soy protein identified by allergen profiling. Potential allergen risk.' },
-      { q:'Q4 2025', text:'Meal replacement shake — actual calorie content significantly above declared value on independent analysis.' },
-      { q:'Q4 2025', text:'Sports nutrition product with amino acid claims — HPLC profiling confirmed several amino acids below declared levels.' },
-      { q:'Q3 2025', text:'Infant formula — one micronutrient level returned below minimum regulatory requirement on independent verification.' },
-      { q:'Q3 2025', text:'Gluten-free supplement product — wheat gluten detected above 20ppm. Non-compliant with gluten-free claim.' }
-    ]
-  },
-  nuts_snacks: {
-    quarterly: [
-      { q:'Q1 2026', concerns: 3 },
-      { q:'Q4 2025', concerns: 2 },
-      { q:'Q3 2025', concerns: 3 },
-      { q:'Q2 2025', concerns: 1 }
-    ],
-    results: [
-      { q:'Q1 2026', text:'Pistachios labelled Iranian origin — isotope and elemental profiling inconsistent with Iranian provenance. US origin indicated.' },
-      { q:'Q1 2026', text:'Premium cashews with origin claim — multi-element fingerprinting does not support declared single-country sourcing.' },
-      { q:'Q1 2026', text:'Mixed nut product — allergen profiling detected undeclared peanut content above 10ppm threshold.' },
-      { q:'Q4 2025', text:'Almonds with variety claim — DNA fingerprinting returned profile inconsistent with declared premium variety.' },
-      { q:'Q4 2025', text:'Walnuts — aflatoxin screening returned B1 levels above EU maximum limit. Food safety concern raised.' },
-      { q:'Q3 2025', text:'Hazelnut product with provenance claim — isotope data inconsistent with declared Turkish origin.' },
-      { q:'Q3 2025', text:'Roasted peanuts declared as a single origin — blended origin profile detected on elemental analysis.' },
-      { q:'Q3 2025', text:'Nut butter — oil profile indicates partial replacement of declared nut oil with cheaper vegetable oil.' }
-    ]
-  },
-  drinks: {
-    quarterly: [
-      { q:'Q1 2026', concerns: 2 },
-      { q:'Q4 2025', concerns: 2 },
-      { q:'Q3 2025', concerns: 1 },
-      { q:'Q2 2025', concerns: 3 }
-    ],
-    results: [
-      { q:'Q1 2026', text:'Not-from-concentrate orange juice — isotope and sugar profile inconsistent with NFC claim. Reconstituted product indicated.' },
-      { q:'Q1 2026', text:'Apple juice with country of origin claim — multi-element fingerprinting inconsistent with declared source country.' },
-      { q:'Q4 2025', text:'Coconut water — authenticity profiling detected addition of water and sugar beyond levels consistent with genuine product.' },
-      { q:'Q4 2025', text:'Premium fruit juice blend — declared fruit content not supported by independent compositional analysis.' },
-      { q:'Q3 2025', text:'Mineral water with source claim — ion profile inconsistent with declared spring source across multiple samples.' },
-      { q:'Q2 2025', text:'Energy drink — taurine and caffeine levels on independent testing below label declaration.' },
-      { q:'Q2 2025', text:'Fruit smoothie — declared fruit content and species composition inconsistent with independent verification.' },
-      { q:'Q2 2025', text:'Premium juice with fresh-pressed claim — microbial indicators suggest heat treatment inconsistent with cold-pressed declaration.' }
-    ]
-  }
-};
+// fiin member testing data: none built in. Panels show "awaiting data" until a
+// testing data source is connected.
 
 var SUPPLY_CHAIN = {
   poultry:       ['Rearing Farm','Slaughter & Evisceration','Cutting & Processing','Further Processing','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
@@ -2275,13 +1512,6 @@ function renderSupplyChain() {
       html += '<div class="sc-tip-divider"></div>';
       html += '<div class="sc-tip-section-head">Indicators</div>';
 
-      var fiinItems = FIIN_DUMMY[cur] || [];
-      if (fiinItems.length) {
-        html += '<div style="padding:2px 13px 1px;font-size:9px;opacity:.5;font-family:DM Mono,monospace;text-transform:uppercase;letter-spacing:.06em">fiin (mock) data</div>';
-        html += fiinItems.slice(0, 2).map(function(txt) {
-          return '<div class="sc-tip-item">' + txt + '</div>';
-        }).join('');
-      }
 
       if (count > 0) {
         html += '<div style="padding:4px 13px 1px;font-size:9px;opacity:.5;font-family:DM Mono,monospace;text-transform:uppercase;letter-spacing:.06em">RASFF data — ' + count + ' alert' + (count!==1?'s':'') + '</div>';
@@ -2293,7 +1523,7 @@ function renderSupplyChain() {
         html += '<div class="sc-tip-empty">No RASFF alerts at this stage</div>';
       }
 
-      html += '<div class="sc-tip-footer">fiin TSG · RASFF/European Commission · placeholder guidance</div>';
+      html += '<div class="sc-tip-footer">fiin TSG · RASFF/European Commission</div>';
       tip.innerHTML = html;
       tip.style.display = 'flex';
       positionTip(e);
@@ -2326,218 +1556,32 @@ function renderSupplyChain() {
 // MARKET INTELLIGENCE
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Built-in fallback intelligence used when Sheet data is not yet connected
-var BUILTIN_NEWS = {
-  beef: {
-    pills: [{l:'Supply tight',c:'r'},{l:'Price elevated',c:'a'},{l:'Species substitution risk',c:'r'}],
-    items: [
-      {r:'r', h:'UK beef production forecast down 1% in 2026 as suckler herd continues structural decline', d:'Prime cattle slaughter expected at 1.98m head. Suckler herd has contracted ~12% over five years. Farmgate prices stable at elevated 630–650p/kg, still 30–40% above 2024 levels.', s:'AHDB Beef Market Outlook, Jan 2026'},
-      {r:'r', h:'Brazilian beef recalled across EU following discovery of banned hormone residues', d:'Hormone residues found in consignments imported via Ireland distributed across Northern Europe, raising concerns about traceability and import controls.', s:'Beef Central · Irish Farmers Journal, Jan 2026'},
-      {r:'a', h:'Retail beef prices up 29.6% year-on-year at major multiples', d:'High farmgate prices feeding through to shelf with further headroom expected. Consumer volumes declining as shoppers switch to mince and smaller pack sizes.', s:'The Grocer, Jan 2026'},
-      {r:'r', h:'UK cattle prices at record highs — farmgate prices expected to remain supported through 2026', d:'UK cattle prices reached record highs in 2025. Farmgate prices are expected to remain supported throughout 2026 with supplies limited. Sustained price imbalance increases risk of cheaper imported product misrepresented as UK, and lower-grade cuts passed off as premium.', s:'AHDB · Q2 2026 Watchlist'},
-      {r:'r', h:'Brazilian meat market changes increasing fraud pressure on smaller operators', d:'Changes in the Brazilian meat and poultry market, including implications of the EU import ban, possible stockpiling and redirection of supply, are creating pressure on smaller operators. Continued monitoring is warranted.', s:'fiin Q2 2026 Watchlist'},
-      {r:'r', h:'Increased Australia-UK trade deal beef imports sustain origin and specification fraud risk', d:'Increased imports of beef under the Australia-UK trade deal continue, with premium cuts largely supplying food service. Elevated imported volumes sustain origin and specification fraud risk as products move through complex distribution and processing channels.', s:'fiin Q2 2026 Watchlist'},
-      {r:'a', h:'New EU honey origin labelling rules in force from mid-2026 — blend composition must be disclosed', d:'Countries of origin must appear in descending order with percentage share. New harmonised analytical methods being finalised by EU JRC. UK must align or diverge post-Brexit. Non-compliance risk elevated during transition period.', s:'EU Commission Honey Directive · fiin Q2 2026 Watchlist'},
-      {r:'b', h:'HPAI situation improved: Great Britain self-declares freedom from H5N1 on 18 May 2026', d:'All housing measures and prevention zones lifted by early June. The 2025/26 season closed with around 100 UK confirmed cases. Pressure on poultry and egg supply chains has reduced for now, but restrictions are likely to return in autumn.', s:'APHA · fiin Q2 2026 Watchlist'}
-    ],
-    fraud: 'Large and growing price premium between UK domestic (630–650p/kg) and South American imports creates strong financial incentive for species or origin substitution. Brazilian hormone recall heightens scrutiny on import documentation. The lamb/beef price differential also elevates cross-species substitution risk in processed products.'
-  },
-  lamb: {
-    pills: [{l:'EU supply tight',c:'r'},{l:'Disease pressure',c:'r'},{l:'Species substitution risk',c:'a'}],
-    items: [
-      {r:'r', h:'EU sheep meat production declined in 2025 due to disease, weather and policy changes', d:'Spanish prices up €1.57/kg year-on-year driven by supply shortages and movement restrictions. EU reference price at €9.38/kg. UK lamb deadweight reached 838p/kg in March 2026.', s:'AHDB Lamb Market Update, Mar 2026'},
-      {r:'r', h:'Greek feta production threatened by sheep and goat pox — 480,000 animals culled since August 2024', d:'Milk availability down ~40% in key regions including Thessaly. Feta output expected to fall by ~20,000 tonnes in 2026. Movement restrictions ongoing.', s:'AHDB · Regulatory reports, Apr 2026'},
-      {r:'a', h:'Large lamb/beef price differential driving species substitution concerns in processed products', d:'With lamb at 838p/kg and beef at 650p/kg, the gap creates incentive to substitute species in minced and processed products where detection is harder.', s:'AHDB deadweight data, Mar 2026'},
-      {r:'r', h:'Sheep and goat pox in Greece causing severe milk supply shortages in PDO categories', d:'Ongoing sheep and goat pox outbreaks in Greece have significantly reduced sheep and goat milk availability. Risks include potential supply shortages, price increases and increased substitution risk within PDO dairy categories including feta and halloumi.', s:'fiin Q2 2026 Watchlist'},
-      {r:'a', h:'Lumpy Skin Disease: fresh outbreaks in Spain and Sardinia in 2026 — UK risk assessed as low', d:'Control has improved but fresh outbreaks reported in Spain (including a new region, Aragón) and Sardinia earlier in 2026. UK incursion risk remains assessed as low.', s:'fiin Q2 2026 Watchlist'},
-      {r:'a', h:'Foot and Mouth Disease: new outbreak in Cyprus and Greece — check current UK import restrictions', d:'A separate and unrelated outbreak (a different strain from 2025 European outbreaks) has emerged in Cyprus and Greece in early 2026, prompting EU-backed vaccination efforts. UK import restrictions should be checked by country rather than assuming the prior list applies.', s:'fiin Q2 2026 Watchlist'}
-    ],
-    fraud: 'The current lamb/beef price spread is at its widest in several years, creating a clear incentive to substitute beef for lamb in processed and minced products. EU supply tightness, particularly in Spain following disease-related movement restrictions, raises the risk of origin misdeclaration as buyers seek lower-cost alternatives.'
-  },
-  chicken: {
-    pills: [{l:'HPAI ongoing',c:'r'},{l:'Production high',c:'b'},{l:'Origin/welfare fraud risk',c:'a'}],
-    items: [
-      {r:'r', h:'UK records 96 avian influenza cases this season — AIPZ mandatory housing still in force', d:'New cases continue to emerge despite lifted local restrictions in Northumberland, Norfolk and Suffolk. UK has begun targeted vaccine trials for turkeys. Wild bird risk remains high.', s:'APHA · Defra, Apr 2026'},
-      {r:'b', h:'EU poultry production reached near 1 million tonnes in February — broiler prices up 1.3% to 293.75 eurocents/kg', d:'EU broiler prices significantly higher than US and Brazil. EU poultry exports for Jan–Nov 2025 fell 1.3% to 1.9 million tonnes year-on-year.', s:'EU Commission poultry data, Apr 2026'},
-      {r:'a', h:'UK ban on all caged egg production could increase imports from lower-welfare systems', d:'British Egg Industry Council warns a full cage ban would increase cheaper imports from abroad, undermining domestic producers. EU laying hen numbers surged to over 15 million birds in December.', s:'BEIC · EU Commission, Apr 2026'},
-      {r:'b', h:'Great Britain self-declares freedom from HPAI H5N1 on 18 May 2026 — all housing measures lifted', d:'Great Britain self-declared freedom from avian influenza on 18 May 2026. The 2025/26 season closed with around 100 confirmed UK cases. Restrictions are likely to return with the onset of the next migratory season in autumn.', s:'APHA · fiin Q2 2026 Watchlist'},
-      {r:'r', h:'Bluetongue: substantial rise in UK cases — predominantly BTV-3 concentrated in England', d:'The UK has recorded a substantial rise in bluetongue cases (and a likelihood of underreporting) in Great Britain, predominantly BTV-3, concentrated in England. This represents a notable increase in scale on prior seasons and warrants continued monitoring.', s:'fiin Q2 2026 Watchlist'},
-      {r:'a', h:'African Swine Fever: no UK detections but continued spread in Europe disrupts pork supply chains', d:'No UK ASF detections but continued spread in Europe continues to impact pork supply chains, causing widespread culling and disrupting trade routes.', s:'fiin Q2 2026 Watchlist'}
-    ],
-    fraud: 'HPAI disruption to domestic supply creates import pressure and increases the risk of welfare status mislabelling as lower-welfare imported product is passed off as higher-welfare UK-reared chicken. The large price differential between Thai/Brazilian chicken and UK domestic (over £1/kg) sustains the financial incentive for geographic origin fraud in processed products.'
-  },
-  honey: {
-    pills: [{l:'Adulteration very high',c:'r'},{l:'UK hive losses severe',c:'r'},{l:'New labelling rules 2026',c:'a'}],
-    items: [
-      {r:'r', h:'South West England beekeepers report hive losses up to 90% over winter 2025/26', d:'Unusually wet and mild winter prevented foraging and cleansing flights. National average loss ~25%. UK produces only ~5% of its annual honey consumption domestically, with 95% imported.', s:'BBKA survey, Apr 2026'},
-      {r:'r', h:'EU "From the Hives" investigation flagged 46% of imported honey as suspicious for adulteration', d:'China (74%), Turkey (93%) had highest suspicion rates. Seven EU operators sanctioned. Methods include sugar syrup blending, antibiotic masking and origin falsification.', s:'EU DG SANTE / OLAF, 2023'},
-      {r:'a', h:'New EU honey origin labelling rules require blend composition disclosure from mid-2026', d:'Countries of origin must appear in descending order with percentage share. New harmonised analytical methods being finalised by EU JRC. UK must align or diverge post-Brexit.', s:'EU Commission Honey Directive, 2024'}
-    ],
-    fraud: 'Severe UK hive losses combined with 95% import dependency means supply tightness will push prices higher and increase adulteration incentive. Sugar syrup blending, chloramphenicol contamination and false geographic origin claims remain dominant fraud vectors. New EU origin labelling requirements from mid-2026 create compliance pressure and an enforcement opportunity.'
-  },
-  oliveoil: {
-    pills: [{l:'Spain harvest disrupted',c:'a'},{l:'Origin fraud elevated',c:'r'},{l:'New anti-fraud controls',c:'b'}],
-    items: [
-      {r:'a', h:'Heavy rainfall in Spain\'s Jaén region cuts harvest by estimated 45% year-on-year', d:'Persistent rain disrupted picking, reduced effective harvesting days and left some fruit uncollected. Spanish EVOO prices holding at €4.50–5.00/kg. Andalusian output down ~30% overall.', s:'Certified Origins Market Report, Jan 2026'},
-      {r:'r', h:'Croatia: one-third of tested EVOO samples failed EU quality standards in 2025', d:'Experts warned fraudulent oils may contain lower-quality substitutes or mineral oil. Italian EVOO maintains premium over Spanish and Greek. Large price differentials persist across origins.', s:'Croatian food authority · Olive Oil Times, 2025'},
-      {r:'b', h:'Spain launches new anti-fraud control framework covering entire olive oil supply chain from 2026', d:'At least 20% of operators covered annually. Digital traceability tools SIMO and REMOA to monitor stocks and bulk movements. Follows December 2024 national debate over shadow operations.', s:'Spain Ministry of Agriculture · Olive Oil Times, Jan 2026'},
-      {r:'r', h:'Ongoing concern: substitution and grade misrepresentation of all olive oil grades', d:'Ensure specifications are verified, with particular attention to the grade purchased. Potential risk of olive oil being adulterated with refined oil. Shelf-life and storage temperature controls should be robustly specified in supplier agreements.', s:'fiin Q2 2026 Watchlist'}
-    ],
-    fraud: 'Olive oil remains structurally fraud-prone: multiple grades, difficult consumer differentiation, premium origin claims and large price differentials (Tunisia at ~€3.40/kg vs Italy at €8.10/kg). Spain\'s harvest disruption keeps supply tight and prices elevated, sustaining fraud incentive. Spain\'s new 2026 traceability controls and EU-Mercosur tariff agreement will increase scrutiny on South American blending operations.'
-  },
-  salmon: {
-    pills: [{l:'Chile/Scotland spread growing',c:'a'},{l:'Species substitution risk',c:'a'},{l:'Farmed vs wild fraud',c:'r'}],
-    items: [
-      {r:'a', h:'Chilean salmon at £4.69/kg versus Scottish at £6.50/kg — gap grown by £0.22/kg this year', d:'Chile has declined slightly while Scottish prices held steady. Norwegian salmon at £6.09/kg tracking closely with Scottish, within £0.41/kg throughout the period.', s:'Seafish price data, Apr 2026'},
-      {r:'r', h:'FAO/IAEA report: seafood fraud rampant globally — substituting Pacific for Atlantic salmon gives ~$10/kg fraud margin', d:'February 2026 FAO report confirmed widespread species substitution across seafood. Oceana studies found 58% of substitutions involved species that could pose health risks to consumers.', s:'FAO/IAEA Seafood Fraud Report, Feb 2026'},
-      {r:'a', h:'Middle East conflict raising fuel costs and shutting down significant portions of EU fishing fleet', d:'Rising fuel prices driven by Middle East tensions have undermined profitability for many fishing operators, threatening supply and prompting government support calls.', s:'Food Navigator, Apr 2026'},
-      {r:'r', h:'Norwegian salmon exports to US face rising tariff pressure — rerouting via third countries risk', d:'Norwegian salmon exports to the US face rising tariff pressure, creating an incentive to reroute or reprocess supply through third countries. Additional scrutiny on Norwegian salmon supply chains is advised.', s:'fiin Q2 2026 Watchlist'},
-      {r:'a', h:'Norwegian salmon feed increasingly incorporating land-based and avian-derived proteins', d:'Norwegian Atlantic Salmon aquaculture is increasingly incorporating land-based and avian-derived proteins as an alternative to soy and fishmeal. This could affect feed-related product claims.', s:'fiin Q2 2026 Watchlist'}
-    ],
-    fraud: 'The £1.81/kg gap between Chilean and Scottish farmed salmon creates a substitution incentive, while the ~$10/kg margin from substituting Pacific for Atlantic salmon remains one of the most profitable seafood fraud opportunities globally. Farmed versus wild mislabelling is also persistent, particularly for smoked salmon where consumers expect wild-caught premium product.'
-  },
-  cod: {
-    pills: [{l:'Species substitution high',c:'r'},{l:'Atlantic cod supply falling',c:'r'},{l:'FAO fraud report 2026',c:'r'}],
-    items: [
-      {r:'r', h:'FAO report: ~two-thirds of Atlantic cod sold with North Sea label actually sourced from Northeast Arctic', d:'FAO February 2026 report confirmed geographic origin misrepresentation is endemic in cod supply chains globally. Called for mandatory seafood traceability as the key intervention.', s:'FAO/IAEA Food Fraud in Fisheries, Feb 2026'},
-      {r:'r', h:'Falling Atlantic cod supply pushing industry to promote pollock and haddock as substitutes', d:'Tight supply and higher prices increase risk of lower-value species sold as cod. Pangasius at £2.69/kg versus certified Icelandic cod at £8.50/kg — largest absolute price gap tracked.', s:'Seafish · Food Navigator, Apr 2026'},
-      {r:'a', h:'Alaska pollock recertified by MSC but with new condition requiring salmon bycatch reduction', d:'Fishery must demonstrate measurable progress limiting incidental salmon catches. Growing ecosystem scrutiny beyond target stock health may affect future certification.', s:'MSC, Apr 2026'},
-      {r:'r', h:'Barents Sea cod quotas for 2026 at lowest level since 1991 — substitution risk very elevated', d:'Whitefish supply remains under pressure following further reductions to Barents Sea cod quotas, now at their lowest level since 1991. Ongoing geopolitical tensions and concerns around quota compliance continue to present risks to stock sustainability and MSC certification.', s:'fiin Q2 2026 Watchlist'},
-      {r:'a', h:'EU dropped proposed ban on Russian cod and pollock in July 2026 sanctions package', d:'The EU\'s proposed ban on Russian cod and Alaskan pollock imports was dropped from its July 2026 sanctions package. However, the prospect of a ban may have prompted supply chain adjustments that will not reverse, and tariffs remain. Traceability should be challenged, particularly where Russian-caught fish is processed via third countries such as China.', s:'fiin Q2 2026 Watchlist'}
-    ],
-    fraud: 'The £5.81/kg gap between pangasius and certified Icelandic cod is the largest price spread tracked across all 11 commodities and creates an extreme substitution incentive. FAO March 2026 confirms origin misrepresentation is endemic. Middle East conflict is disrupting EU fishing operations and raising costs, adding further pressure on margins and increasing substitution risk.'
-  },
-  milk: {
-    pills: [{l:'Prices tentatively recovering',c:'b'},{l:'Input costs rising',c:'a'},{l:'Adulteration risk',c:'a'}],
-    items: [
-      {r:'b', h:'Dairy markets showing tentative recovery after months of oversupply — modest gains in GDT auctions', d:'UK wholesale prices for skimmed milk powder and Cheddar edging up. Rising energy, feed and input costs linked to Middle East conflict add risk and keep farm margins tight.', s:'AHDB Dairy · GDT data, Apr 2026'},
-      {r:'r', h:'Andhra Pradesh, India: 16 people died after consuming milk adulterated with ethylene glycol', d:'Ethylene glycol caused acute renal failure. Incident underscores ongoing risk of chemical adulteration in milk supply chains, particularly in South and Southeast Asian sourcing regions.', s:'India regulatory reports, Mar 2026'},
-      {r:'a', h:'NZ powder/UK farm gate spread at £11.60/100L — persistent throughout period', d:'NZ equivalent at £25.80/100L versus UK farm gate at £37.40/100L. Gap has remained almost constant, creating a stable economic incentive for substitution in dairy processing.', s:'AHDB · FAO price data, Apr 2026'},
-      {r:'r', h:'Sheep and goat pox in Greece: major PDO dairy supply disruption — feta and halloumi at risk', d:'Ongoing sheep and goat pox outbreaks in Greece have significantly reduced sheep and goat milk availability. Feta output expected to fall by ~20,000 tonnes in 2026. Similar pressures expected in halloumi supply chains. Verify PDO chain-of-custody documentation and differentiate PDO feta from non-PDO salad cheese.', s:'AHDB · fiin Q2 2026 Watchlist'}
-    ],
-    fraud: 'The persistent £11.60/100L spread between NZ powder equivalent and UK farm gate creates ongoing substitution incentive in processed dairy products. The March 2026 India fatalities from ethylene glycol adulteration highlight the severe end of milk fraud risk. UK welfare and organic status fraud — caged versus free range, conventional versus organic — remains a lower-profile but commercially significant concern.'
-  },
-  oregano: {
-    pills: [{l:'Herbs market severely disrupted',c:'r'},{l:'Origin fraud high',c:'r'},{l:'Dye adulteration risk',c:'r'}],
-    items: [
-      {r:'r', h:'European fresh herbs market facing severe disruption — basil cargo capacity from Kenya and Israel cut by ~50%', d:'Middle East conflict causing widespread flight cancellations. Heavy rains in Kenya damaged basil crops with losses estimated over 30%. Supplies from Israel also very limited.', s:'Trade press · FAO, Apr 2026'},
-      {r:'r', h:'Investigations reveal vendors adulterating ground pepper and spices with toxic textile dyes in West African markets', d:'Nigerian market investigations found discarded pepper seeds and unripe tomatoes mixed with red dyes — often non-food-grade chemicals intended for textiles — to achieve bright red appearance.', s:'Nigerian food safety authority reports, Mar 2026'},
-      {r:'a', h:'China/Greece oregano price spread at $9.82/kg — above norm for entire past 12 months', d:'Chinese oregano at $3.68/kg versus Greek at $13.50/kg. Both Morocco ($5.08/kg) and China have declined further, widening the spread and the financial incentive to substitute or mislabel.', s:'ITC trade data, Apr 2026'},
-      {r:'r', h:'Saffron: Iran supply disruption expected — bulking with safflower most probable near-term fraud', d:'~90% of global saffron originates from Iran. Ongoing conflict means supply disruption is anticipated and fraud risk is elevated. Known fraud types include PDO origin fraud (Iranian sold as Spanish), grade fraud, substitution and bulking out (with safflower or other materials), especially in ground saffron.', s:'fiin Q2 2026 Watchlist'},
-      {r:'a', h:'Additional scrutiny advised for spices from India — complex supply chains require ongoing verification', d:'Ongoing pressures in Indian spice supply chains require continued verification of origin, quality and authenticity claims. Multiple enforcement actions in recent years highlight the need for robust due diligence on Indian-origin spices.', s:'fiin Q2 2026 Watchlist'}
-    ],
-    fraud: 'The $9.82/kg spread between Chinese and Greek oregano has been above the fraud-pressure threshold for over 12 months. Key risks are filler species substitution (olive leaves, myrtle), geographic origin mislabelling, and dye addition to enhance colour — a practice confirmed in West African markets and suspected in other major sourcing regions. Supply disruption from the Middle East conflict is further tightening quality herb availability.'
-  },
-  eggs: {
-    pills: [{l:'HPAI ongoing',c:'r'},{l:'Welfare fraud risk',c:'r'},{l:'Cage ban debate',c:'b'}],
-    items: [
-      {r:'r', h:'UK records 96 avian influenza cases this season — biosecurity requirements remain mandatory', d:'AIPZ mandatory housing still in force. UK has begun targeted vaccine trials for turkeys. Wild bird risk remains high. Risk from HPAI H5N1 continues to be significant for both supply and food safety.', s:'APHA · Defra, Apr 2026'},
-      {r:'r', h:'UK cage ban debate: BEIC warns a full ban would increase cheaper imports from lower-welfare systems abroad', d:'EU laying hen numbers surged to over 15 million birds in December, with France, Germany and Spain as leading producers. Cheaper EU imports would undermine domestic welfare-premium producers.', s:'BEIC · EU Commission, Apr 2026'},
-      {r:'a', h:'Free range/caged egg spread at £1.36/dozen — actively growing as free range prices rise', d:'UK free range at £3.10/dozen versus caged at £1.74/dozen. Gap growing as free range rises while caged dips. Creates financial incentive to sell caged or barn eggs as free range.', s:'AHDB egg price data, Apr 2026'}
-    ],
-    fraud: 'The £1.36/dozen spread between free range and caged eggs is actively growing, making welfare status fraud the primary concern. HPAI disruption creates supply pressure that may lead to importing from regions with lower welfare standards and mislabelling on entry. EU import volumes increasing through any cage ban transition period would require enhanced origin and welfare status verification.'
-  },
-  pistachio: {
-    pills: [{l:'Global supply constrained',c:'r'},{l:'Iran export disruption',c:'r'},{l:'Origin misdeclaration risk',c:'r'}],
-    items: [
-      {r:'r', h:'Middle East conflict blocking California pistachio exports to UAE and Saudi Arabia', d:'Key Gulf markets inaccessible. Exporters exploring alternative routes at rising cost. ~20% of 2025/26 California walnut crop remains uncommitted, raising concerns over pricing competition.', s:'Trade press · Food Forensics-equivalent sources, Apr 2026'},
-      {r:'r', h:'Iran exports constrained by unrest, drought and sanctions; Turkey in smaller 2025 off-year', d:'Global supply dominated by US, Iran and Turkey. US is in an off-year. Iran under multiple constraints. Turkey\'s smaller crop and shipping delays tightening supply. Pricing expected firm to rising.', s:'APC · Trade press, Apr 2026'},
-      {r:'a', h:'US pistachio sector facing heat stress, water constraints and disrupted export channels simultaneously', d:'California growers navigating combination of weather stress, water availability and disrupted export channels. FreshPlaza reports sector caution amid market uncertainty.', s:'FreshPlaza · AgNet News, Apr 2026'},
-      {r:'a', h:'Turkey hazelnut, walnut and pistachio yields recovering after severe 2025 spring frost damage', d:'Severe spring frosts in Turkey during April 2025, followed by drought, caused significant yield losses across hazelnuts, walnuts and pistachios. Early forecasts point to a recovery for the 2026/27 crop on more favourable weather, though longer-term climate risk concerns remain.', s:'fiin Q2 2026 Watchlist'},
-      {r:'r', h:'Salmonella contamination continues to place recurring pressure on pistachio supply chains', d:'Recent Salmonella contamination recalls in the US and Canada highlight ongoing food safety and supply pressure in pistachio supply chains.', s:'fiin Q2 2026 Watchlist'}
-    ],
-    fraud: 'Simultaneous supply constraints across all three major origins (US off-year, Iran sanctioned, Turkey smaller crop) create a rare convergence of supply pressure intensifying origin misdeclaration risk — particularly Iranian product declared as Turkish or US. Aflatoxin contamination concealment is also elevated when supply is stressed and quality controls under pressure.'
-  }
-,
-  fruit_veg: {
-    pills: [{l:'Drought/heat reducing yields',c:'r'},{l:'Pest pressure elevated',c:'r'},{l:'Organic fraud risk',c:'r'}],
-    items: [
-      {r:'r', h:'Extreme heat, drought and wildfires across Europe reducing yields across wide range of products', d:'Specific impacts: reduced yields in EU brassicas and potatoes; heat increasing pest pressure in the UK (challenging for organic suppliers); cucumber, tomato and pepper supply chains facing water shortages; avocado yields from Peru reduced by high temperatures. Post-buying and sourcing outside established suppliers may increase food fraud vulnerability.', s:'fiin Q2 2026 Watchlist'},
-      {r:'r', h:'Spain garlic sector under threat from cheap imports — sector calling for stronger customs supervision', d:'High costs and pressure from cheap imports are continuing to undermine Spain\'s garlic sector, with the sector calling for strengthened customs supervision to prevent fraud.', s:'fiin Q2 2026 Watchlist'},
-      {r:'a', h:'Global citrus market tight: smaller harvests, reduced EU availability, fraudulent certificates from Egypt', d:'The global citrus market is experiencing tight supply and anticipated price increases due to smaller harvests and reduced availability for the European market. Fraudulent test certificates and documentation have been observed from Egypt.', s:'fiin Q2 2026 Watchlist'}
-    ],
-    fraud: 'Supply shortages caused by drought, heat and wildfires increase the risk of panic buying outside established suppliers, weakening controls and increasing exposure to origin misrepresentation, variety fraud and inappropriate production practices (including organic fraud). Garlic and citrus are specific high-risk areas.'
-  },
-  bakery_cereals: {
-    pills: [{l:'UK wheat yields critically low',c:'r'},{l:'Asia rice supply falling',c:'r'},{l:'Organic fraud risk',c:'a'}],
-    items: [
-      {r:'r', h:'UK wheat yields expected to be exceptionally low in 2026 due to prolonged hot, dry conditions', d:'Reduced UK wheat yields and quality resulting from prolonged hot, dry conditions may increase reliance on alternative sources, creating authenticity vulnerabilities where established origins, suppliers or specifications change.', s:'fiin Q2 2026 Watchlist'},
-      {r:'a', h:'Rice supply expected to fall as farmers reduce planting across Asia due to input cost pressures', d:'Fertiliser shortages and fuel costs are leading farmers to reduce rice planting across Asia. Monitor for increased origin substitution and variety fraud.', s:'fiin Q2 2026 Watchlist'},
-      {r:'a', h:'Organic cereal supply chains at heightened risk — drought and pests may increase fraud incentive', d:'Drought, heat and pest pressures reduce organic yields and may make production to organic standards more difficult. Lower organic availability combined with price premiums increases the incentive for conventional material to enter organic supply chains.', s:'fiin Q2 2026 Watchlist'}
-    ],
-    fraud: 'UK wheat harvest constraints in 2026 are expected to be among the lowest on record, driving increased reliance on imports and creating origin and authenticity vulnerabilities. Organic cereals are particularly exposed where drought and pest pressure make organic certification harder to maintain and more valuable to fraudulently claim.'
-  },
-  drinks: {
-    pills: [{l:'Orange juice supply contracting',c:'r'},{l:'Price volatility elevated',c:'r'},{l:'Origin/adulteration risk',c:'a'}],
-    items: [
-      {r:'r', h:'Global orange juice supply forecast to contract again — citrus greening disease and adverse weather key drivers', d:'Citrus supply chains remain under sustained pressure from citrus greening disease (HLB) and adverse weather in key producing regions, notably Brazil and Florida. Global OJ supply is forecast to contract again in the coming season, extending the price volatility and supply constraints of recent seasons.', s:'fiin Q2 2026 Watchlist'}
-    ],
-    fraud: 'Continued watchouts recommended for origin and adulteration/substitution in fruit juices. Price volatility and supply constraints create incentives for dilution, reconstituted-from-concentrate mislabelling as NFC, and origin fraud in orange juice supply chains.'
-  },
-  nuts_snacks: {
-    pills: [{l:'Turkey crop recovering',c:'b'},{l:'Salmonella risk in pistachios',c:'r'},{l:'Origin fraud risk',c:'a'}],
-    items: [
-      {r:'b', h:'Turkey nut crops expected to recover in 2026/27 after severe spring frost damage in 2025', d:'Severe spring frosts in Turkey during April 2025, followed by drought, caused significant yield losses across hazelnuts, walnuts and pistachios. Early forecasts point to a recovery for the 2026/27 crop on more favourable weather, though longer-term climate risk concerns remain.', s:'fiin Q2 2026 Watchlist'},
-      {r:'r', h:'Salmonella contamination continues to pressure pistachio supply chains', d:'Recent Salmonella contamination recalls in the US and Canada highlight ongoing food safety and supply pressure. Heightened food safety vigilance recommended for pistachio products.', s:'fiin Q2 2026 Watchlist'}
-    ],
-    fraud: 'Ongoing origin fraud risk in nuts, particularly for Iranian pistachios (declared as Turkish or US), and premium nut variety mislabelling. Simultaneous supply constraints across major origins continue to intensify origin misdeclaration risk.'
-  }
-,
-  dairy: {
-    pills: [{l:'PDO dairy under pressure',c:'r'},{l:'Sheep/goat pox impact',c:'r'},{l:'Adulteration risk',c:'a'}],
-    items: [
-      {r:'r', h:'Sheep and goat pox in Greece causing major PDO dairy supply disruption — feta and halloumi at risk', d:'Ongoing sheep and goat pox outbreaks in Greece have significantly reduced sheep and goat milk availability. Risks include supply shortages, price increases and increased substitution risk within PDO dairy categories including feta and halloumi.', s:'fiin Q2 2026 Watchlist'},
-      {r:'r', h:'Buyers urged to differentiate PDO feta (Greek milk only) from non-PDO salad cheese', d:'Apply enhanced due diligence to all Greek and Cypriot dairy products where PDO claims are made. Verify chain-of-custody documentation. Non-PDO products may legitimately contain non-Greek milk but must not be presented as PDO feta.', s:'fiin Q2 2026 Watchlist'},
-      {r:'a', h:'NZ powder/UK farm gate spread persists — stable economic incentive for substitution in processed dairy', d:'The persistent spread between NZ powder equivalent and UK farm gate pricing creates ongoing substitution incentive in processed dairy products. Adulteration risk remains elevated across global sourcing.', s:'AHDB · fiin Q2 2026 Watchlist'}
-    ],
-    fraud: 'PDO dairy fraud is the primary Q2 2026 concern: Greek sheep/goat pox outbreaks are severely constraining milk supply for feta and halloumi, creating strong incentives to substitute non-qualifying milk in PDO products. Additionally, the persistent NZ powder/UK farm gate price spread sustains economic incentive for adulteration in processed dairy.'
-  },
-  herbs_spices: {
-    pills: [{l:'Saffron supply disrupted',c:'r'},{l:'Iran fraud risk elevated',c:'r'},{l:'India spices: extra scrutiny',c:'a'}],
-    items: [
-      {r:'r', h:'Saffron: Iran supply disruption expected — bulking with safflower most probable near-term fraud type', d:'Approximately 90% of global saffron supply originates from Iran. Ongoing conflict means supply disruption is anticipated and fraud risk is elevated. Known fraud types: PDO origin fraud (Iranian sold as Spanish), grade fraud, substitution and bulking with safflower or other materials, especially in ground saffron.', s:'fiin Q2 2026 Watchlist'},
-      {r:'a', h:'Additional scrutiny advised for spices from India — complex supply chains require ongoing verification', d:'Ongoing pressures in Indian spice supply chains require continued verification of origin, quality and authenticity claims. Multiple enforcement actions in recent years highlight the need for robust due diligence on Indian-origin spices.', s:'fiin Q2 2026 Watchlist'}
-    ],
-    fraud: 'Saffron is the highest-risk spice: Iran supply disruption is expected to drive bulking with safflower (especially in ground saffron), PDO fraud (Iranian sold as Spanish), and grade/quality fraud. Indian-origin spices more broadly warrant additional due diligence given complexity of supply chains and ongoing enforcement actions.'
-  }
-};
-
-
-// BUILTIN_NEWS product name aliases
-[['Beef','beef'],['Lamb','lamb'],['Chicken','chicken'],['Blossom honey','honey'],
- ['Salmon','salmon'],['Cod','cod'],['Liquid milk','milk'],['Oregano','oregano'],
- ['Eggs (free range)','eggs'],['Pistachios','pistachio']
-].forEach(function(a){BUILTIN_NEWS[a[0]]=BUILTIN_NEWS[a[1]];});
 // ── Render market intelligence section ──────────────────────────────────────
 function renderNews() {
   var section = document.getElementById('intel-section');
   var items   = document.getElementById('intel-items');
   var meta    = document.getElementById('intel-meta');
 
-  // Get data — keyed by curProd (product level), fall back to cur (category), then built-in
+  // Live Sheet news only — keyed by product, falling back to category
   var prodKey   = typeof curProd !== 'undefined' ? curProd : cur;
-  // BUILTIN_NEWS may be keyed by old commodity name or new product name — try both
-  var builtinKey = BUILTIN_NEWS[prodKey] ? prodKey : (BUILTIN_NEWS[cur] ? cur : null);
-  var builtinData = builtinKey ? BUILTIN_NEWS[builtinKey] : null;
   var liveNews  = (newsData[newsKey(prodKey)] && newsData[newsKey(prodKey)].length) ? newsData[newsKey(prodKey)]
                 : (newsData[newsKey(cur)]     && newsData[newsKey(cur)].length)     ? newsData[newsKey(cur)]
                 : null;
-  var commNews  = liveNews || (builtinData ? builtinData.items : []);
-  var commFraud = fraudData[prodKey] || fraudData[cur] || (builtinData ? builtinData.fraud : '');
-  var isLive    = !!liveNews;
+  var commNews  = liveNews || [];
 
   section.style.display = 'block';
 
-  meta.textContent = isLive ? 'Live from Sheet' + (newsUpdated ? ' · updated ' + newsUpdated : '')
-    : !NEWS_CSV_URL ? 'Built-in intelligence · connect Sheet for live updates'
-    : !newsLoaded   ? 'Loading...'
-    : 'No live news for this product yet · showing built-in intelligence';
+  meta.textContent = !NEWS_CSV_URL ? 'News sheet not connected'
+    : !newsLoaded ? 'Loading...'
+    : 'Live from Sheet' + (newsUpdated ? ' · updated ' + newsUpdated : '');
 
   // Pills
 
   // News items
   if (!commNews.length) {
-    items.innerHTML = '<div class="intel-empty">No news found for ' + prodKey + ' · check your Sheet has rows matching this product.</div>';
+    items.innerHTML = '<div class="intel-empty">' + (newsLoaded || !NEWS_CSV_URL
+      ? 'No market news in the Sheet for ' + prodKey + ' yet.'
+      : 'Loading market news&hellip;') + '</div>';
   } else {
     items.innerHTML = commNews.map(function(n) {
       var risk = n.risk_level || n.r || 'b';
@@ -2596,26 +1640,6 @@ function months(n) {
   });
 }
 
-function slice(arr, p) {
-  if (p === 0) return arr.slice(-6);
-  if (p === 2) {
-    var ext = [];
-    for (var i = 11; i >= 0; i--) {
-      ext.unshift(Math.round(arr[0] * (1 - Math.sin(i*3.7)*.03 - i*.002) * 100) / 100);
-    }
-    return ext.concat(arr);
-  }
-  return arr.slice();
-}
-
-function spread(comm, p) {
-  var n = p===0?6:p===2?24:12;
-  return Array.from({length:n}, function(_,i) {
-    var pp = comm.origins.map(function(o){ var s=slice(o.p,p); return s[i]||o.p[0]; });
-    return Math.round((Math.max.apply(null,pp)-Math.min.apply(null,pp))*100)/100;
-  });
-}
-
 function badge(r) {
   if (r==='Very high') return {bg:'#FDF0EF',tc:'#8B2020'};
   if (r==='High')      return {bg:'#FDF0EF',tc:'#A02828'};
@@ -2665,7 +1689,7 @@ function parseCSV(txt) {
 // DATA TIER SYSTEM
 // Three tiers, shown explicitly in the UI so nobody mistakes a "sourced but
 // unpulled" status for a real price:
-//   live     — real number, exact date, independently pulled this session
+//   live     — real number and date loaded from a connected Sheet
 //   sourced  — legitimate source confirmed, current figure not yet pulled
 //   none     — no reliable source exists
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2775,74 +1799,9 @@ function loadLiveData() {
   });
 }
 
-// Products with a REAL number + REAL date pulled and verified this session.
-var LIVE_DATA = {
-  'Beef': {
-    benchmarkSeries: { labels:['Feb','Mar','Apr','May','Jun'], usd:[7.596,7.712,7.748,7.632,7.532] },
-    benchmarkSource: 'IMF Primary Commodity Prices (FRED: PBEEFUSDM) — last reported Jun 2026',
-    origins: [
-      { n:'Ireland', usd:11.0857, asOf:'2025 annual' },{ n:'Argentina', usd:11.0486, asOf:'2025 annual' },
-      { n:'Australia', usd:11.1715, asOf:'2025 annual' },{ n:'Brazil', usd:6.2011, asOf:'2025 annual' }
-    ],
-    ukWholesaleGBP: 6.00, ukSource: 'AHDB GB Deadweight Cattle Price — steers & heifers, all grades — last reported w/e 18 Jul 2026', ukAsOf: 'w/e 18 Jul 2026',
-    wholesale: [{ n:'UK', gbp:6.00, asOf:'w/e 18 Jul 2026', source:'AHDB', spec:'deadweight carcass, steers & heifers' }]
-  },
-  'Lamb': {
-    benchmarkSeries: { labels:['Feb','Mar','Apr','May','Jun'], usd:[3.731,3.675,3.723,3.733,3.719] },
-    benchmarkSource: 'IMF Primary Commodity Prices (FRED: PLAMBUSDM) — last reported Jun 2026',
-    origins: [
-      { n:'New Zealand', usd:7.3361, asOf:'2025 annual' },{ n:'Iceland', usd:6.8483, asOf:'2025 annual' },
-      { n:'Australia', usd:6.3313, asOf:'2025 annual' }
-    ],
-    ukWholesaleGBP: 8.00, ukSource: 'AHDB GB Deadweight Sheep Price — SQQ (Standard Quality Quotation), all grades — last reported w/e 23 Jul 2026', ukAsOf: 'w/e 23 Jul 2026',
-    wholesale: [{ n:'UK', gbp:8.00, asOf:'w/e 23 Jul 2026', source:'AHDB', spec:'deadweight carcass, SQQ' }]
-  },
-  'Pork': {
-    benchmarkSeries: { labels:['Jan','Feb','Mar','Apr','May'], usd:[1.771,1.871,1.955,1.940,1.957] },
-    benchmarkSource: 'IMF Primary Commodity Prices (FRED: PPORKUSDM) — last reported May 2026',
-    origins: [
-      { n:'Netherlands', usd:3.1242, asOf:'2025 annual' },{ n:'Germany', usd:3.0643, asOf:'2025 annual' },
-      { n:'Denmark', usd:2.9624, asOf:'2025 annual' }
-    ],
-    ukWholesaleGBP: null, ukSource: null
-  },
-  'Chicken': {
-    benchmarkSeries: { labels:['Nov','Dec','Jan','Feb','Mar'], usd:[3.564,3.622,3.710,3.673,3.714] },
-    benchmarkSource: 'IMF Primary Commodity Prices (FRED: PPOULTUSDM) — last reported Mar 2026',
-    origins: [
-      { n:'Thailand', usd:2.9007, asOf:'2024 annual' },{ n:'Ukraine', usd:2.1449, asOf:'2024 annual' },
-      { n:'Brazil', usd:1.7783, asOf:'2025 annual' }
-    ],
-    ukWholesaleGBP: null, ukSource: null
-  },
-  'Wheat': {
-    benchmarkSeries: { labels:['Jan','Feb','Mar','Apr','May'], usd:[169.25,174.75,193.88,202.64,220.88] },
-    benchmarkSource: 'IMF Primary Commodity Prices (FRED: PWHEAMTUSDM) — last reported May 2026',
-    origins: [
-      { n:'Canada', usd:274.1, asOf:'2025 annual' },{ n:'USA', usd:253.6, asOf:'2025 annual' },
-      { n:'Ukraine', usd:180.8, asOf:'2024 annual' }
-    ],
-    ukWholesaleGBP: null, ukSource: null
-  },
-  'Maize': {
-    benchmarkSeries: { labels:['Jan','Feb','Mar','Apr','May'], usd:[203.90,210.64,213.30,214.52,215.62] },
-    benchmarkSource: 'IMF Primary Commodity Prices (FRED: PMAIZMTUSDM) — last reported May 2026',
-    origins: [
-      { n:'USA', usd:233.7, asOf:'2025 annual' },{ n:'Argentina', usd:208.8, asOf:'2025 annual' },
-      { n:'Brazil', usd:209.6, asOf:'2025 annual' },{ n:'Ukraine', usd:171.2, asOf:'2024 annual' }
-    ],
-    ukWholesaleGBP: null, ukSource: null
-  },
-  'Bananas': {
-    benchmarkSeries: { labels:['Oct','Nov','Dec','Jan','Feb'], usd:[1132.60,1160.22,1156.62,1207.94,1215.47] },
-    benchmarkSource: 'IMF Primary Commodity Prices (FRED: PBANSOPUSDM) — last reported Feb 2026',
-    origins: [
-      { n:'Ecuador', usd:590.7, asOf:'2025 annual' },{ n:'Colombia', usd:548.3, asOf:'2025 annual' },
-      { n:'Costa Rica', usd:539.7, asOf:'2024 annual' }
-    ],
-    ukWholesaleGBP: null, ukSource: null
-  }
-};
+// Price data per product, filled ONLY from the connected Sheets at load time
+// (price sheet, Comtrade, EU Agri-food). Nothing is typed in here.
+var LIVE_DATA = {};
 
 // Products where a legitimate source is confirmed but no current figure has
 // been independently pulled this session. Organised by category key exactly
@@ -2904,7 +1863,7 @@ function render() {
   // Tier banner — states plainly what confidence level this product's data has
   var tierEl = document.getElementById('data-tier-banner');
   if (tier === 'live') {
-    tierEl.innerHTML = '<span style="font-family:\'DM Mono\',monospace;font-size:11px;font-weight:600;padding:4px 10px;border-radius:4px;background:#E6F3EA;color:#1F5C33;">● LIVE DATA</span> <span style="font-size:12px;color:var(--muted);margin-left:8px">Real figures pulled and dated this session — see exact dates on each chart below.</span>';
+    tierEl.innerHTML = '<span style="font-family:\'DM Mono\',monospace;font-size:11px;font-weight:600;padding:4px 10px;border-radius:4px;background:#E6F3EA;color:#1F5C33;">● LIVE DATA</span> <span style="font-size:12px;color:var(--muted);margin-left:8px">Figures from your connected Sheets — see the date on each figure below.</span>';
   } else if (tier === 'sourced') {
     tierEl.innerHTML = '<span style="font-family:\'DM Mono\',monospace;font-size:11px;font-weight:600;padding:4px 10px;border-radius:4px;background:#FAEEDA;color:#633806;">○ SOURCED — FIGURE PENDING</span> <span style="font-size:12px;color:var(--muted);margin-left:8px">A legitimate source is confirmed (' + (prod ? prod.sources : '') + ') but no current figure has been independently pulled yet. Not a price — a status.</span>';
   } else {
@@ -2995,7 +1954,7 @@ function render() {
     document.getElementById('stats').innerHTML = [
       benchStat,
       stat('Origins tracked', (live.origins||[]).length, 'live, dated figures', 40, '#2D6B2D'),
-      stat('Data tier', 'Live', 'Verified this session', 100, '#1F5C33')
+      stat('Data tier', 'Live', 'From connected Sheets', 100, '#1F5C33')
     ].join('');
     document.getElementById('price-alerts').innerHTML = '';
 
@@ -3059,7 +2018,7 @@ function stat(lbl, val, sub, pct, col) {
 function renderFiinIndicators() {
   var el = document.getElementById('fiin-indicators-body');
   if (!el) return;
-  var items = FIIN_DUMMY[cur] || ['No fiin testing data available for this category yet.'];
+  var items = ['Awaiting fiin member testing data.'];
   el.innerHTML = items.map(function(txt) {
     return '<div class="indicators-dummy-item">' + txt + '</div>';
   }).join('');
@@ -3346,20 +2305,25 @@ function loadData() {
       .then(function(txt) {
         var rows = parseCSV(txt);
         // columns: category, product, origin, price, unit, source, updated
+        // Each row becomes a dated figure in that product's wholesale panel.
+        var loaded = 0;
         rows.forEach(function(r) {
-          var catKey  = (r[0]||'').trim();
           var product = (r[1]||'').trim();
           var origin  = (r[2]||'').trim();
-          var price   = parseFloat(r[3]);
-          if (!COMM[catKey] || !COMM[catKey].products || !product || isNaN(price)) return;
-          var prod = COMM[catKey].products[product];
-          if (!prod) return;
-          var orig = prod.origins.find(function(o){ return o.n === origin; });
-          if (orig) { orig.p = orig.p.slice(1).concat([price]); }
+          var price   = parseFloat((r[3]||'').replace(/[^0-9.\-]/g, ''));
+          if (!product || !origin || isNaN(price)) return;
+          if (!LIVE_DATA[product]) LIVE_DATA[product] = { origins: [], benchmarkSeries: null, benchmarkSource: null };
+          if (!LIVE_DATA[product].wholesale) LIVE_DATA[product].wholesale = [];
+          var entry = { n: origin, gbp: price, asOf: (r[6]||'').trim() || 'date not given', source: (r[5]||'').trim() || 'price sheet' };
+          var existing = LIVE_DATA[product].wholesale.filter(function(w){ return w.n === origin; });
+          if (existing.length) { existing[0].gbp = entry.gbp; existing[0].asOf = entry.asOf; existing[0].source = entry.source; }
+          else LIVE_DATA[product].wholesale.push(entry);
+          loaded++;
         });
+        console.log('Price sheet rows loaded:', loaded);
         render();
       })
-      .catch(function(){ /* use built-in data */ });
+      .catch(function(e){ console.error('Price sheet fetch error:', e); });
   }
 }
 
@@ -3567,26 +2531,7 @@ function renderTestingPanel() {
   var rEl = document.getElementById('tp-results');
   if (!rEl) return;
 
-  // Map COMM keys to FIIN_TESTING keys
-  var keyMap = {
-    bakery_cereals:'bakery_cereals', prepared_dishes:'prepared_dishes',
-    cakes_conf:'cakes_conf', diet_foods:'diet_foods', nuts_snacks:'nuts_snacks'
-  };
-  var testKey = keyMap[cur] || cur;
-  var data = FIIN_TESTING[testKey];
-
-  if (!data) {
-    rEl.innerHTML = '<div style="font-size:11px;color:var(--muted);font-style:italic;padding:4px 0">No mock data for this category yet.</div>';
-    return;
-  }
-
-  // Individual results
-  rEl.innerHTML = data.results.map(function(r) {
-    return '<div class="tp-result-item">' +
-      '<div class="tp-result-meta">' + r.q + ' · anonymised</div>' +
-      r.text +
-    '</div>';
-  }).join('');
+  rEl.innerHTML = '<div style="font-size:11px;color:var(--muted);font-style:italic;padding:4px 0">Awaiting fiin member testing data.</div>';
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -3661,101 +2606,6 @@ setInterval(function() {
   loadLiveData();
 }, REFRESH_INTERVAL_MINUTES * 60 * 1000);
 
-// ── fiin testing data placeholder chart ──────────────────────────────────────
-(function() {
-  var ctx = document.getElementById('testingChart');
-  if (!ctx) return;
-  var quarters = ['Q1 2024','Q2 2024','Q3 2024','Q4 2024','Q1 2025'];
-  var tests     = [9200, 10800, 7400, 13700, 8200];  // illustrative
-  var anomalies = [67,   89,    82,   109,   43];     // illustrative
-  var authConc  = [25,   28,    28,   43,    18];     // illustrative
-
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: quarters,
-      datasets: [
-        {
-          type: 'bar',
-          label: 'Tests performed',
-          data: tests,
-          backgroundColor: '#8DC63F',
-          yAxisID: 'yLeft',
-          borderRadius: 3,
-          order: 2
-        },
-        {
-          type: 'line',
-          label: 'Anomalies detected',
-          data: anomalies,
-          borderColor: '#1A5FA5',
-          backgroundColor: 'transparent',
-          borderWidth: 2,
-          pointRadius: 4,
-          pointBackgroundColor: '#1A5FA5',
-          yAxisID: 'yRight',
-          tension: 0.3,
-          order: 1,
-          datalabels: { display: false }
-        },
-        {
-          type: 'line',
-          label: 'Authenticity concerns',
-          data: authConc,
-          borderColor: '#C84040',
-          backgroundColor: 'transparent',
-          borderWidth: 2,
-          pointRadius: 4,
-          pointBackgroundColor: '#C84040',
-          yAxisID: 'yRight',
-          tension: 0.3,
-          order: 1
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: function(ctx) {
-              if (ctx.dataset.yAxisID === 'yLeft') {
-                return ctx.dataset.label + ': ' + ctx.raw.toLocaleString();
-              }
-              return ctx.dataset.label + ': ' + ctx.raw;
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          grid: { color: 'rgba(0,0,0,.04)' },
-          ticks: { color: 'rgba(0,0,0,.4)', font: { size: 10 } },
-          border: { color: 'transparent' }
-        },
-        yLeft: {
-          type: 'linear',
-          position: 'left',
-          grid: { color: 'rgba(0,0,0,.04)' },
-          ticks: {
-            color: 'rgba(0,0,0,.4)', font: { size: 10 },
-            callback: function(v) { return (v/1000).toFixed(0) + 'k'; }
-          },
-          border: { color: 'transparent' }
-        },
-        yRight: {
-          type: 'linear',
-          position: 'right',
-          grid: { display: false },
-          ticks: { color: 'rgba(0,0,0,.4)', font: { size: 10 } },
-          border: { color: 'transparent' }
-        }
-      }
-    }
-  });
-})();
 </script>
 <div id="sc-float-tip"></div>
 </body>
