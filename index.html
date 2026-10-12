@@ -237,6 +237,30 @@ input[type=range] { flex: 1; max-width: 140px; accent-color: var(--forest); curs
   padding: 14px 16px;
 }
 .card-title { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+/* ── Price risk card (HMRC import signals) ── */
+.risk-card .card-title { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.risk-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: #E6F1FB; color: #0C447C; font-family: 'DM Mono', monospace; letter-spacing: .03em; }
+.risk-lights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 4px 0 14px; }
+@media (max-width: 700px) { .risk-lights { grid-template-columns: 1fr; } }
+.risk-light { border: 1px solid var(--border); border-radius: 6px; padding: 9px 10px 10px; background: white; border-top-width: 3px; }
+.risk-light.r { border-top-color: #C0392B; }
+.risk-light.a { border-top-color: #D4820A; }
+.risk-light.g { border-top-color: #4E9A2F; }
+.risk-light-head { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.risk-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.risk-light.r .risk-dot { background: #C0392B; } .risk-light.a .risk-dot { background: #D4820A; } .risk-light.g .risk-dot { background: #4E9A2F; }
+.risk-light-name { font-size: 11px; font-weight: 600; color: var(--ink); }
+.risk-light-status { margin-left: auto; font-size: 9px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.risk-light.r .risk-light-status { color: #A02828; } .risk-light.a .risk-light-status { color: #7A4800; }
+.risk-light-text { font-size: 11px; line-height: 1.45; color: var(--ink); }
+.risk-light-text b { font-weight: 600; }
+.risk-chart-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.risk-chart-title { font-size: 11px; font-weight: 600; color: var(--ink); }
+.risk-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; color: var(--muted); margin-left: 10px; white-space: nowrap; }
+.risk-chip i { display: inline-block; width: 14px; height: 0; border-top: 2px solid; }
+.risk-chip i.uk { border-top-width: 3px; }
+.risk-chip i.dash { border-top-style: dashed; }
+.risk-foot { font-size: 10px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
 .card-sub { font-size: 10px; color: var(--muted); margin-bottom: 10px; line-height: 1.5; }
 .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
 .leg { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--muted); }
@@ -987,6 +1011,22 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
       <div class="two-col">
         <div class="left">
 
+          <!-- Price risk signals from HMRC UK import data (prototype) -->
+          <div class="card risk-card" id="risk-card" style="display:none;margin-bottom:14px;">
+            <div class="card-title">
+              <span>Price risk signals &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="risk-prod" style="color:var(--forest)"></span></span>
+              <span class="risk-badge">UK IMPORTS · HMRC</span>
+            </div>
+            <div class="card-sub" id="risk-sub"></div>
+            <div class="risk-lights" id="risk-lights"></div>
+            <div class="risk-chart-head">
+              <span class="risk-chart-title">Import price per kg: UK average vs main origins</span>
+              <span class="legend" id="risk-legend"></span>
+            </div>
+            <div style="position:relative;height:210px"><canvas id="riskChart"></canvas></div>
+            <div class="risk-foot" id="risk-foot"></div>
+          </div>
+
           <div class="card" id="data-tier-banner" style="margin-bottom:14px;"></div>
 
           <div class="card" id="wholesale-card">
@@ -1073,6 +1113,8 @@ var NEWS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR68kbziTvBG
 // var NEWS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/YOUR_PUBLISHED_ID/pub?gid=YOUR_GID&single=true&output=csv';
 
 var FRAUD_CSV_URL = null;
+// Price risk signals: publish the Sheet's "trade" tab as CSV and paste the link here
+var TRADE_CSV_URL = null;
 // var FRAUD_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/YOUR_PUBLISHED_ID/pub?gid=YOUR_GID&single=true&output=csv';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1875,6 +1917,233 @@ document.addEventListener('click', function(e) {
   renderNews();
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// PRICE RISK SIGNALS — HMRC UK import data (prototype)
+// Reads the "trade" tab written by runTrade() in the Apps Script:
+//   product, category, month (YYYY-MM), origin, value_gbp, kg, hmrc_codes, updated
+// and turns it into three traffic lights plus a UK-average vs origin chart.
+// ─────────────────────────────────────────────────────────────────────────────
+var tradeData = {};      // product → { months:[], origins:{name:{m:{v,kg}}}, label, updated }
+var tradeLoaded = false;
+var riskChart = null;
+// What the HMRC code actually covers, for use in sentences (defaults to the product name)
+var TRADE_NOUNS = { 'Blossom honey': 'honey', 'Prawns (warm water)': 'warm-water prawn', 'Beef': 'boneless beef', 'Pistachios': 'pistachio' };
+function possessive(name) { return /s$/i.test(name) ? name + '\u2019' : name + '\u2019s'; }
+
+// Thresholds — kept here so fiin's technical group can tune them
+var RISK = {
+  swingRed: 0.25, swingAmber: 0.12,     // latest 3-month price vs 2-year average
+  rangeRed: 0.30, rangeAmber: 0.15,     // high-to-low spread of the last 6 months
+  shiftRed: 15,   shiftAmber: 7,        // gain in an origin's share of UK volume, percentage points
+  cheaperRed: 0.25, cheaperAmber: 0.15, // an origin falling in price relative to the UK average
+  gapRed: 0.40,   gapAmber: 0.25,       // an origin's price below the UK average
+  minShare: 0.03                        // origins below 3% of volume are ignored for gap/cheaper
+};
+
+function loadTradeCsv(txt) {
+  var all = parseCSV('x\n' + txt);
+  var hdr = (all[0] || []).map(function(h){ return (h || '').toLowerCase().trim(); });
+  var ix = function(n){ return hdr.indexOf(n); };
+  var P = ix('product'), M = ix('month'), O = ix('origin'), V = ix('value_gbp'), K = ix('kg'),
+      L = ix('hmrc_codes'), U = ix('updated');
+  tradeData = {};
+  all.slice(1).forEach(function(r) {
+    var p = (r[P] || '').trim(), m = (r[M] || '').trim(), o = (r[O] || '').trim();
+    var v = parseFloat(r[V]), kg = parseFloat(r[K]);
+    if (!p || !/^\d{4}-\d{2}$/.test(m) || !o || !(v > 0) || !(kg > 0)) return;
+    var t = tradeData[p] || (tradeData[p] = { months: {}, origins: {}, label: '', updated: '' });
+    t.months[m] = true;
+    var oo = t.origins[o] || (t.origins[o] = {});
+    var cell = oo[m] || (oo[m] = { v: 0, kg: 0 });
+    cell.v += v; cell.kg += kg;
+    if (L > -1 && r[L]) t.label = r[L];
+    if (U > -1 && r[U]) t.updated = r[U];
+  });
+  Object.keys(tradeData).forEach(function(p) {
+    tradeData[p].months = Object.keys(tradeData[p].months).sort().slice(-24);
+  });
+  console.log('Trade data loaded for:', JSON.stringify(Object.keys(tradeData)));
+}
+
+// Sum £ and kg for one origin (or all, if origin is null) over a list of months
+function tradeSum(t, origin, months) {
+  var v = 0, kg = 0;
+  (origin ? [origin] : Object.keys(t.origins)).forEach(function(o) {
+    months.forEach(function(m) { var c = t.origins[o][m]; if (c) { v += c.v; kg += c.kg; } });
+  });
+  return { v: v, kg: kg, p: kg > 0 ? v / kg : null };
+}
+
+// 3-month rolling £/kg series (smooths out lumpy monthly shipments)
+function tradeRolling(t, origin) {
+  return t.months.map(function(m, i) {
+    if (i < 2) return null;
+    return tradeSum(t, origin, t.months.slice(i - 2, i + 1)).p;
+  });
+}
+
+function fmtGBP(p) {
+  if (p == null || isNaN(p)) return '—';
+  return '£' + (p >= 100 ? Math.round(p).toLocaleString('en-GB') : p.toFixed(2));
+}
+function fmtPct(x) { return Math.round(Math.abs(x) * 100) + '%'; }
+function fmtMonth(m) {
+  var d = new Date(+m.slice(0, 4), +m.slice(5, 7) - 1, 1);
+  return d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+}
+
+function computeRiskSignals(prodName, t) {
+  var M = t.months, n = M.length;
+  var last3 = M.slice(-3), last6 = M.slice(-6), prev12 = M.slice(Math.max(0, n - 18), n - 6);
+  var noun = TRADE_NOUNS[prodName] || prodName.toLowerCase();
+
+  // ── 1. Price swing: UK average now vs its 2-year average, and recent spread ──
+  var ukNow = tradeSum(t, null, last3).p, ukAvg = tradeSum(t, null, M).p;
+  var roll = tradeRolling(t, null).slice(-6).filter(function(x){ return x != null; });
+  var hi = Math.max.apply(null, roll), lo = Math.min.apply(null, roll), range = lo > 0 ? hi / lo - 1 : 0;
+  var chg = ukAvg ? ukNow / ukAvg - 1 : 0;
+  var swing = { name: 'Price swing' };
+  swing.level = (Math.abs(chg) >= RISK.swingRed || range >= RISK.rangeRed) ? 'r'
+              : (Math.abs(chg) >= RISK.swingAmber || range >= RISK.rangeAmber) ? 'a' : 'g';
+  swing.status = swing.level === 'r' ? 'Big move' : swing.level === 'a' ? 'Moving' : 'Stable';
+  swing.text = 'UK import price is <b>' + fmtGBP(ukNow) + '/kg</b> (3 months to ' + fmtMonth(M[n - 1]) + '), ' +
+    (Math.abs(chg) < 0.03 ? 'close to' : fmtPct(chg) + (chg > 0 ? ' above' : ' below')) +
+    ' its 2-year average of ' + fmtGBP(ukAvg) + '/kg.' +
+    (range >= RISK.rangeAmber ? ' It has swung by ' + fmtPct(range) + ' over the last 6 months.' : '') +
+    (swing.level !== 'g' ? ' Sharp moves increase the incentive to cut corners.' : '');
+
+  // ── 2. Origin shift: change in share of UK volume, and origins getting cheaper ──
+  var totNow = tradeSum(t, null, last6), totBefore = tradeSum(t, null, prev12);
+  var origins = Object.keys(t.origins).map(function(o) {
+    var a = tradeSum(t, o, last6), b = tradeSum(t, o, prev12);
+    return { o: o, now: a, before: b,
+             shareNow: totNow.kg ? a.kg / totNow.kg : 0, shareBefore: totBefore.kg ? b.kg / totBefore.kg : 0 };
+  });
+  var shifts = origins.map(function(x) { return { x: x, pp: (x.shareNow - x.shareBefore) * 100 }; })
+                      .sort(function(a, b){ return b.pp - a.pp; });
+  var top = shifts[0];
+  var cheaper = origins.filter(function(x) {
+    return x.shareNow >= RISK.minShare && x.now.p && x.before.p && totNow.p && totBefore.p;
+  }).map(function(x) {
+    return { x: x, rel: (x.now.p / totNow.p) / (x.before.p / totBefore.p) - 1 };
+  }).sort(function(a, b){ return a.rel - b.rel; })[0];
+
+  var shift = { name: 'Origin shift' };
+  var shiftLvl = top && top.pp >= RISK.shiftRed ? 'r' : top && top.pp >= RISK.shiftAmber ? 'a' : 'g';
+  var cheapLvl = cheaper && -cheaper.rel >= RISK.cheaperRed ? 'r' : cheaper && -cheaper.rel >= RISK.cheaperAmber ? 'a' : 'g';
+  var isNew = top && top.x.shareBefore < 0.02 && top.x.shareNow >= 0.08;
+  if (isNew) shiftLvl = 'r';
+  shift.level = ({ r: 2, a: 1, g: 0 }[shiftLvl] >= { r: 2, a: 1, g: 0 }[cheapLvl]) ? shiftLvl : cheapLvl;
+  shift.status = shift.level === 'r' ? 'Big shift' : shift.level === 'a' ? 'Shifting' : 'Steady';
+  shift.flag = null;
+  if (shiftLvl !== 'g' && ({ r: 2, a: 1, g: 0 }[shiftLvl] >= { r: 2, a: 1, g: 0 }[cheapLvl])) {
+    shift.flag = top.x.o;
+    shift.text = (isNew ? '<b>New major source:</b> ' : '') + '<b>' + escHtml(possessive(top.x.o)) + '</b> share of UK ' + escHtml(noun) +
+      ' imports rose from ' + fmtPct(top.x.shareBefore) + ' to <b>' + fmtPct(top.x.shareNow) + '</b> (last 6 months vs the year before).' +
+      ' Sudden switches, especially to countries that produce little, can point to re-routing or origin misdeclaration.';
+  } else if (cheapLvl !== 'g') {
+    shift.flag = cheaper.x.o;
+    shift.text = '<b>' + escHtml(cheaper.x.o) + '</b> has become <b>' + fmtPct(cheaper.rel) + ' cheaper</b> relative to other origins over the last 6 months' +
+      ' (' + fmtGBP(cheaper.x.before.p) + ' → ' + fmtGBP(cheaper.x.now.p) + '/kg). A newly cheap origin can draw buyers and blending.';
+  } else {
+    var lead = origins.slice().sort(function(a, b){ return b.shareNow - a.shareNow; }).slice(0, 2);
+    shift.text = 'No big change in where UK ' + escHtml(noun) + ' comes from. Main origins: ' +
+      lead.map(function(x){ return escHtml(x.o) + ' ' + fmtPct(x.shareNow); }).join(', ') + ' of volume.';
+  }
+
+  // ── 3. Price gap: origins far cheaper than the UK average ──
+  var gaps = origins.filter(function(x){ return x.shareNow >= RISK.minShare && x.now.p && totNow.p; })
+    .map(function(x){ return { x: x, gap: x.now.p / totNow.p - 1 }; })
+    .sort(function(a, b){ return a.gap - b.gap; });
+  var g0 = gaps[0];
+  var gap = { name: 'Price gap' };
+  gap.level = g0 && -g0.gap >= RISK.gapRed ? 'r' : g0 && -g0.gap >= RISK.gapAmber ? 'a' : 'g';
+  gap.status = gap.level === 'r' ? 'Very cheap origin' : gap.level === 'a' ? 'Cheap origin' : 'No outlier';
+  gap.flag = gap.level !== 'g' ? g0.x.o : null;
+  gap.text = !g0 ? 'Not enough volume to compare origins.'
+    : gap.level !== 'g'
+      ? escHtml((noun.charAt(0).toUpperCase() + noun.slice(1)).replace(/ prawn$/, ' prawns').replace(/^Pistachio$/, 'Pistachios')) + ' from <b>' + escHtml(g0.x.o) + '</b> averaged <b>' + fmtGBP(g0.x.now.p) + '/kg</b>, ' +
+        fmtPct(g0.gap) + ' below the UK average of ' + fmtGBP(totNow.p) + '/kg (last 6 months, ' + fmtPct(g0.x.shareNow) + ' of volume).' +
+        ' Gaps this large can signal substitution, dilution or a lower grade sold as premium.'
+      : 'No major origin is far below the UK average of ' + fmtGBP(totNow.p) + '/kg. Cheapest: ' +
+        escHtml(g0.x.o) + ', ' + (g0.gap < 0 ? fmtPct(g0.gap) + ' below' : 'at or above average') + '.';
+
+  // Origins to draw: top 3 by recent volume, plus any flagged origin
+  var draw = origins.slice().sort(function(a, b){ return b.now.kg - a.now.kg; }).slice(0, 3).map(function(x){ return x.o; });
+  [shift.flag, gap.flag].forEach(function(f){ if (f && draw.indexOf(f) === -1) draw.push(f); });
+
+  return { lights: [swing, shift, gap], draw: draw, flags: [shift.flag, gap.flag], shiftFlag: shift.flag, gapFlag: gap.flag };
+}
+
+function renderTradeRisk() {
+  var card = document.getElementById('risk-card');
+  if (!card) return;
+  var prod = typeof curProd !== 'undefined' ? curProd : null;
+  var t = prod ? tradeData[prod] : null;
+  var tierEl = document.getElementById('data-tier-banner'), statsEl = document.getElementById('stats');
+  if (!t || t.months.length < 12) {
+    card.style.display = 'none';
+    if (tierEl) tierEl.style.display = '';
+    if (statsEl) statsEl.style.display = '';
+    return;
+  }
+  card.style.display = '';
+  if (tierEl) tierEl.style.display = 'none';   // the risk card replaces the "sourced / pending" status
+  if (statsEl) statsEl.style.display = 'none';
+
+  var sig = computeRiskSignals(prod, t);
+  var M = t.months;
+  document.getElementById('risk-prod').textContent = prod;
+  document.getElementById('risk-sub').textContent =
+    'What UK importers paid per kg, by country of origin. ' + fmtMonth(M[0]) + ' – ' + fmtMonth(M[M.length - 1]) +
+    ' (HMRC publishes about 2 months after the month ends).';
+  document.getElementById('risk-lights').innerHTML = sig.lights.map(function(l) {
+    return '<div class="risk-light ' + l.level + '">' +
+      '<div class="risk-light-head"><span class="risk-dot"></span><span class="risk-light-name">' + l.name + '</span>' +
+      '<span class="risk-light-status">' + l.status + '</span></div>' +
+      '<div class="risk-light-text">' + l.text + '</div></div>';
+  }).join('');
+
+  // Chart: UK average (thick) vs main origins (thin); flagged origins dashed red/amber
+  var PAL = ['#2a78d6', '#1baf7a', '#8e6fd8', '#e87ba4', '#5a7a8c'];
+  // First two months have no 3-month average yet, so start the chart at month 3
+  var labels = M.slice(2).map(function(m){ return fmtMonth(m).replace(/ (\d{2})(\d{2})$/, " '$2"); });
+  var sets = [{ label: 'UK average (all origins)', data: tradeRolling(t, null).slice(2), borderColor: '#1A3D1A',
+                borderWidth: 3, pointRadius: 0, tension: 0.3, spanGaps: true, order: 0 }];
+  var legend = '<span class="risk-chip"><i class="uk" style="border-color:#1A3D1A"></i>UK average</span>';
+  sig.draw.forEach(function(o, i) {
+    var flagged = sig.flags.indexOf(o) > -1;
+    var col = o === sig.gapFlag ? '#C0392B' : o === sig.shiftFlag ? '#D4820A' : PAL[i % PAL.length];
+    sets.push({ label: o, data: tradeRolling(t, o).slice(2), borderColor: col, borderWidth: flagged ? 2 : 1.5,
+                borderDash: flagged ? [5, 4] : [], pointRadius: 0, tension: 0.3, spanGaps: true, order: 1 });
+    legend += '<span class="risk-chip"><i class="' + (flagged ? 'dash' : '') + '" style="border-color:' + col + '"></i>' +
+              escHtml(o) + (o === sig.gapFlag ? ' (price gap)' : o === sig.shiftFlag ? ' (origin shift)' : '') + '</span>';
+  });
+  document.getElementById('risk-legend').innerHTML = legend;
+  if (riskChart) riskChart.destroy();
+  if (typeof Chart !== 'undefined') {
+    riskChart = new Chart(document.getElementById('riskChart'), {
+      type: 'line',
+      data: { labels: labels, datasets: sets },
+      options: {
+        responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { display: false }, datalabels: { display: false },
+          tooltip: { callbacks: { label: function(c){ return c.dataset.label + ': ' + (c.raw == null ? 'no data' : fmtGBP(c.raw) + '/kg'); } } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: 'rgba(0,0,0,.45)', font: { size: 10 }, maxTicksLimit: 8 } },
+          y: { grid: { color: 'rgba(0,0,0,.05)' }, ticks: { color: 'rgba(0,0,0,.45)', font: { size: 10 },
+               callback: function(v){ return fmtGBP(v); } }, title: { display: true, text: '£ per kg', color: 'rgba(0,0,0,.45)', font: { size: 10 } } }
+        }
+      }
+    });
+  }
+  document.getElementById('risk-foot').innerHTML =
+    'Lines are 3-month rolling averages of customs value ÷ weight. They average across grades and pack formats, so treat them as ' +
+    '<b>indicators to investigate, not market prices</b>. Source: HMRC Overseas Trade Statistics' +
+    (t.label ? ' — ' + escHtml(t.label) : '') + '. © Crown copyright, Open Government Licence v3.0.' +
+    (t.updated ? ' Updated ' + escHtml(t.updated) + '.' : '');
+}
+
 // ── Render market intelligence section ──────────────────────────────────────
 function renderNews() {
   var section = document.getElementById('intel-section');
@@ -2350,6 +2619,9 @@ function render() {
   // Market intelligence
   renderNews();
 
+  // Price risk signals (HMRC)
+  try { renderTradeRisk(); } catch (e) { console.error('Price risk card error:', e); }
+
   // Supply chain map
   renderSupplyChain();
 
@@ -2691,6 +2963,13 @@ function loadData() {
         renderNews();
       })
       .catch(function(e){ console.error('News fetch error:', e); newsLoaded = true; renderNews(); });
+  }
+
+  if (TRADE_CSV_URL) {
+    fetch(TRADE_CSV_URL)
+      .then(function(r){ return r.text(); })
+      .then(function(txt) { loadTradeCsv(txt); tradeLoaded = true; renderTradeRisk(); })
+      .catch(function(e){ console.error('Trade data fetch error:', e); });
   }
 
   if (FRAUD_CSV_URL) {
