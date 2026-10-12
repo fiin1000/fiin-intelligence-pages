@@ -39,6 +39,8 @@ body {
   background: var(--forest);
   padding: 8px 28px;
   border-bottom: 3px solid var(--lime);
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,.18);
 }
 .header-inner {
   max-width: 1280px;
@@ -134,6 +136,8 @@ body {
 .cat-select-sub { font-size: 11px; color: var(--muted); line-height: 1.5; max-width: 540px; }
 
 /* ── COMMODITY HEADER ── */
+.com-header { scroll-margin-top: 110px; }
+#risk-card { scroll-margin-top: 110px; }
 .com-header {
   background: var(--forest);
   border-radius: 8px 8px 0 0;
@@ -150,28 +154,10 @@ body {
   line-height: 1.2;
   text-transform: capitalize;
 }
-.overview-card { background: white; border: 1px solid var(--border); border-radius: 10px; margin: 6px 0 12px; overflow: hidden; }
-.ov-toggle { display: flex; align-items: center; gap: 14px; width: 100%; padding: 12px 18px; background: none; border: none; font: inherit; text-align: left; cursor: pointer; flex-wrap: wrap; }
-.ov-toggle:hover .ov-action { text-decoration: underline; }
-.ov-title { font-size: 13px; font-weight: 600; color: var(--forest); }
-.ov-summary { display: inline-flex; gap: 14px; font-size: 12.5px; color: var(--ink); flex-wrap: wrap; }
-.ov-summary b { font-weight: 600; }
-.ov-action { margin-left: auto; font-size: 12px; font-weight: 600; color: var(--pine); }
-.ov-body { border-top: 1px solid var(--border); max-height: 420px; overflow-y: auto; }
-.ov-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-.ov-table th { position: sticky; top: 0; background: var(--mist); text-align: left; font-weight: 600; font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 8px 12px; border-bottom: 1px solid var(--border); }
-.ov-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--ink); }
-.ov-table tr.ov-row { cursor: pointer; }
-.ov-table tr.ov-row:hover td { background: #F4F8EE; }
-.ov-table td.ov-cat { color: var(--muted); white-space: nowrap; }
-.ov-table td.ov-prod { font-weight: 600; }
-.ov-lights { white-space: nowrap; }
-.ov-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: -1px; }
-.ov-dot.r { background: #C0392B; } .ov-dot.a { background: #D4820A; } .ov-dot.g { background: #4E9A2F; }
-.ov-note { padding: 9px 12px; font-size: 10.5px; color: var(--muted); background: var(--mist); }
 .com-glance { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font-size: 12px; color: #E8F2DD; }
 .com-glance-label { font-family: 'DM Mono', monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--sage); }
 .com-glance-item { display: inline-flex; align-items: center; gap: 6px; }
+.com-glance-item + .com-glance-item::before { content: '\00b7'; color: var(--sage); margin-right: 8px; }
 .com-glance-item b { font-weight: 600; color: white; }
 .com-glance-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .com-glance-dot.r { background: #F26B6B; } .com-glance-dot.a { background: #F5B942; } .com-glance-dot.g { background: #8DC63F; } .com-glance-dot.n { background: rgba(255,255,255,.35); }
@@ -193,12 +179,12 @@ body {
 @media print {
   @page { size: A4 portrait; margin: 12mm; }
   body { background: white !important; }
-  .header, .overview-card, .print-btn, #pw-gate, .setup-notice, .intel-more, .rasff-more, .tsg-more, .risk-info, footer { display: none !important; }
+  .header, .print-btn, #pw-gate, .setup-notice, .intel-more, .rasff-more, .tsg-more, .risk-info, footer { display: none !important; }
   .print-head { display: block !important; border-bottom: 2px solid #1A3D1A; padding-bottom: 8px; margin-bottom: 10px; }
   .ph-title { font-size: 18px; font-weight: 700; color: #1A3D1A; }
   .ph-meta { font-size: 10.5px; color: #333; margin-top: 3px; line-height: 1.5; }
   .com-header { background: #1A3D1A !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .card, .tsg-card, .res-card, .tp-panel, .rasff-list-card, .risk-light, .intel-section { break-inside: avoid; }
+  .card, .tsg-card, .res-card, .tp-panel, .risk-light, .intel-section { break-inside: avoid; }
   .risk-light, .com-glance-dot, .ov-dot, .risk-dot, .intel-dot, .rasff-sev, .sc-node { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .tsg-resources-row, .two-col { display: block !important; }
   .res-body, .tp-results, .ov-body { max-height: none !important; overflow: visible !important; }
@@ -479,6 +465,9 @@ tr:hover td { background: var(--mist); }
 .rasff-status { padding: 28px 18px; text-align: center; font-size: 11px; color: var(--muted); line-height: 1.7; }
 .rasff-status a { color: var(--blue); text-decoration: none; }
 .rasff-status a:hover { text-decoration: underline; }
+.rasff-link-row { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 12px 16px; background: white; border: 1px solid var(--border); border-radius: 10px; font-size: 12.5px; color: var(--ink); }
+.rasff-link-row a { font-weight: 600; color: var(--pine); text-decoration: none; }
+.rasff-link-row a:hover { text-decoration: underline; }
 .rasff-list-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 13px 16px 10px; border-bottom: 1px solid var(--border); }
 .rasff-list-title { font-size: 13px; font-weight: 600; color: var(--ink); }
 .rasff-list-meta { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
@@ -959,16 +948,6 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
   </div>
 
 
-  <!-- Overview of red/amber price signals across every product -->
-  <div class="overview-card" id="overview-card" style="display:none">
-    <button type="button" class="ov-toggle" id="ov-toggle" aria-expanded="false">
-      <span class="ov-title">Across all products</span>
-      <span class="ov-summary" id="ov-summary"></span>
-      <span class="ov-action" id="ov-action">Show list ▾</span>
-    </button>
-    <div class="ov-body" id="ov-body" hidden></div>
-  </div>
-
   <!-- Shown only when printing -->
   <div class="print-head" id="print-head"></div>
 
@@ -1038,15 +1017,13 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
       </div>
 
     </div>
-    <!-- Latest RASFF alerts for the category -->
-    <div class="card rasff-list-card" id="rasff-list-card" style="margin-top:14px;padding:0">
-      <div class="rasff-list-head">
-        <span class="rasff-list-title">Latest RASFF alerts &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="rasff-com" style="color:var(--forest);text-transform:capitalize"></span></span>
-        <span class="rasff-list-meta"><span id="rasff-count"></span> <span id="rasff-badge" style="display:none"></span></span>
-      </div>
-      <div id="rasff-body"></div>
-      <div class="rasff-list-foot">EU/UK enforcement notifications for the whole category, last 6 months, newest first. Excludes pathogens, pesticides, mycotoxins and other contamination-only alerts. Source: <a href="https://webgate.ec.europa.eu/rasff-window/screen/search" target="_blank" rel="noopener">RASFF Window</a>, © European Union.</div>
+    <!-- RASFF: link only -->
+    <div class="rasff-link-row" id="rasff-link-row">
+      <span>Full list of EU/UK RASFF alerts for <span id="rasff-com" style="text-transform:lowercase"></span>, searchable by product and country:</span>
+      <a id="rasff-portal-link" href="https://webgate.ec.europa.eu/rasff-window/screen/search" target="_blank" rel="noopener">Open RASFF Window →</a>
+      <span style="display:none"><span id="rasff-count"></span><span id="rasff-badge"></span><div id="rasff-body"></div></span>
     </div>
+
     <!-- EU Agri-Food Fraud Network monthly report: this category's entries -->
     <div class="card rasff-list-card" id="eu-card" style="margin-top:14px;padding:0;display:none">
       <div class="rasff-list-head">
@@ -2291,69 +2268,6 @@ document.addEventListener('click', function(e) {
   euShowAll = !euShowAll; renderEuFraud();
 });
 
-// ── Overview: red / amber price signals across every product ─────────────────
-var ovOpen = false;
-function renderOverview() {
-  var card = document.getElementById('overview-card');
-  if (!card) return;
-  if (!tradeLoaded) { card.style.display = 'none'; return; }
-  var rows = [], seen = [];
-  Object.keys(COMM).forEach(function(cat) {
-    Object.keys(COMM[cat].products).forEach(function(p) {
-      var hit = tradeFor(p);
-      if (!hit) return;
-      var existing = null;
-      for (var i = 0; i < seen.length; i++) if (seen[i].t === hit.t) existing = seen[i];
-      if (existing) { existing.products.push(p); return; }   // shared dataset: one row, products listed together
-      var sig;
-      try { sig = computeRiskSignals(p, hit.t); } catch (e) { return; }
-      var lv = sig.lights.map(function(l){ return l.level; });
-      var row = { t: hit.t, cat: cat, products: [p], sig: sig,
-                  worst: lv.indexOf('r') > -1 ? 'r' : lv.indexOf('a') > -1 ? 'a' : 'g',
-                  reds: lv.filter(function(x){ return x === 'r'; }).length };
-      seen.push(row);
-      if (row.worst !== 'g') rows.push(row);
-    });
-  });
-  var red = rows.filter(function(r){ return r.worst === 'r'; }).length, amber = rows.length - red;
-  card.style.display = '';
-  document.getElementById('ov-summary').innerHTML =
-    '<span><span class="ov-dot r"></span><b>' + red + '</b> with a red price signal</span>' +
-    '<span><span class="ov-dot a"></span><b>' + amber + '</b> amber only</span>' +
-    '<span style="color:var(--muted)">of ' + seen.length + ' product datasets</span>';
-  rows.sort(function(a, b){ return (b.worst === 'r') - (a.worst === 'r') || b.reds - a.reds || COMM[a.cat].label.localeCompare(COMM[b.cat].label); });
-  var dots = function(sig){ return sig.lights.map(function(l){ return '<span class="ov-dot ' + l.level + '" title="' + l.name + ': ' + l.status + '"></span>'; }).join(''); };
-  var why = function(sig){
-    return sig.lights.filter(function(l){ return l.level !== 'g'; })
-      .map(function(l){ return l.name + ' (' + l.status.toLowerCase() + ')' + (l.name === 'Price gap' && sig.gapFlag ? ': ' + sig.gapFlag : l.name === 'Origin shift' && sig.shiftFlag ? ': ' + sig.shiftFlag : ''); })
-      .join(' · ');
-  };
-  document.getElementById('ov-body').innerHTML = rows.length
-    ? '<table class="ov-table"><thead><tr><th>Category</th><th>Product</th><th>Swing · Shift · Gap</th><th>What is flagged</th></tr></thead><tbody>' +
-      rows.map(function(r) {
-        var name = r.products.length > 3 ? r.products[0] + ' and ' + (r.products.length - 1) + ' related' : r.products.join(', ');
-        return '<tr class="ov-row" data-cat="' + r.cat + '" data-prod="' + escHtml(r.products[0]) + '"><td class="ov-cat">' + escHtml(COMM[r.cat].label) +
-          '</td><td class="ov-prod">' + escHtml(name) + '</td><td class="ov-lights">' + dots(r.sig) + '</td><td>' + escHtml(why(r.sig)) + '</td></tr>';
-      }).join('') + '</tbody></table>' +
-      '<div class="ov-note">Click a row to open that product. Products sharing one customs code appear once. Lights use the same rules as each product\u2019s price card.</div>'
-    : '<div class="ov-note">No product currently has a red or amber price signal.</div>';
-  document.getElementById('ov-body').hidden = !ovOpen;
-  document.getElementById('ov-action').textContent = ovOpen ? 'Hide list \u25B4' : 'Show list \u25BE';
-  document.getElementById('ov-toggle').setAttribute('aria-expanded', ovOpen ? 'true' : 'false');
-}
-document.addEventListener('click', function(e) {
-  if (e.target.closest && e.target.closest('#ov-toggle')) { ovOpen = !ovOpen; renderOverview(); return; }
-  var row = e.target.closest && e.target.closest('.ov-row');
-  if (!row) return;
-  var btn = document.querySelector('.pill[data-key="' + row.getAttribute('data-cat') + '"]');
-  if (btn) btn.click();
-  curProd = row.getAttribute('data-prod');
-  rebuildProductDropdown();
-  render();
-  var sec = document.getElementById('risk-card');
-  if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
-});
-
 // ── Printable, dated snapshot of the current category ───────────────────────
 function printSnapshot() {
   var today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -2365,10 +2279,9 @@ function printSnapshot() {
     ' \u00b7 For fiin member use only. Evidence of horizon scanning, not a vulnerability assessment in itself.</div>';
   // Open everything that is folded on screen
   var tsg = document.getElementById('tsg-content'); if (tsg) tsg.classList.remove('clamped');
-  rasffShowAll = true; renderRasff();
   window.print();
 }
-window.addEventListener('afterprint', function() { rasffShowAll = false; renderRasff(); renderTSG(); });
+window.addEventListener('afterprint', function() { renderTSG(); });
 
 // ── At-a-glance strip under the category name ───────────────────────────────
 function renderGlance() {
@@ -2414,7 +2327,7 @@ function renderGlance() {
   el.innerHTML = parts.length ? '<span class="com-glance-label">At a glance</span>' + parts.join('') : '';
 }
 function glanceItem(dot, html) {
-  return '<span class="com-glance-item"><span class="com-glance-dot ' + dot + '"></span>' + html + '</span>';
+  return '<span class="com-glance-item">' + html + '</span>';
 }
 
 // ── Render market intelligence section ──────────────────────────────────────
@@ -2779,8 +2692,6 @@ function render() {
   // At-a-glance strip
   try { renderGlance(); } catch (e) { console.error('Glance error:', e); }
 
-  // Overview across all products
-  try { renderOverview(); } catch (e) { console.error('Overview error:', e); }
 
   // Supply chain map
   renderSupplyChain();
@@ -3443,6 +3354,8 @@ Object.keys(COMM).forEach(function(key) {
     document.querySelectorAll('.pill').forEach(function(b){ b.classList.remove('active'); });
     this.classList.add('active');
     cur = this.dataset.key;
+    var ch = document.getElementById('com-header');
+    if (ch && ch.getBoundingClientRect().top < 0) ch.scrollIntoView({ behavior: 'smooth', block: 'start' });
     var prods = Object.keys(COMM[cur].products);
     var liveFirst = prods.filter(function(p){ return getTier(cur,p)==='live'; })[0];
     var sourcedFirst = prods.filter(function(p){ return getTier(cur,p)==='sourced'; })[0];
