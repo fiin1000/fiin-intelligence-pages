@@ -630,7 +630,9 @@ tr:hover td { background: var(--mist); }
 .intel-dot-a { background: #7A4800; }
 .intel-dot-b { background: #185FA5; }
 .intel-dot-g { background: #2D6B2D; }
-.intel-body  {}
+.intel-body  { min-width: 0; flex: 1; overflow-wrap: anywhere; word-break: break-word; }
+.intel-link   { color: var(--pine); font-style: normal; font-weight: 500; text-decoration: none; white-space: nowrap; }
+.intel-link:hover { text-decoration: underline; }
 .intel-headline { font-size: 12px; font-weight: 600; color: var(--ink); line-height: 1.4; margin-bottom: 3px; }
 .intel-detail   { font-size: 11px; color: var(--sub); line-height: 1.55; }
 .intel-src      { font-size: 10px; color: var(--muted); margin-top: 3px; font-style: italic; }
@@ -923,7 +925,7 @@ tr:hover td { background: var(--mist); }
             <span class="tp-head-title">fiin member testing data</span>
             <span class="tp-soon">coming soon</span>
           </div>
-          <span class="tp-period" id="testing-period"></span>
+          <span class="tp-period" id="testing-period">Q1 2024 – Q1 2025</span>
         </div>
         <div class="tp-kpis">
           <div class="tp-kpi"><div class="tp-kpi-label">Items Tested</div><div class="tp-kpi-value">—</div><div class="tp-kpi-sub">awaiting data</div></div>
@@ -934,11 +936,16 @@ tr:hover td { background: var(--mist); }
         <div class="tp-content">
           <div class="tp-chart-area">
             <div class="tp-chart-title">Tests performed vs anomalies detected</div>
-            <div class="tp-chart-sub">Quarterly</div>
-            <div style="flex:1;min-height:0;display:flex;align-items:center;font-size:11px;color:var(--muted);font-style:italic">Awaiting fiin member testing data.</div>
+            <div class="tp-chart-sub">Quarterly · illustrative placeholder</div>
+            <div style="position:relative;flex:1;min-height:0"><canvas id="testingChart"></canvas></div>
+            <div class="tp-legend" style="margin-top:6px">
+              <span class="tp-leg-item"><span class="tp-leg-swatch" style="background:#8DC63F"></span>Tests performed</span>
+              <span class="tp-leg-item"><span class="tp-leg-swatch" style="background:#1A5FA5"></span>Anomalies</span>
+              <span class="tp-leg-item"><span class="tp-leg-swatch" style="background:#C84040"></span>Auth. concerns</span>
+            </div>
           </div>
           <div class="tp-fiin-area" id="tp-fiin-area">
-            <div class="tp-fiin-title">fiin member data</div>
+            <div class="tp-fiin-title">fiin member data <span style="font-size:9px;font-weight:400;color:var(--muted)">(mock)</span></div>
             <div class="tp-fiin-sub">Anonymised authenticity concerns</div>
             <div class="tp-results" id="tp-results"></div>
           </div>
@@ -1374,8 +1381,277 @@ var KNOWN_RISKS = {
   }
 };
 
-// fiin member testing data: none built in. Panels show "awaiting data" until a
-// testing data source is connected.
+// ── Dummy fiin data per category ───────────────────────────────────────────────
+// Placeholder until live fiin testing data is connected
+var FIIN_DUMMY = {
+  poultry:       ['Q1 2026: Authenticity anomaly detected in processed poultry products — species confirmation pending (4 samples)', 'Q4 2025: Welfare status irregularity flagged in 2 of 18 samples labelled free-range'],
+  red_meat:      ['Q1 2026: Species confirmation testing of beef mince — 3 samples flagged for possible pork presence', 'Q4 2025: Origin verification — 2 samples inconsistent with declared country of origin'],
+  fish_shellfish:['Q1 2026: DNA barcoding — 6 samples sold as cod confirmed as pollock or pangasius', 'Q4 2025: Smoked salmon — 2 samples mislabelled as Scottish, confirmed Norwegian origin'],
+  honey:         ['Q1 2026: NMR profiling — 4 samples positive for sugar syrup adulteration', 'Q4 2025: Pollen analysis — 3 samples origin inconsistent with label claim'],
+  herbs_spices:  ['Q1 2026: Dye screening — 2 paprika samples positive for Sudan red', 'Q4 2025: Oregano authenticity — 5 samples contained >30% non-oregano plant material'],
+  dairy:         ['Q1 2026: PDO verification — 2 Parmigiano-Reggiano samples failed authenticity testing', 'Q4 2025: Adulteration screen — 1 sample positive for non-dairy protein addition'],
+  nuts:          ['Q1 2026: Pistachio origin verification — 3 samples labelled Iranian confirmed US origin', 'Q4 2025: Nut species ID — 2 premium nut products contained undeclared cheaper species'],
+  eggs:          ['Q1 2026: Welfare status testing — 4 free-range samples failed expected isotope profile', 'Q4 2025: Date integrity check — 2 samples flagged for potential re-dating'],
+  fruit_veg:     ['Q1 2026: Pesticide screen — 3 imported strawberry samples above MRL', 'Q4 2025: Organic certification — 2 samples inconsistent with organic pesticide profile'],
+  cereals:       ['Q1 2026: Basmati authenticity — 4 samples contained non-basmati rice varieties', 'Q4 2025: Gluten-free verification — 2 products exceeded permitted gluten thresholds']
+};
+
+// Quarterly summary + individual anonymised results for testing panel
+var FIIN_TESTING = {
+  poultry: {
+    quarterly: [
+      { q:'Q1 2026', concerns: 4 },
+      { q:'Q4 2025', concerns: 2 },
+      { q:'Q3 2025', concerns: 3 },
+      { q:'Q2 2025', concerns: 1 }
+    ],
+    results: [
+      { q:'Q1 2026', text:'Processed poultry product labelled as chicken breast — DNA profiling detected turkey content at approximately 35%. Product description inconsistent with species composition.' },
+      { q:'Q1 2026', text:'Cooked sliced poultry product claimed as free-range — isotope ratio analysis inconsistent with outdoor-reared profile. Barn-reared signature detected.' },
+      { q:'Q1 2026', text:'Ready-meal ingredient declared as British-reared chicken — stable isotope data indicates likely non-UK origin.' },
+      { q:'Q1 2026', text:'Frozen poultry pieces — water content above permitted threshold, consistent with undeclared water injection.' },
+      { q:'Q4 2025', text:'Chicken portions labelled organic — pesticide residue screen returned results inconsistent with organic production standards.' },
+      { q:'Q4 2025', text:'Processed poultry spread — species-specific PCR identified duck content not declared on label.' },
+      { q:'Q3 2025', text:'Whole chicken labelled free-range — foot pad condition scoring on retained samples inconsistent with outdoor access claim.' },
+      { q:'Q3 2025', text:'Diced chicken product — nitrogen content analysis suggests protein enhancement not disclosed on ingredient list.' },
+      { q:'Q3 2025', text:'Poultry mince — collagen:protein ratio elevated, indicative of mechanically separated meat present but undeclared.' }
+    ]
+  },
+  red_meat: {
+    quarterly: [
+      { q:'Q1 2026', concerns: 3 },
+      { q:'Q4 2025', concerns: 2 },
+      { q:'Q3 2025', concerns: 4 },
+      { q:'Q2 2025', concerns: 2 }
+    ],
+    results: [
+      { q:'Q1 2026', text:'Beef mince product — real-time PCR detected porcine DNA above quantification threshold. Not consistent with cross-contamination levels.' },
+      { q:'Q1 2026', text:'Premium beef burger patties declared as Irish Angus — isotope profiling inconsistent with Irish pasture-fed origin. South American profile indicated.' },
+      { q:'Q1 2026', text:'Lamb kebab product — species identification testing confirmed predominantly beef composition with minor lamb content.' },
+      { q:'Q4 2025', text:'Diced beef labelled as British — stable isotope analysis returned origin profile inconsistent with UK grass-fed production.' },
+      { q:'Q4 2025', text:'Halal-certified minced beef — DNA screen detected porcine traces above the 0.1% reporting threshold.' },
+      { q:'Q3 2025', text:'Veal escalope — stable isotope data suggests older animal than veal classification permits.' },
+      { q:'Q3 2025', text:'Beef steak product with breed claim — authentication testing unable to confirm declared breed. Generic bovine profile returned.' },
+      { q:'Q3 2025', text:'Minced lamb — quantitative PCR indicates approximately 40% bovine content, undeclared on label.' },
+      { q:'Q3 2025', text:'Pork sausages — country of origin declared as British; isotope data inconsistent with UK pig production profile.' }
+    ]
+  },
+  fish_shellfish: {
+    quarterly: [
+      { q:'Q1 2026', concerns: 6 },
+      { q:'Q4 2025', concerns: 3 },
+      { q:'Q3 2025', concerns: 5 },
+      { q:'Q2 2025', concerns: 2 }
+    ],
+    results: [
+      { q:'Q1 2026', text:'Retail cod fillet — DNA barcoding identified Pacific pollock. Species substitution confirmed; labelling non-compliant.' },
+      { q:'Q1 2026', text:'Smoked salmon labelled Scottish — isotope analysis indicates Norwegian origin. Premium origin claim unsubstantiated.' },
+      { q:'Q1 2026', text:'Breaded fish product declared as haddock — cytochrome b sequencing returned blue whiting match.' },
+      { q:'Q1 2026', text:'Frozen prawns declared warm-water species from Ecuador — DNA profiling indicates mixed-origin product inconsistent with single-origin claim.' },
+      { q:'Q1 2026', text:'Tuna steak labelled yellowfin — species testing confirmed skipjack. Price differential between species creates substitution incentive.' },
+      { q:'Q1 2026', text:'Crab meat product — species verification identified substitution with swimming crab where brown crab was declared.' },
+      { q:'Q4 2025', text:'Sea bass fillets — DNA testing identified bream content. Two species with similar appearance and significant price differential.' },
+      { q:'Q4 2025', text:'Farmed salmon declared as wild-caught — fatty acid profiling inconsistent with wild capture; farmed signature confirmed.' },
+      { q:'Q3 2025', text:'Squid rings declared Falkland Islands origin — DNA and isotope data suggest South-East Asian sourcing.' }
+    ]
+  },
+  honey: {
+    quarterly: [
+      { q:'Q1 2026', concerns: 4 },
+      { q:'Q4 2025', concerns: 3 },
+      { q:'Q3 2025', concerns: 2 },
+      { q:'Q2 2025', concerns: 5 }
+    ],
+    results: [
+      { q:'Q1 2026', text:'Blossom honey labelled UK origin — NMR profiling returned marker profile inconsistent with British flora. Central European signature indicated.' },
+      { q:'Q1 2026', text:'Acacia honey — pollen analysis detected species inconsistent with acacia monofloral claim. Mixed flora product.' },
+      { q:'Q1 2026', text:'Honey product — NMR screening positive for C4 sugar syrup addition. Adulteration confirmed above 7% threshold.' },
+      { q:'Q1 2026', text:'Manuka honey with UMF claim — methylglyoxal content significantly below stated activity rating. Label claim unsubstantiated.' },
+      { q:'Q4 2025', text:'Blended honey declared as EU/non-EU mix — pollen and isotope data indicate higher proportion of non-EU honey than label states.' },
+      { q:'Q4 2025', text:'Heather honey — pollen count below minimum threshold required to support monofloral classification.' },
+      { q:'Q4 2025', text:'Organic honey — residue screening detected antibiotic traces (chloramphenicol) inconsistent with organic certification.' },
+      { q:'Q3 2025', text:'Clover honey — isotope data suggests rice syrup adulteration not detectable by standard refractometry.' },
+      { q:'Q3 2025', text:'Premium honey product with geographic indication — pollen profile does not match declared region of production.' },
+      { q:'Q2 2025', text:'Imported honey relabelled as UK-produced — geographic marker profiling confirmed overseas origin.' }
+    ]
+  },
+  herbs_spices: {
+    quarterly: [
+      { q:'Q1 2026', concerns: 2 },
+      { q:'Q4 2025', concerns: 5 },
+      { q:'Q3 2025', concerns: 3 },
+      { q:'Q2 2025', concerns: 4 }
+    ],
+    results: [
+      { q:'Q1 2026', text:'Ground paprika — dye screening returned positive result for Sudan Red I. Non-permitted colourant confirmed.' },
+      { q:'Q1 2026', text:'Dried oregano — microscopic and DNA analysis confirmed presence of olive leaf and myrtle at approximately 40% of total composition.' },
+      { q:'Q4 2025', text:'Ground cumin — foreign seed material identified including grass seed species, comprising approximately 15% of sample weight.' },
+      { q:'Q4 2025', text:'Saffron threads — spectroscopic analysis confirmed artificial colourant addition (tartrazine) to enhance colour score.' },
+      { q:'Q4 2025', text:'Black pepper — near-infrared profiling detected papaya seed adulteration at estimated 20% substitution level.' },
+      { q:'Q4 2025', text:'Turmeric powder — lead chromate detected on colourimetric screening. Toxic adulterant used to enhance yellow colour.' },
+      { q:'Q4 2025', text:'Ground coriander — species authentication confirmed substitution with a proportion of spent/exhausted coriander material.' },
+      { q:'Q3 2025', text:'Dried basil — country of origin declared Italy; isotope and metabolite profiling inconsistent with Italian-grown herb.' },
+      { q:'Q3 2025', text:'Chilli flakes — Sudan dye IV detected. Product recalled by submitting member.' }
+    ]
+  },
+  dairy: {
+    quarterly: [
+      { q:'Q1 2026', concerns: 2 },
+      { q:'Q4 2025', concerns: 1 },
+      { q:'Q3 2025', concerns: 3 },
+      { q:'Q2 2025', concerns: 2 }
+    ],
+    results: [
+      { q:'Q1 2026', text:'Hard cheese with PDO designation — DNA profiling of milk source inconsistent with protected designation requirements. Non-qualifying breed detected.' },
+      { q:'Q1 2026', text:'Organic whole milk — pesticide residue screen returned results above thresholds consistent with organic production.' },
+      { q:'Q4 2025', text:'Cream cheese — non-milk protein (soy) detected by ELISA. Undeclared ingredient and potential allergen.' },
+      { q:'Q3 2025', text:'Butter with provenance claim — fatty acid profile inconsistent with stated pasture-fed, single-origin claim.' },
+      { q:'Q3 2025', text:'Mozzarella declared buffalo milk — real-time PCR quantification indicates predominantly bovine milk composition.' },
+      { q:'Q3 2025', text:'Skimmed milk powder — reconstituted milk solids detected; product not labelled as reconstituted.' },
+      { q:'Q2 2025', text:'Infant formula — declared nutrient levels not confirmed on independent analysis. Protein content below stated specification.' },
+      { q:'Q2 2025', text:'Greek-style yoghurt — total solids content inconsistent with authentic strained yoghurt. Thickener addition suspected.' }
+    ]
+  },
+  eggs: {
+    quarterly: [
+      { q:'Q1 2026', concerns: 4 },
+      { q:'Q4 2025', concerns: 2 },
+      { q:'Q3 2025', concerns: 1 },
+      { q:'Q2 2025', concerns: 3 }
+    ],
+    results: [
+      { q:'Q1 2026', text:'Free-range eggs — stable isotope analysis of egg content inconsistent with outdoor-reared hens. Indoor profile indicated across 4 samples.' },
+      { q:'Q1 2026', text:'Organic eggs — carotenoid profile and isotope data inconsistent with organic feed and outdoor access requirements.' },
+      { q:'Q1 2026', text:'Dried egg albumen declared EU origin — isotope profiling suggests non-EU sourcing, inconsistent with label.' },
+      { q:'Q1 2026', text:'Free-range liquid whole egg — yolk colour and fatty acid profile below expected range for genuine free-range production.' },
+      { q:'Q4 2025', text:'Barn eggs sold as free-range — flock density indicators from submitted documentation inconsistent with free-range stocking requirements.' },
+      { q:'Q4 2025', text:'Eggs with British Lion mark — traceability documentation review identified gap in chain of custody from stated farm.' },
+      { q:'Q3 2025', text:'Organic eggs — residue screening detected coccidiostat not permitted in organic production.' },
+      { q:'Q2 2025', text:'Free-range eggs — omega-3 fatty acid levels significantly below expected profile for genuinely free-range birds.' }
+    ]
+  },
+  fruit_veg: {
+    quarterly: [
+      { q:'Q1 2026', concerns: 3 },
+      { q:'Q4 2025', concerns: 2 },
+      { q:'Q3 2025', concerns: 4 },
+      { q:'Q2 2025', concerns: 1 }
+    ],
+    results: [
+      { q:'Q1 2026', text:'Strawberries declared organic — multi-residue pesticide screen detected fungicide residues inconsistent with organic production.' },
+      { q:'Q1 2026', text:'Tomatoes labelled British-grown — stable isotope profiling inconsistent with UK production. Southern European origin indicated.' },
+      { q:'Q1 2026', text:'Bagged salad leaves with organic claim — chlormequat residue detected above organic threshold.' },
+      { q:'Q4 2025', text:'Garlic declared Spanish origin — DNA variety testing and isotope data suggest Chinese origin.' },
+      { q:'Q4 2025', text:'Blueberries with provenance claim — multi-element profiling inconsistent with declared country of cultivation.' },
+      { q:'Q3 2025', text:'Avocados declared country of origin — documentary and isotope review raised inconsistency with declared source.' },
+      { q:'Q3 2025', text:'Apples with variety claim — DNA fingerprinting confirmed mislabelled variety.' },
+      { q:'Q3 2025', text:'Organic peppers — imidacloprid detected above MRL. Pesticide not permitted in organic production.' }
+    ]
+  },
+  bakery_cereals: {
+    quarterly: [
+      { q:'Q1 2026', concerns: 2 },
+      { q:'Q4 2025', concerns: 3 },
+      { q:'Q3 2025', concerns: 2 },
+      { q:'Q2 2025', concerns: 1 }
+    ],
+    results: [
+      { q:'Q1 2026', text:'Basmati rice — DNA varietal profiling confirmed mixture of non-basmati long-grain varieties. Estimated 30% non-compliant content.' },
+      { q:'Q1 2026', text:'Gluten-free bread — ELISA testing confirmed gluten content above 20ppm threshold. Non-compliant for declared gluten-free claim.' },
+      { q:'Q4 2025', text:'Wheat flour with origin claim — isotope data inconsistent with declared country of production.' },
+      { q:'Q4 2025', text:'Sourdough loaf with fermentation claim — acidity and microbiological profile inconsistent with genuine long-fermentation sourdough process.' },
+      { q:'Q4 2025', text:'Oat product declared gluten-free — avenin profiling indicates cross-contamination above permitted threshold.' },
+      { q:'Q3 2025', text:'Rye bread — rye content analysis returned proportion significantly below typical rye bread composition. Wheat substitution indicated.' },
+      { q:'Q3 2025', text:'Organic oats — chlorpyrifos residue detected. Pesticide non-compliant with organic certification standards.' }
+    ]
+  },
+  prepared_dishes: {
+    quarterly: [
+      { q:'Q1 2026', concerns: 3 },
+      { q:'Q4 2025', concerns: 2 },
+      { q:'Q3 2025', concerns: 2 },
+      { q:'Q2 2025', concerns: 1 }
+    ],
+    results: [
+      { q:'Q1 2026', text:'Chicken tikka ready meal — species testing confirmed duck content in addition to chicken. Undeclared species.' },
+      { q:'Q1 2026', text:'Beef lasagne — quantitative PCR returned porcine content above 1%. Not declared on label.' },
+      { q:'Q1 2026', text:'Seafood pasta — species authentication identified substitution of premium shellfish with lower-value species.' },
+      { q:'Q4 2025', text:'Vegetarian ready meal — allergen screen detected egg traces above 10ppm. Not declared.' },
+      { q:'Q4 2025', text:'Premium soup with provenance ingredient claim — mass balance review inconsistent with declared inclusion level.' },
+      { q:'Q3 2025', text:'Ethnic cuisine ready meal — declared meat species inconsistent with PCR results.' },
+      { q:'Q3 2025', text:'Chilled pasta sauce — microbiological testing indicated time-temperature abuse inconsistent with chill chain documentation.' }
+    ]
+  },
+  cakes_conf: {
+    quarterly: [
+      { q:'Q1 2026', concerns: 1 },
+      { q:'Q4 2025', concerns: 2 },
+      { q:'Q3 2025', concerns: 1 },
+      { q:'Q2 2025', concerns: 2 }
+    ],
+    results: [
+      { q:'Q1 2026', text:'Dark chocolate with origin claim — cocoa bean isotope profiling inconsistent with declared single-origin provenance.' },
+      { q:'Q4 2025', text:'Confectionery with nut claim — allergen ELISA detected undeclared peanut traces above reporting threshold.' },
+      { q:'Q4 2025', text:'Premium chocolate declared high cocoa content — independent analysis confirmed cocoa solid content below label claim.' },
+      { q:'Q3 2025', text:'Cake with butter claim — fatty acid profiling detected partial replacement with non-dairy fat, undeclared.' },
+      { q:'Q2 2025', text:'Sugar confectionery with natural colour claim — synthetic dye detected inconsistent with natural colourant declaration.' },
+      { q:'Q2 2025', text:'Cocoa powder declared single origin — elemental fingerprinting inconsistent with declared country of cultivation.' }
+    ]
+  },
+  diet_foods: {
+    quarterly: [
+      { q:'Q1 2026', concerns: 3 },
+      { q:'Q4 2025', concerns: 2 },
+      { q:'Q3 2025', concerns: 2 },
+      { q:'Q2 2025', concerns: 1 }
+    ],
+    results: [
+      { q:'Q1 2026', text:'Whey protein supplement — nitrogen spiking detected (glycine addition). Declared protein content not reflective of true whey protein level.' },
+      { q:'Q1 2026', text:'Vitamin D supplement — independent potency testing returned values 40% below label claim.' },
+      { q:'Q1 2026', text:'Protein bar — undeclared soy protein identified by allergen profiling. Potential allergen risk.' },
+      { q:'Q4 2025', text:'Meal replacement shake — actual calorie content significantly above declared value on independent analysis.' },
+      { q:'Q4 2025', text:'Sports nutrition product with amino acid claims — HPLC profiling confirmed several amino acids below declared levels.' },
+      { q:'Q3 2025', text:'Infant formula — one micronutrient level returned below minimum regulatory requirement on independent verification.' },
+      { q:'Q3 2025', text:'Gluten-free supplement product — wheat gluten detected above 20ppm. Non-compliant with gluten-free claim.' }
+    ]
+  },
+  nuts_snacks: {
+    quarterly: [
+      { q:'Q1 2026', concerns: 3 },
+      { q:'Q4 2025', concerns: 2 },
+      { q:'Q3 2025', concerns: 3 },
+      { q:'Q2 2025', concerns: 1 }
+    ],
+    results: [
+      { q:'Q1 2026', text:'Pistachios labelled Iranian origin — isotope and elemental profiling inconsistent with Iranian provenance. US origin indicated.' },
+      { q:'Q1 2026', text:'Premium cashews with origin claim — multi-element fingerprinting does not support declared single-country sourcing.' },
+      { q:'Q1 2026', text:'Mixed nut product — allergen profiling detected undeclared peanut content above 10ppm threshold.' },
+      { q:'Q4 2025', text:'Almonds with variety claim — DNA fingerprinting returned profile inconsistent with declared premium variety.' },
+      { q:'Q4 2025', text:'Walnuts — aflatoxin screening returned B1 levels above EU maximum limit. Food safety concern raised.' },
+      { q:'Q3 2025', text:'Hazelnut product with provenance claim — isotope data inconsistent with declared Turkish origin.' },
+      { q:'Q3 2025', text:'Roasted peanuts declared as a single origin — blended origin profile detected on elemental analysis.' },
+      { q:'Q3 2025', text:'Nut butter — oil profile indicates partial replacement of declared nut oil with cheaper vegetable oil.' }
+    ]
+  },
+  drinks: {
+    quarterly: [
+      { q:'Q1 2026', concerns: 2 },
+      { q:'Q4 2025', concerns: 2 },
+      { q:'Q3 2025', concerns: 1 },
+      { q:'Q2 2025', concerns: 3 }
+    ],
+    results: [
+      { q:'Q1 2026', text:'Not-from-concentrate orange juice — isotope and sugar profile inconsistent with NFC claim. Reconstituted product indicated.' },
+      { q:'Q1 2026', text:'Apple juice with country of origin claim — multi-element fingerprinting inconsistent with declared source country.' },
+      { q:'Q4 2025', text:'Coconut water — authenticity profiling detected addition of water and sugar beyond levels consistent with genuine product.' },
+      { q:'Q4 2025', text:'Premium fruit juice blend — declared fruit content not supported by independent compositional analysis.' },
+      { q:'Q3 2025', text:'Mineral water with source claim — ion profile inconsistent with declared spring source across multiple samples.' },
+      { q:'Q2 2025', text:'Energy drink — taurine and caffeine levels on independent testing below label declaration.' },
+      { q:'Q2 2025', text:'Fruit smoothie — declared fruit content and species composition inconsistent with independent verification.' },
+      { q:'Q2 2025', text:'Premium juice with fresh-pressed claim — microbial indicators suggest heat treatment inconsistent with cold-pressed declaration.' }
+    ]
+  }
+};
 
 var SUPPLY_CHAIN = {
   poultry:       ['Rearing Farm','Slaughter & Evisceration','Cutting & Processing','Further Processing','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
@@ -1512,6 +1788,14 @@ function renderSupplyChain() {
       html += '<div class="sc-tip-divider"></div>';
       html += '<div class="sc-tip-section-head">Indicators</div>';
 
+      var fiinItems = FIIN_DUMMY[cur] || [];
+      if (fiinItems.length) {
+        html += '<div style="padding:2px 13px 1px;font-size:9px;opacity:.5;font-family:DM Mono,monospace;text-transform:uppercase;letter-spacing:.06em">fiin (mock) data</div>';
+        html += fiinItems.slice(0, 2).map(function(txt) {
+          return '<div class="sc-tip-item">' + txt + '</div>';
+        }).join('');
+      }
+
 
       if (count > 0) {
         html += '<div style="padding:4px 13px 1px;font-size:9px;opacity:.5;font-family:DM Mono,monospace;text-transform:uppercase;letter-spacing:.06em">RASFF data — ' + count + ' alert' + (count!==1?'s':'') + '</div>';
@@ -1523,7 +1807,7 @@ function renderSupplyChain() {
         html += '<div class="sc-tip-empty">No RASFF alerts at this stage</div>';
       }
 
-      html += '<div class="sc-tip-footer">fiin TSG · RASFF/European Commission</div>';
+      html += '<div class="sc-tip-footer">fiin TSG · RASFF/European Commission · placeholder guidance</div>';
       tip.innerHTML = html;
       tip.style.display = 'flex';
       positionTip(e);
@@ -1573,7 +1857,7 @@ function renderNews() {
 
   meta.textContent = !NEWS_CSV_URL ? 'News sheet not connected'
     : !newsLoaded ? 'Loading...'
-    : 'Live from Sheet' + (newsUpdated ? ' · updated ' + newsUpdated : '');
+    : 'Live from Sheet' + (newsUpdated ? ' · latest item ' + fmtNewsDate(newsUpdated) : '');
 
   // Pills
 
@@ -1583,17 +1867,17 @@ function renderNews() {
       ? 'No market news in the Sheet for ' + prodKey + ' yet.'
       : 'Loading market news&hellip;') + '</div>';
   } else {
-    items.innerHTML = commNews.map(function(n) {
-      var risk = n.risk_level || n.r || 'b';
-      var head = n.headline   || n.h || '';
-      var det  = n.detail     || n.d || '';
-      var src  = n.source     || n.s || '';
+    items.innerHTML = commNews.slice(0, NEWS_MAX_ITEMS).map(function(n) {
+      var risk = n.risk_level || 'b';
+      var meta = [n.source, n.date ? fmtNewsDate(n.date) : ''].filter(Boolean).join(' · ');
       return '<div class="intel-item">' +
         '<div class="intel-dot intel-dot-' + risk + '"></div>' +
         '<div class="intel-body">' +
-          '<div class="intel-headline">' + head + '</div>' +
-          '<div class="intel-detail">'   + det  + '</div>' +
-          '<div class="intel-src">'      + src  + '</div>' +
+          '<div class="intel-headline">' + escHtml(n.headline) + '</div>' +
+          (n.detail ? '<div class="intel-detail">' + escHtml(n.detail) + '</div>' : '') +
+          '<div class="intel-src">' + escHtml(meta) +
+            (n.url ? (meta ? ' &nbsp;' : '') + '<a class="intel-link" href="' + escHtml(n.url) + '" target="_blank" rel="noopener">Read more →</a>' : '') +
+          '</div>' +
         '</div>' +
       '</div>';
     }).join('');
@@ -1617,6 +1901,21 @@ var newsLoaded  = false;
 // Normalise a news sheet key so "Beef", "beef ", "Red meat" and "red_meat" all match page keys
 function newsKey(s) {
   return (s || '').toString().trim().toLowerCase().replace(/[\s\-\/&]+/g, '_').replace(/_+/g, '_');
+}
+var NEWS_MAX_ITEMS = 10; // most recent items shown per product
+function escHtml(v) {
+  return (v == null ? '' : String(v)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+// Reads ISO (2026-10-09), UK (09/10/2026 = 9 Oct) and text dates (9 Oct 2026)
+function parseNewsDate(v) {
+  if (!v) return null;
+  var m = String(v).trim().match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/);
+  var d = m ? new Date(+m[3], +m[2] - 1, +m[1]) : new Date(v);
+  return isNaN(d.getTime()) ? null : d;
+}
+function fmtNewsDate(v) {
+  var d = parseNewsDate(v);
+  return d ? d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) : v;
 }
 // Map the sheet's risk column to the page's dot colours (r = red, a = amber, b = blue)
 function riskCode(s) {
@@ -2018,7 +2317,7 @@ function stat(lbl, val, sub, pct, col) {
 function renderFiinIndicators() {
   var el = document.getElementById('fiin-indicators-body');
   if (!el) return;
-  var items = ['Awaiting fiin member testing data.'];
+  var items = FIIN_DUMMY[cur] || ['No fiin testing data available for this category yet.'];
   el.innerHTML = items.map(function(txt) {
     return '<div class="indicators-dummy-item">' + txt + '</div>';
   }).join('');
@@ -2258,24 +2557,52 @@ function loadData() {
     fetch(NEWS_CSV_URL)
       .then(function(r){ return r.text(); })
       .then(function(txt) {
-        var rows = parseCSV(txt);
-        // columns: commodity, headline, detail, source, risk_level, updated
+        // Read columns by HEADER NAME, so the sheet's column order doesn't matter.
+        // Falls back to the old fixed order: commodity, headline, detail, source, risk_level, updated
+        var all = parseCSV('x\n' + txt);
+        var hdr = (all[0] || []).map(function(h){ return (h||'').toLowerCase().trim(); });
+        var rows = all.slice(1);
+        var knownHeader = hdr.some(function(h){ return /headline|title|commodity|product|summary|lead|url|link/.test(h); });
+        function col(names, fallback) {
+          for (var n = 0; n < names.length; n++) {
+            for (var i = 0; i < hdr.length; i++) if (hdr[i] === names[n]) return i;
+          }
+          for (var n2 = 0; n2 < names.length; n2++) {
+            for (var j = 0; j < hdr.length; j++) if (hdr[j].indexOf(names[n2]) > -1) return j;
+          }
+          return knownHeader ? -1 : fallback; // only use fixed positions if the sheet has no recognisable header
+        }
+        var C = {
+          comm:   col(['commodity','product','category','key'], 0),
+          head:   col(['headline','title'], 1),
+          detail: col(['lead','lead paragraph','summary','description','snippet','excerpt','detail','body','text'], 2),
+          url:    col(['url','link','article url','href'], -1),
+          source: col(['source','publisher','outlet','site'], 3),
+          risk:   col(['risk_level','risk level','risk','level'], 4),
+          date:   col(['published','pub_date','date','updated'], 5)
+        };
+        console.log('News header:', JSON.stringify(hdr), 'column map:', JSON.stringify(C));
+        function cell(r, i) { return i > -1 ? (r[i] || '').trim() : ''; }
+        function isUrl(v) { return /^https?:\/\//i.test(v); }
         newsData = {};
         newsUpdated = '';
         rows.forEach(function(r) {
-          var comm = newsKey(r[0]);
-          if (!comm || comm === '_none') return;
-          if (!(r[1]||'').trim()) return; // skip rows with no headline
+          var comm = newsKey(cell(r, C.comm));
+          var head = cell(r, C.head);
+          if (!comm || comm === '_none' || !head) return;
+          var detail = cell(r, C.detail), url = cell(r, C.url), src = cell(r, C.source);
+          // Never show a bare link as the paragraph or source text — turn it into the "Read more" link
+          if (isUrl(detail)) { if (!url) url = detail; detail = ''; }
+          if (isUrl(src))    { if (!url) url = src;    src = ''; }
+          if (!src && url) { try { src = new URL(url).hostname.replace(/^www\./, ''); } catch (e) {} }
+          var dateStr = cell(r, C.date), d = parseNewsDate(dateStr);
+          if (d && (!newsUpdated || d > parseNewsDate(newsUpdated))) newsUpdated = dateStr;
           if (!newsData[comm]) newsData[comm] = [];
-          var upd = (r[5]||'').trim();
-          if (upd && (!newsUpdated || new Date(upd) > new Date(newsUpdated))) newsUpdated = upd;
-          newsData[comm].push({
-            headline:   (r[1]||'').trim(),
-            detail:     (r[2]||'').trim(),
-            source:     (r[3]||'').trim(),
-            risk_level: riskCode(r[4])
-          });
+          newsData[comm].push({ headline: head, detail: detail, source: src, url: url,
+                                date: dateStr, ts: d ? d.getTime() : 0, risk_level: riskCode(cell(r, C.risk)) });
         });
+        // Newest first
+        Object.keys(newsData).forEach(function(k){ newsData[k].sort(function(x, y){ return y.ts - x.ts; }); });
         console.log('News rows loaded for:', JSON.stringify(Object.keys(newsData)), 'latest update:', newsUpdated);
         newsLoaded = true;
         renderNews();
@@ -2531,7 +2858,26 @@ function renderTestingPanel() {
   var rEl = document.getElementById('tp-results');
   if (!rEl) return;
 
-  rEl.innerHTML = '<div style="font-size:11px;color:var(--muted);font-style:italic;padding:4px 0">Awaiting fiin member testing data.</div>';
+  // Map COMM keys to FIIN_TESTING keys
+  var keyMap = {
+    bakery_cereals:'bakery_cereals', prepared_dishes:'prepared_dishes',
+    cakes_conf:'cakes_conf', diet_foods:'diet_foods', nuts_snacks:'nuts_snacks'
+  };
+  var testKey = keyMap[cur] || cur;
+  var data = FIIN_TESTING[testKey];
+
+  if (!data) {
+    rEl.innerHTML = '<div style="font-size:11px;color:var(--muted);font-style:italic;padding:4px 0">No mock data for this category yet.</div>';
+    return;
+  }
+
+  // Individual results
+  rEl.innerHTML = data.results.map(function(r) {
+    return '<div class="tp-result-item">' +
+      '<div class="tp-result-meta">' + r.q + ' · anonymised</div>' +
+      r.text +
+    '</div>';
+  }).join('');
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2606,6 +2952,101 @@ setInterval(function() {
   loadLiveData();
 }, REFRESH_INTERVAL_MINUTES * 60 * 1000);
 
+// ── fiin testing data placeholder chart ──────────────────────────────────────
+(function() {
+  var ctx = document.getElementById('testingChart');
+  if (!ctx) return;
+  var quarters = ['Q1 2024','Q2 2024','Q3 2024','Q4 2024','Q1 2025'];
+  var tests     = [9200, 10800, 7400, 13700, 8200];  // illustrative
+  var anomalies = [67,   89,    82,   109,   43];     // illustrative
+  var authConc  = [25,   28,    28,   43,    18];     // illustrative
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: quarters,
+      datasets: [
+        {
+          type: 'bar',
+          label: 'Tests performed',
+          data: tests,
+          backgroundColor: '#8DC63F',
+          yAxisID: 'yLeft',
+          borderRadius: 3,
+          order: 2
+        },
+        {
+          type: 'line',
+          label: 'Anomalies detected',
+          data: anomalies,
+          borderColor: '#1A5FA5',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: '#1A5FA5',
+          yAxisID: 'yRight',
+          tension: 0.3,
+          order: 1,
+          datalabels: { display: false }
+        },
+        {
+          type: 'line',
+          label: 'Authenticity concerns',
+          data: authConc,
+          borderColor: '#C84040',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: '#C84040',
+          yAxisID: 'yRight',
+          tension: 0.3,
+          order: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              if (ctx.dataset.yAxisID === 'yLeft') {
+                return ctx.dataset.label + ': ' + ctx.raw.toLocaleString();
+              }
+              return ctx.dataset.label + ': ' + ctx.raw;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(0,0,0,.04)' },
+          ticks: { color: 'rgba(0,0,0,.4)', font: { size: 10 } },
+          border: { color: 'transparent' }
+        },
+        yLeft: {
+          type: 'linear',
+          position: 'left',
+          grid: { color: 'rgba(0,0,0,.04)' },
+          ticks: {
+            color: 'rgba(0,0,0,.4)', font: { size: 10 },
+            callback: function(v) { return (v/1000).toFixed(0) + 'k'; }
+          },
+          border: { color: 'transparent' }
+        },
+        yRight: {
+          type: 'linear',
+          position: 'right',
+          grid: { display: false },
+          ticks: { color: 'rgba(0,0,0,.4)', font: { size: 10 } },
+          border: { color: 'transparent' }
+        }
+      }
+    }
+  });
+})();
 </script>
 <div id="sc-float-tip"></div>
 </body>
