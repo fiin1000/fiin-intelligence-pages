@@ -620,26 +620,28 @@ tr:hover td { background: var(--mist); }
 .intel-title { font-size: 12px; font-weight: 600; color: var(--ink); }
 .intel-meta  { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
 .intel-items { display: flex; flex-direction: column; gap: 0; }
-.intel-item  {
-  display: flex; gap: 10px; align-items: flex-start;
-  padding: 9px 0; border-bottom: 0.5px solid var(--border);
-}
-.intel-item:last-child { border-bottom: none; padding-bottom: 0; }
-.intel-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.intel-group { padding: 8px 0 6px; border-bottom: 0.5px solid var(--border); }
+.intel-group:last-child { border-bottom: none; }
+.intel-group-head { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+.intel-group-count { font-size: 9px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.intel-item  { display: flex; gap: 8px; align-items: flex-start; padding: 4px 0; }
+.intel-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
 .intel-dot-r { background: #8B2020; }
 .intel-dot-a { background: #7A4800; }
 .intel-dot-b { background: #185FA5; }
 .intel-dot-g { background: #2D6B2D; }
 .intel-body  { min-width: 0; flex: 1; overflow-wrap: anywhere; word-break: break-word; }
-.intel-theme  { display: inline-block; font-size: 9px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .05em; padding: 1px 6px; border-radius: 3px; margin-bottom: 3px; }
+.intel-theme  { display: inline-block; font-size: 9px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .05em; padding: 1px 6px; border-radius: 3px; }
 .intel-theme-r { background: var(--alert-r-bg); color: var(--alert-r); }
 .intel-theme-a { background: var(--alert-a-bg); color: var(--alert-a); }
 .intel-theme-b { background: var(--blue-bg); color: var(--blue); }
-.intel-link   { color: var(--pine); font-style: normal; font-weight: 500; text-decoration: none; white-space: nowrap; }
-.intel-link:hover { text-decoration: underline; }
-.intel-headline { font-size: 12px; font-weight: 600; color: var(--ink); line-height: 1.4; margin-bottom: 3px; }
-.intel-detail   { font-size: 11px; color: var(--sub); line-height: 1.55; }
-.intel-src      { font-size: 10px; color: var(--muted); margin-top: 3px; font-style: italic; }
+.intel-headline { display: block; font-size: 11.5px; font-weight: 600; color: var(--ink); line-height: 1.35; text-decoration: none; }
+a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
+.intel-detail   { font-size: 11px; color: var(--sub); line-height: 1.5; }
+.intel-src      { font-size: 10px; color: var(--muted); margin-top: 1px; font-style: italic; }
+.intel-trade    { font-style: normal; font-size: 9px; font-weight: 600; color: var(--pine); text-transform: uppercase; letter-spacing: .04em; }
+.intel-more     { background: none; border: none; padding: 2px 0 0 14px; font: inherit; font-size: 10.5px; font-weight: 500; color: var(--pine); cursor: pointer; }
+.intel-more:hover { text-decoration: underline; }
 .intel-fraud {
   background: var(--lbg); border-radius: 6px;
   padding: 10px 12px; margin-top: 10px;
@@ -1844,18 +1846,55 @@ function renderSupplyChain() {
 // MARKET INTELLIGENCE
 // ─────────────────────────────────────────────────────────────────────────────
 
+var NEWS_PER_THEME = 2;   // headlines shown per theme before "Show all"
+var NEWS_THEME_ORDER = ['Fraud & integrity', 'Supply & demand', 'Prices & markets', 'Weather & climate',
+                        'Harvest & crop', 'Disease & pests', 'Trade & geopolitics', 'Logistics',
+                        'Inputs & energy', 'Policy & regulation'];
+var newsExpanded = {}, newsViewKey = null;
+
+function newsItemHtml(n) {
+  var risk = n.risk_level || 'b';
+  var meta = [n.source, n.date ? fmtNewsDate(n.date) : ''].filter(Boolean).join(' · ');
+  var href = n.url || n.findUrl;
+  return '<div class="intel-item">' +
+    '<div class="intel-dot intel-dot-' + risk + '"></div>' +
+    '<div class="intel-body">' +
+      (href ? '<a class="intel-headline" href="' + escHtml(href) + '" target="_blank" rel="noopener">' + escHtml(n.headline) + '</a>'
+            : '<div class="intel-headline">' + escHtml(n.headline) + '</div>') +
+      (n.detail ? '<div class="intel-detail">' + escHtml(n.detail) + '</div>' : '') +
+      '<div class="intel-src">' + (n.tier === 'trade' ? '<span class="intel-trade">Trade press</span> ' : '') + escHtml(meta) + '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest && e.target.closest('.intel-more');
+  if (!btn) return;
+  var t = btn.getAttribute('data-theme');
+  newsExpanded[t] = !newsExpanded[t];
+  renderNews();
+});
+
 // ── Render market intelligence section ──────────────────────────────────────
 function renderNews() {
   var section = document.getElementById('intel-section');
   var items   = document.getElementById('intel-items');
   var meta    = document.getElementById('intel-meta');
 
-  // Live Sheet news only — keyed by product, falling back to category
-  var prodKey   = typeof curProd !== 'undefined' ? curProd : cur;
-  var liveNews  = (newsData[newsKey(prodKey)] && newsData[newsKey(prodKey)].length) ? newsData[newsKey(prodKey)]
-                : (newsData[newsKey(cur)]     && newsData[newsKey(cur)].length)     ? newsData[newsKey(cur)]
-                : null;
-  var commNews  = liveNews || [];
+  // Live Sheet news: the product's own items plus its category's, without duplicates
+  var prodKey = typeof curProd !== 'undefined' ? curProd : cur;
+  var seenHead = {}, commNews = [];
+  [newsData[newsKey(prodKey)] || [], newsData[newsKey(cur)] || []].forEach(function(list) {
+    list.forEach(function(n) {
+      var k = (n.headline || '').toLowerCase().slice(0, 70);
+      if (seenHead[k]) return;
+      seenHead[k] = true;
+      commNews.push(n);
+    });
+  });
+
+  // Collapse any "show all" lists when the product changes
+  if (newsViewKey !== prodKey) { newsViewKey = prodKey; newsExpanded = {}; }
 
   section.style.display = 'block';
 
@@ -1863,30 +1902,42 @@ function renderNews() {
     : !newsLoaded ? 'Loading...'
     : 'Live from Sheet' + (newsUpdated ? ' · newest article ' + fmtNewsDate(newsUpdated) : '');
 
-  // Pills
-
-  // News items
   if (!commNews.length) {
     items.innerHTML = '<div class="intel-empty">' + (newsLoaded || !NEWS_CSV_URL
-      ? 'No market news in the Sheet for ' + prodKey + ' yet.'
+      ? 'No supply chain news in the Sheet for ' + escHtml(prodKey) + ' in the last 30 days.'
       : 'Loading market news&hellip;') + '</div>';
-  } else {
-    items.innerHTML = commNews.slice(0, NEWS_MAX_ITEMS).map(function(n) {
-      var risk = n.risk_level || 'b';
-      var meta = [n.source, n.date ? fmtNewsDate(n.date) : ''].filter(Boolean).join(' · ');
-      return '<div class="intel-item">' +
-        '<div class="intel-dot intel-dot-' + risk + '"></div>' +
-        '<div class="intel-body">' +
-          (n.theme ? '<span class="intel-theme intel-theme-' + risk + '">' + escHtml(n.theme) + '</span>' : '') +
-          '<div class="intel-headline">' + escHtml(n.headline) + '</div>' +
-          (n.detail ? '<div class="intel-detail">' + escHtml(n.detail) + '</div>' : '') +
-          '<div class="intel-src">' + escHtml(meta) +
-            (n.url || n.findUrl ? (meta ? ' &nbsp;' : '') + '<a class="intel-link" href="' + escHtml(n.url || n.findUrl) + '" target="_blank" rel="noopener">' + (n.url ? 'Read more →' : 'Find article →') + '</a>' : '') +
-          '</div>' +
-        '</div>' +
-      '</div>';
-    }).join('');
+    return;
   }
+
+  // Group by theme; fixed theme order, anything unlabelled goes last
+  var groups = {};
+  commNews.forEach(function(n) {
+    var t = n.theme || 'Other news';
+    (groups[t] = groups[t] || []).push(n);
+  });
+  var order = NEWS_THEME_ORDER.filter(function(t){ return groups[t]; })
+    .concat(Object.keys(groups).filter(function(t){ return NEWS_THEME_ORDER.indexOf(t) === -1; }));
+
+  var RANK = { r: 0, a: 1, b: 2 };
+  items.innerHTML = order.map(function(theme) {
+    // Trade press first, then newest
+    var list = groups[theme].slice().sort(function(x, y) {
+      return (y.tier === 'trade') - (x.tier === 'trade') || y.ts - x.ts;
+    });
+    var worst = list.reduce(function(w, n){ return RANK[n.risk_level] < RANK[w] ? n.risk_level : w; }, 'b');
+    var open  = !!newsExpanded[theme];
+    var shown = open ? list : list.slice(0, NEWS_PER_THEME);
+    var more  = list.length - NEWS_PER_THEME;
+    return '<div class="intel-group">' +
+      '<div class="intel-group-head">' +
+        '<span class="intel-theme intel-theme-' + worst + '">' + escHtml(theme) + '</span>' +
+        '<span class="intel-group-count">' + list.length + '</span>' +
+      '</div>' +
+      shown.map(newsItemHtml).join('') +
+      (more > 0 ? '<button type="button" class="intel-more" data-theme="' + escHtml(theme) + '">' +
+        (open ? 'Show fewer' : 'Show all ' + list.length + ' →') + '</button>' : '') +
+    '</div>';
+  }).join('');
 
   // Fraud signal removed
 }
@@ -1910,7 +1961,6 @@ function newsKey(s) {
 function decodeEntities(v) {
   var t = document.createElement('textarea'); t.innerHTML = v || ''; return t.value;
 }
-var NEWS_MAX_ITEMS = 10; // most recent items shown per product
 function escHtml(v) {
   return (v == null ? '' : String(v)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -2588,7 +2638,8 @@ function loadData() {
           source: col(['source','publisher','outlet','site'], 3),
           risk:   col(['risk_level','risk level','risk','level'], 4),
           date:   col(['published','pub_date','date','updated'], 5),
-          theme:  col(['theme','topic'], -1)
+          theme:  col(['theme','topic'], -1),
+          tier:   col(['tier'], -1)
         };
         console.log('News header:', JSON.stringify(hdr), 'column map:', JSON.stringify(C));
         function cell(r, i) { return i > -1 ? (r[i] || '').trim() : ''; }
@@ -2631,7 +2682,7 @@ function loadData() {
           if (d && (!newsUpdated || d > parseNewsDate(newsUpdated))) newsUpdated = dateStr;
           if (!newsData[comm]) newsData[comm] = [];
           newsData[comm].push({ headline: head, detail: detail, source: src, url: url, findUrl: findUrl,
-                                date: dateStr, ts: d ? d.getTime() : 0, theme: cell(r, C.theme), risk_level: riskCode(cell(r, C.risk)) });
+                                date: dateStr, ts: d ? d.getTime() : 0, theme: cell(r, C.theme), tier: cell(r, C.tier).toLowerCase(), risk_level: riskCode(cell(r, C.risk)) });
         });
         // Newest first
         Object.keys(newsData).forEach(function(k){ newsData[k].sort(function(x, y){ return y.ts - x.ts; }); });
