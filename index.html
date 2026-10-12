@@ -150,6 +150,25 @@ body {
   line-height: 1.2;
   text-transform: capitalize;
 }
+.overview-card { background: white; border: 1px solid var(--border); border-radius: 10px; margin: 6px 0 12px; overflow: hidden; }
+.ov-toggle { display: flex; align-items: center; gap: 14px; width: 100%; padding: 12px 18px; background: none; border: none; font: inherit; text-align: left; cursor: pointer; flex-wrap: wrap; }
+.ov-toggle:hover .ov-action { text-decoration: underline; }
+.ov-title { font-size: 13px; font-weight: 600; color: var(--forest); }
+.ov-summary { display: inline-flex; gap: 14px; font-size: 12.5px; color: var(--ink); flex-wrap: wrap; }
+.ov-summary b { font-weight: 600; }
+.ov-action { margin-left: auto; font-size: 12px; font-weight: 600; color: var(--pine); }
+.ov-body { border-top: 1px solid var(--border); max-height: 420px; overflow-y: auto; }
+.ov-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.ov-table th { position: sticky; top: 0; background: var(--mist); text-align: left; font-weight: 600; font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 8px 12px; border-bottom: 1px solid var(--border); }
+.ov-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--ink); }
+.ov-table tr.ov-row { cursor: pointer; }
+.ov-table tr.ov-row:hover td { background: #F4F8EE; }
+.ov-table td.ov-cat { color: var(--muted); white-space: nowrap; }
+.ov-table td.ov-prod { font-weight: 600; }
+.ov-lights { white-space: nowrap; }
+.ov-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: -1px; }
+.ov-dot.r { background: #C0392B; } .ov-dot.a { background: #D4820A; } .ov-dot.g { background: #4E9A2F; }
+.ov-note { padding: 9px 12px; font-size: 10.5px; color: var(--muted); background: var(--mist); }
 .com-glance { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font-size: 12px; color: #E8F2DD; }
 .com-glance-label { font-family: 'DM Mono', monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--sage); }
 .com-glance-item { display: inline-flex; align-items: center; gap: 6px; }
@@ -168,6 +187,24 @@ body {
 }
 .com-meta { text-align: right; flex-shrink: 0; }
 .com-meta-label { font-size: 10px; color: rgba(255,255,255,.4); font-family: 'DM Mono', monospace; }
+.print-btn { display: inline-block; margin: 4px 0 6px; background: rgba(255,255,255,.1); color: white; border: 1px solid rgba(255,255,255,.35); border-radius: 5px; padding: 5px 11px; font: inherit; font-size: 11.5px; font-weight: 600; cursor: pointer; }
+.print-btn:hover { background: rgba(255,255,255,.2); }
+.print-head { display: none; }
+@media print {
+  @page { size: A4 portrait; margin: 12mm; }
+  body { background: white !important; }
+  .header, .overview-card, .print-btn, #pw-gate, .setup-notice, .intel-more, .rasff-more, .tsg-more, .risk-info, footer { display: none !important; }
+  .print-head { display: block !important; border-bottom: 2px solid #1A3D1A; padding-bottom: 8px; margin-bottom: 10px; }
+  .ph-title { font-size: 18px; font-weight: 700; color: #1A3D1A; }
+  .ph-meta { font-size: 10.5px; color: #333; margin-top: 3px; line-height: 1.5; }
+  .com-header { background: #1A3D1A !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .card, .tsg-card, .res-card, .tp-panel, .rasff-list-card, .risk-light, .intel-section { break-inside: avoid; }
+  .risk-light, .com-glance-dot, .ov-dot, .risk-dot, .intel-dot, .rasff-sev, .sc-node { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .tsg-resources-row, .two-col { display: block !important; }
+  .res-body, .tp-results, .ov-body { max-height: none !important; overflow: visible !important; }
+  #tsg-content.clamped { max-height: none !important; }
+  #tsg-content.clamped::after { display: none; }
+}
 .com-meta-value { font-size: 11px; color: var(--lime); margin-top: 3px; }
 
 /* ── BODY ── */
@@ -275,6 +312,17 @@ input[type=range] { flex: 1; max-width: 140px; accent-color: var(--forest); curs
 .risk-empty { grid-column: 1 / -1; font-size: 11.5px; line-height: 1.5; color: var(--ink); background: var(--mist); border-radius: 6px; padding: 12px 14px; }
 .risk-empty b { font-weight: 600; }
 .risk-note { display: block; color: #7A4800; font-weight: 500; margin-bottom: 2px; }
+.risk-origins-title { font-size: 11.5px; font-weight: 600; color: var(--ink); margin: 14px 0 6px; }
+.risk-origins { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+.risk-origins th { text-align: left; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 5px 8px; border-bottom: 1px solid var(--border); background: var(--mist); }
+.risk-origins td { padding: 6px 8px; border-bottom: 1px solid var(--border); color: var(--ink); }
+.risk-origins td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.risk-origins th.num { text-align: right; }
+.risk-origins .below { color: #A02828; font-weight: 600; } .risk-origins .above { color: var(--muted); }
+.risk-origins .flag { font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 3px; margin-left: 6px; }
+.risk-origins .flag.gap { background: var(--alert-r-bg); color: var(--alert-r); } .risk-origins .flag.shift { background: var(--alert-a-bg); color: var(--alert-a); }
+.cpi-bar { display: inline-block; width: 46px; height: 6px; border-radius: 3px; background: var(--border); vertical-align: middle; margin-left: 6px; overflow: hidden; }
+.cpi-bar i { display: block; height: 100%; background: var(--muted); }
 .risk-foot { font-size: 10px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
 .card-sub { font-size: 10px; color: var(--muted); margin-bottom: 10px; line-height: 1.5; }
 .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
@@ -431,10 +479,22 @@ tr:hover td { background: var(--mist); }
 .rasff-status { padding: 28px 18px; text-align: center; font-size: 11px; color: var(--muted); line-height: 1.7; }
 .rasff-status a { color: var(--blue); text-decoration: none; }
 .rasff-status a:hover { text-decoration: underline; }
+.rasff-list-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 13px 16px 10px; border-bottom: 1px solid var(--border); }
+.rasff-list-title { font-size: 13px; font-weight: 600; color: var(--ink); }
+.rasff-list-meta { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.rasff-list-foot { padding: 9px 16px; background: var(--mist); border-top: 1px solid var(--border); font-size: 10.5px; color: var(--muted); line-height: 1.5; border-radius: 0 0 10px 10px; }
+.rasff-list-foot a { color: var(--pine); }
+.rasff-more { display: block; width: 100%; text-align: left; background: none; border: none; border-top: 1px solid var(--border); padding: 9px 16px; font: inherit; font-size: 12px; font-weight: 600; color: var(--pine); cursor: pointer; }
+.rasff-more:hover { text-decoration: underline; }
+.eu-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.eu-table th { text-align: left; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 7px 16px; border-bottom: 1px solid var(--border); background: var(--mist); }
+.eu-table td { padding: 8px 16px; border-bottom: 1px solid var(--border); color: var(--ink); vertical-align: top; }
+.eu-table td.eu-type { font-size: 11px; color: var(--muted); }
+.eu-empty { padding: 14px 16px; font-size: 12px; color: var(--muted); }
 .rasff-item { padding: 11px 16px; border-bottom: 1px solid var(--border); }
 .rasff-item:last-child { border-bottom: none; }
 .rasff-item-head { display: flex; align-items: flex-start; gap: 8px; justify-content: space-between; }
-.rasff-item-title { font-size: 11px; font-weight: 600; color: var(--ink); line-height: 1.4; flex: 1; }
+.rasff-item-title { font-size: 12px; font-weight: 600; color: var(--ink); line-height: 1.4; flex: 1; }
 .rasff-sev {
   font-size: 10px;
   font-family: 'DM Mono', monospace;
@@ -899,6 +959,19 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
   </div>
 
 
+  <!-- Overview of red/amber price signals across every product -->
+  <div class="overview-card" id="overview-card" style="display:none">
+    <button type="button" class="ov-toggle" id="ov-toggle" aria-expanded="false">
+      <span class="ov-title">Across all products</span>
+      <span class="ov-summary" id="ov-summary"></span>
+      <span class="ov-action" id="ov-action">Show list ▾</span>
+    </button>
+    <div class="ov-body" id="ov-body" hidden></div>
+  </div>
+
+  <!-- Shown only when printing -->
+  <div class="print-head" id="print-head"></div>
+
   <div class="com-header" id="com-header" style="margin-top:6px">
     <div>
       <div class="com-name" id="com-name"></div>
@@ -907,6 +980,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
     </div>
     <div class="com-meta">
       <div class="com-meta-label" id="com-period"></div>
+      <button type="button" class="print-btn" onclick="printSnapshot()">Print / save as PDF</button>
       <div class="com-meta-value">RASFF: daily &nbsp;·&nbsp; News: daily &nbsp;·&nbsp; Prices: monthly (HMRC imports) &nbsp;·&nbsp; fiin data: quarterly</div>
     </div>
   </div>
@@ -952,10 +1026,6 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
       <div class="sc-sub" id="sc-sub">RASFF alerts plotted by supply chain stage · Badge colour: red = serious/alert, amber = information, green = border rejection</div>
       <div class="sc-map" id="sc-map"></div>
       <div style="display:none">
-        <span id="rasff-com"></span>
-        <span id="rasff-badge"></span>
-        <span id="rasff-count"></span>
-        <div id="rasff-body"></div>
         <div id="fiin-indicators-body"></div>
       </div>
 
@@ -968,6 +1038,25 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
       </div>
 
     </div>
+    <!-- Latest RASFF alerts for the category -->
+    <div class="card rasff-list-card" id="rasff-list-card" style="margin-top:14px;padding:0">
+      <div class="rasff-list-head">
+        <span class="rasff-list-title">Latest RASFF alerts &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="rasff-com" style="color:var(--forest);text-transform:capitalize"></span></span>
+        <span class="rasff-list-meta"><span id="rasff-count"></span> <span id="rasff-badge" style="display:none"></span></span>
+      </div>
+      <div id="rasff-body"></div>
+      <div class="rasff-list-foot">EU/UK enforcement notifications for the whole category, last 6 months, newest first. Excludes pathogens, pesticides, mycotoxins and other contamination-only alerts. Source: <a href="https://webgate.ec.europa.eu/rasff-window/screen/search" target="_blank" rel="noopener">RASFF Window</a>, © European Union.</div>
+    </div>
+    <!-- EU Agri-Food Fraud Network monthly report: this category's entries -->
+    <div class="card rasff-list-card" id="eu-card" style="margin-top:14px;padding:0;display:none">
+      <div class="rasff-list-head">
+        <span class="rasff-list-title">EU fraud suspicions &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="eu-month" style="color:var(--forest)"></span></span>
+        <span class="rasff-list-meta" id="eu-count"></span>
+      </div>
+      <div id="eu-body"></div>
+      <div class="rasff-list-foot" id="eu-foot"></div>
+    </div>
+
     <div style="margin-top:14px">
       <div class="tp-panel">
         <div class="tp-head">
@@ -1035,6 +1124,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
             </div>
             <div style="position:relative;height:210px"><canvas id="riskChart"></canvas></div>
             </div>
+            <div id="risk-origins"></div>
             <div class="risk-foot" id="risk-foot"></div>
           </div>
 
@@ -1091,6 +1181,8 @@ var NEWS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR68kbziTvBG
 
 var FRAUD_CSV_URL = null;
 // Price risk signals: publish the Sheet's "trade" tab as CSV and paste the link here
+// EU Agri-Food Fraud Network monthly report: publish the Sheet's "eu_fraud" tab as CSV and paste the link here
+var EU_FRAUD_CSV_URL = null;
 var TRADE_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR68kbziTvBGmuCrsqLB8m_MbCKs6JrSidcoLtiybXwZHkyvaGwCtslyJtPeiN5pJCyMAbE-LydRyO1/pub?gid=56413450&single=true&output=csv';
 // var FRAUD_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/YOUR_PUBLISHED_ID/pub?gid=YOUR_GID&single=true&output=csv';
 
@@ -1897,13 +1989,15 @@ function loadTradeCsv(txt) {
   var hdr = (all[0] || []).map(function(h){ return (h || '').toLowerCase().trim(); });
   var ix = function(n){ return hdr.indexOf(n); };
   var P = ix('product'), M = ix('month'), O = ix('origin'), V = ix('value_gbp'), K = ix('kg'),
-      L = ix('hmrc_codes'), U = ix('updated'), N = ix('noun'), T = ix('note');
+      L = ix('hmrc_codes'), U = ix('updated'), N = ix('noun'), T = ix('note'), CP = ix('cpi_score'), CY = ix('cpi_year');
   tradeData = {};
   all.slice(1).forEach(function(r) {
     var p = (r[P] || '').trim(), m = (r[M] || '').trim(), o = (r[O] || '').trim();
     var v = parseFloat(r[V]), kg = parseFloat(r[K]);
     if (!p || !/^\d{4}-\d{2}$/.test(m) || !o || !(v > 0) || !(kg > 0)) return;
-    var t = tradeData[p] || (tradeData[p] = { months: {}, origins: {}, label: '', updated: '', noun: '', note: '' });
+    var t = tradeData[p] || (tradeData[p] = { months: {}, origins: {}, label: '', updated: '', noun: '', note: '', cpi: {}, cpiYear: '' });
+    if (CP > -1 && r[CP] !== '' && r[CP] != null && !isNaN(parseFloat(r[CP]))) t.cpi[o] = Math.round(parseFloat(r[CP]));
+    if (CY > -1 && r[CY]) t.cpiYear = r[CY];
     t.months[m] = true;
     var oo = t.origins[o] || (t.origins[o] = {});
     var cell = oo[m] || (oo[m] = { v: 0, kg: 0 });
@@ -2039,6 +2133,10 @@ function computeRiskSignals(prodName, t) {
   var draw = origins.slice().sort(function(a, b){ return b.now.kg - a.now.kg; }).slice(0, 3).map(function(x){ return x.o; });
   [shift.flag, gap.flag].forEach(function(f){ if (f && draw.indexOf(f) === -1) draw.push(f); });
 
+  [[gap, gap.flag], [shift, shift.flag]].forEach(function(x) {
+    var c = x[1] && t.cpi ? t.cpi[x[1]] : null;
+    if (c != null) x[0].text += ' Corruption Perceptions Index for ' + escHtml(x[1]) + ': ' + c + '/100.';
+  });
   return { lights: [swing, shift, gap], draw: draw, flags: [shift.flag, gap.flag], shiftFlag: shift.flag, gapFlag: gap.flag };
 }
 
@@ -2064,6 +2162,7 @@ function renderTradeRisk() {
            (covered ? ' (' + covered + ' products currently covered).' : '.')) +
       '</div>';
     document.getElementById('risk-foot').innerHTML = '';
+    document.getElementById('risk-origins').innerHTML = '';
     return;
   }
   chartBlock.style.display = '';
@@ -2114,12 +2213,162 @@ function renderTradeRisk() {
       }
     });
   }
+
+  // Main origins table: share, price vs UK average, and Transparency International CPI
+  var last6 = M.slice(-6), tot6 = tradeSum(t, null, last6);
+  var orows = Object.keys(t.origins).filter(function(o){ return o !== OTHER_ORIGINS; }).map(function(o) {
+    var a = tradeSum(t, o, last6);
+    return { o: o, kg: a.kg, p: a.p, share: tot6.kg ? a.kg / tot6.kg : 0 };
+  }).filter(function(r){ return r.kg > 0; }).sort(function(a, b){ return b.kg - a.kg; }).slice(0, 6);
+  [sig.gapFlag, sig.shiftFlag].forEach(function(f) {
+    if (f && !orows.some(function(r){ return r.o === f; })) {
+      var a = tradeSum(t, f, last6); if (a.kg > 0) orows.push({ o: f, kg: a.kg, p: a.p, share: a.kg / tot6.kg });
+    }
+  });
+  var hasCpi = orows.some(function(r){ return t.cpi && t.cpi[r.o] != null; });
+  document.getElementById('risk-origins').innerHTML = orows.length ?
+    '<div class="risk-origins-title">Main origins, last 6 months</div>' +
+    '<table class="risk-origins"><thead><tr><th>Origin</th><th class="num">Share of UK volume</th><th class="num">\u00a3/kg</th><th class="num">vs UK average</th>' +
+    (hasCpi ? '<th class="num">Corruption Perceptions Index</th>' : '') + '</tr></thead><tbody>' +
+    orows.map(function(r) {
+      var d = tot6.p ? r.p / tot6.p - 1 : 0;
+      var cpi = t.cpi ? t.cpi[r.o] : null;
+      return '<tr><td>' + escHtml(r.o) +
+        (r.o === sig.gapFlag ? '<span class="flag gap">price gap</span>' : '') + (r.o === sig.shiftFlag ? '<span class="flag shift">origin shift</span>' : '') +
+        '</td><td class="num">' + fmtPct(r.share) + '</td><td class="num">' + fmtGBP(r.p) + '</td>' +
+        '<td class="num ' + (d <= -RISK.gapAmber ? 'below' : 'above') + '">' + (Math.abs(d) < 0.005 ? 'level' : (d < 0 ? '\u2212' : '+') + fmtPct(d)) + '</td>' +
+        (hasCpi ? '<td class="num">' + (cpi != null ? cpi + '/100<span class="cpi-bar"><i style="width:' + cpi + '%"></i></span>' : '\u2014') + '</td>' : '') +
+        '</tr>';
+    }).join('') + '</tbody></table>' : '';
   document.getElementById('risk-foot').innerHTML =
     'Lines are 3-month rolling averages of customs value ÷ weight. They average across grades and pack formats, so treat them as ' +
     '<b>indicators to investigate, not market prices</b>. Source: HMRC Overseas Trade Statistics' +
     (t.label ? ' — ' + escHtml(t.label) : '') + '. © Crown copyright, Open Government Licence v3.0.' +
-    (t.updated ? ' Updated ' + escHtml(t.updated) + '.' : '');
+    (t.updated ? ' Updated ' + escHtml(t.updated) + '.' : '') +
+    (t.cpiYear ? ' Corruption Perceptions Index ' + escHtml(t.cpiYear) + ' © Transparency International, <a href="https://www.transparency.org/en/cpi" target="_blank" rel="noopener">transparency.org/cpi</a>, licensed under CC BY-ND 4.0: 0 = highly corrupt, 100 = very clean. Scores are shown as published.' : '');
 }
+
+// ── EU Agri-Food Fraud Network monthly report (European Commission) ─────────
+var euRows = [], euLoaded = false, euShowAll = false, euViewCat = null;
+// Report categories that do not match a page category's RASFF names exactly
+var EU_EXTRA_MATCH = { cocoa: /cocoa|chocolate/i };
+function loadEuCsv(txt) {
+  var all = parseCSV('x\n' + txt), hdr = (all[0] || []).map(function(h){ return (h || '').toLowerCase().trim(); });
+  euRows = all.slice(1).map(function(r){ var o = {}; hdr.forEach(function(h, i){ o[h] = (r[i] || '').trim(); }); return o; })
+    .filter(function(o){ return o.month || o.report_url; });
+}
+function renderEuFraud() {
+  var card = document.getElementById('eu-card');
+  if (!card) return;
+  if (!EU_FRAUD_CSV_URL || !euLoaded || !euRows.length) { card.style.display = 'none'; return; }
+  card.style.display = '';
+  if (euViewCat !== cur) { euViewCat = cur; euShowAll = false; }
+  var cats = (COMM[cur].rasffCategories || []).map(function(c){ return c.toLowerCase(); });
+  var extra = EU_EXTRA_MATCH[cur];
+  var items = euRows.filter(function(r) {
+    if (!r.commodity && !r.issue) return false;
+    var pc = (r.product_category || '').toLowerCase();
+    return cats.indexOf(pc) > -1 || (extra && extra.test(pc + ' ' + r.commodity));
+  });
+  var month = euRows[0].month, url = euRows[0].report_url;
+  document.getElementById('eu-month').textContent = month ? 'European Commission report, ' + fmtMonth(month) : 'European Commission report';
+  document.getElementById('eu-count').textContent = items.length + ' for ' + COMM[cur].label.toLowerCase();
+  var shown = euShowAll ? items : items.slice(0, 5);
+  document.getElementById('eu-body').innerHTML = items.length
+    ? '<table class="eu-table"><thead><tr><th>Commodity</th><th>Issue</th><th>Origin</th><th>Type</th></tr></thead><tbody>' +
+      shown.map(function(r) {
+        return '<tr><td>' + escHtml(r.commodity) + '</td><td>' + escHtml(r.issue) + '</td><td>' + escHtml(r.origin) +
+          '</td><td class="eu-type">' + escHtml(r.classification) + '</td></tr>';
+      }).join('') + '</tbody></table>' +
+      (items.length > 5 ? '<button type="button" class="rasff-more eu-more">' + (euShowAll ? 'Show fewer ▴' : 'Show all ' + items.length + ' ▾') + '</button>' : '')
+    : '<div class="eu-empty">No ' + escHtml(COMM[cur].label.toLowerCase()) + ' entries in this month’s report.</div>';
+  document.getElementById('eu-foot').innerHTML = 'Suspicions reported through the EU Agri-Food Fraud Network, RASFF and administrative assistance; <b>not confirmed fraud</b>. ' +
+    (url ? '<a href="' + escHtml(url) + '" target="_blank" rel="noopener">Full monthly report (PDF)</a>. ' : '') +
+    'Source: European Commission, Report on EU Agri-Food Fraud Suspicions, © European Union, reused under CC BY 4.0; only this category’s entries are shown.';
+}
+document.addEventListener('click', function(e) {
+  if (!(e.target.closest && e.target.closest('.eu-more'))) return;
+  euShowAll = !euShowAll; renderEuFraud();
+});
+
+// ── Overview: red / amber price signals across every product ─────────────────
+var ovOpen = false;
+function renderOverview() {
+  var card = document.getElementById('overview-card');
+  if (!card) return;
+  if (!tradeLoaded) { card.style.display = 'none'; return; }
+  var rows = [], seen = [];
+  Object.keys(COMM).forEach(function(cat) {
+    Object.keys(COMM[cat].products).forEach(function(p) {
+      var hit = tradeFor(p);
+      if (!hit) return;
+      var existing = null;
+      for (var i = 0; i < seen.length; i++) if (seen[i].t === hit.t) existing = seen[i];
+      if (existing) { existing.products.push(p); return; }   // shared dataset: one row, products listed together
+      var sig;
+      try { sig = computeRiskSignals(p, hit.t); } catch (e) { return; }
+      var lv = sig.lights.map(function(l){ return l.level; });
+      var row = { t: hit.t, cat: cat, products: [p], sig: sig,
+                  worst: lv.indexOf('r') > -1 ? 'r' : lv.indexOf('a') > -1 ? 'a' : 'g',
+                  reds: lv.filter(function(x){ return x === 'r'; }).length };
+      seen.push(row);
+      if (row.worst !== 'g') rows.push(row);
+    });
+  });
+  var red = rows.filter(function(r){ return r.worst === 'r'; }).length, amber = rows.length - red;
+  card.style.display = '';
+  document.getElementById('ov-summary').innerHTML =
+    '<span><span class="ov-dot r"></span><b>' + red + '</b> with a red price signal</span>' +
+    '<span><span class="ov-dot a"></span><b>' + amber + '</b> amber only</span>' +
+    '<span style="color:var(--muted)">of ' + seen.length + ' product datasets</span>';
+  rows.sort(function(a, b){ return (b.worst === 'r') - (a.worst === 'r') || b.reds - a.reds || COMM[a.cat].label.localeCompare(COMM[b.cat].label); });
+  var dots = function(sig){ return sig.lights.map(function(l){ return '<span class="ov-dot ' + l.level + '" title="' + l.name + ': ' + l.status + '"></span>'; }).join(''); };
+  var why = function(sig){
+    return sig.lights.filter(function(l){ return l.level !== 'g'; })
+      .map(function(l){ return l.name + ' (' + l.status.toLowerCase() + ')' + (l.name === 'Price gap' && sig.gapFlag ? ': ' + sig.gapFlag : l.name === 'Origin shift' && sig.shiftFlag ? ': ' + sig.shiftFlag : ''); })
+      .join(' · ');
+  };
+  document.getElementById('ov-body').innerHTML = rows.length
+    ? '<table class="ov-table"><thead><tr><th>Category</th><th>Product</th><th>Swing · Shift · Gap</th><th>What is flagged</th></tr></thead><tbody>' +
+      rows.map(function(r) {
+        var name = r.products.length > 3 ? r.products[0] + ' and ' + (r.products.length - 1) + ' related' : r.products.join(', ');
+        return '<tr class="ov-row" data-cat="' + r.cat + '" data-prod="' + escHtml(r.products[0]) + '"><td class="ov-cat">' + escHtml(COMM[r.cat].label) +
+          '</td><td class="ov-prod">' + escHtml(name) + '</td><td class="ov-lights">' + dots(r.sig) + '</td><td>' + escHtml(why(r.sig)) + '</td></tr>';
+      }).join('') + '</tbody></table>' +
+      '<div class="ov-note">Click a row to open that product. Products sharing one customs code appear once. Lights use the same rules as each product\u2019s price card.</div>'
+    : '<div class="ov-note">No product currently has a red or amber price signal.</div>';
+  document.getElementById('ov-body').hidden = !ovOpen;
+  document.getElementById('ov-action').textContent = ovOpen ? 'Hide list \u25B4' : 'Show list \u25BE';
+  document.getElementById('ov-toggle').setAttribute('aria-expanded', ovOpen ? 'true' : 'false');
+}
+document.addEventListener('click', function(e) {
+  if (e.target.closest && e.target.closest('#ov-toggle')) { ovOpen = !ovOpen; renderOverview(); return; }
+  var row = e.target.closest && e.target.closest('.ov-row');
+  if (!row) return;
+  var btn = document.querySelector('.pill[data-key="' + row.getAttribute('data-cat') + '"]');
+  if (btn) btn.click();
+  curProd = row.getAttribute('data-prod');
+  rebuildProductDropdown();
+  render();
+  var sec = document.getElementById('risk-card');
+  if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+// ── Printable, dated snapshot of the current category ───────────────────────
+function printSnapshot() {
+  var today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  var period = document.getElementById('com-period').textContent;
+  document.getElementById('print-head').innerHTML =
+    '<div class="ph-title">fiin Commodity Intelligence \u2014 ' + escHtml(COMM[cur].label) + ' snapshot</div>' +
+    '<div class="ph-meta">Printed ' + today + ' \u00b7 Product shown: ' + escHtml(curProd || '') +
+    (period ? ' \u00b7 ' + escHtml(period) : '') + ' \u00b7 RASFF and news as loaded on ' + today +
+    ' \u00b7 For fiin member use only. Evidence of horizon scanning, not a vulnerability assessment in itself.</div>';
+  // Open everything that is folded on screen
+  var tsg = document.getElementById('tsg-content'); if (tsg) tsg.classList.remove('clamped');
+  rasffShowAll = true; renderRasff();
+  window.print();
+}
+window.addEventListener('afterprint', function() { rasffShowAll = false; renderRasff(); renderTSG(); });
 
 // ── At-a-glance strip under the category name ───────────────────────────────
 function renderGlance() {
@@ -2524,8 +2773,14 @@ function render() {
   // Price risk signals (HMRC)
   try { renderTradeRisk(); } catch (e) { console.error('Price risk card error:', e); }
 
+  // EU fraud suspicions
+  try { renderEuFraud(); } catch (e) { console.error('EU fraud error:', e); }
+
   // At-a-glance strip
   try { renderGlance(); } catch (e) { console.error('Glance error:', e); }
+
+  // Overview across all products
+  try { renderOverview(); } catch (e) { console.error('Overview error:', e); }
 
   // Supply chain map
   renderSupplyChain();
@@ -2636,24 +2891,34 @@ function renderRasff() {
 
   bdg.textContent = 'via Sheet ✓';
   count.textContent = items.length + ' alert' + (items.length!==1?'s':'') +
-    (items[0].date ? ' · latest ' + items[0].date : '');
+    (items[0].date ? ' · latest ' + fmtNewsDate(items[0].date) : '');
 
-  body.innerHTML = items.map(function(r) {
+  if (rasffViewCat !== cur) { rasffViewCat = cur; rasffShowAll = false; }
+  var shown = rasffShowAll ? items : items.slice(0, RASFF_SHOWN);
+  body.innerHTML = shown.map(function(r) {
     var sc = sevClass(r.severity);
     return '<div class="rasff-item">' +
       '<div class="rasff-item-head">' +
-        '<span class="rasff-item-title">' + r.title + '</span>' +
+        '<span class="rasff-item-title">' + escHtml(r.title) + '</span>' +
         '<span class="rasff-sev ' + sc + '">' + (r.severity||'Alert') + '</span>' +
       '</div>' +
       '<div class="rasff-meta">' +
-        (r.country ? '🌍 Origin: ' + r.country : '') +
-        (r.date    ? (r.country?' &nbsp;':'') + '📅 ' + r.date : '') +
+        (r.country ? 'Origin: ' + escHtml(r.country) : '') +
+        (r.date    ? (r.country?' &nbsp;·&nbsp; ':'') + fmtNewsDate(r.date) : '') +
         (r.ref     ? ' &nbsp;Ref: ' + r.ref : '') +
       '</div>' +
-      (r.link ? '<a class="rasff-link" href="' + r.link + '" target="_blank">View on RASFF portal →</a>' : '') +
+      (r.link ? '<a class="rasff-link" href="' + escHtml(r.link) + '" target="_blank" rel="noopener">View on RASFF portal →</a>' : '') +
     '</div>';
-  }).join('');
+  }).join('') +
+  (items.length > RASFF_SHOWN ? '<button type="button" class="rasff-more">' +
+     (rasffShowAll ? 'Show fewer \u25B4' : 'Show all ' + items.length + ' alerts \u25BE') + '</button>' : '');
 }
+var RASFF_SHOWN = 5, rasffShowAll = false, rasffViewCat = null;
+document.addEventListener('click', function(e) {
+  if (!(e.target.closest && e.target.closest('.rasff-more'))) return;
+  rasffShowAll = !rasffShowAll;
+  renderRasff();
+});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DATA LOADING
@@ -2866,6 +3131,13 @@ function loadData() {
         renderNews();
       })
       .catch(function(e){ console.error('News fetch error:', e); newsLoaded = true; renderNews(); });
+  }
+
+  if (EU_FRAUD_CSV_URL) {
+    fetch(EU_FRAUD_CSV_URL)
+      .then(function(r){ return r.text(); })
+      .then(function(txt) { loadEuCsv(txt); euLoaded = true; renderEuFraud(); })
+      .catch(function(e){ console.error('EU fraud fetch error:', e); });
   }
 
   if (TRADE_CSV_URL) {
