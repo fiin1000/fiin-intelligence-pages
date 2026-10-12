@@ -631,6 +631,10 @@ tr:hover td { background: var(--mist); }
 .intel-dot-b { background: #185FA5; }
 .intel-dot-g { background: #2D6B2D; }
 .intel-body  { min-width: 0; flex: 1; overflow-wrap: anywhere; word-break: break-word; }
+.intel-theme  { display: inline-block; font-size: 9px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .05em; padding: 1px 6px; border-radius: 3px; margin-bottom: 3px; }
+.intel-theme-r { background: var(--alert-r-bg); color: var(--alert-r); }
+.intel-theme-a { background: var(--alert-a-bg); color: var(--alert-a); }
+.intel-theme-b { background: var(--blue-bg); color: var(--blue); }
 .intel-link   { color: var(--pine); font-style: normal; font-weight: 500; text-decoration: none; white-space: nowrap; }
 .intel-link:hover { text-decoration: underline; }
 .intel-headline { font-size: 12px; font-weight: 600; color: var(--ink); line-height: 1.4; margin-bottom: 3px; }
@@ -1873,6 +1877,7 @@ function renderNews() {
       return '<div class="intel-item">' +
         '<div class="intel-dot intel-dot-' + risk + '"></div>' +
         '<div class="intel-body">' +
+          (n.theme ? '<span class="intel-theme intel-theme-' + risk + '">' + escHtml(n.theme) + '</span>' : '') +
           '<div class="intel-headline">' + escHtml(n.headline) + '</div>' +
           (n.detail ? '<div class="intel-detail">' + escHtml(n.detail) + '</div>' : '') +
           '<div class="intel-src">' + escHtml(meta) +
@@ -2582,7 +2587,8 @@ function loadData() {
           url:    col(['url','link','article url','href'], -1),
           source: col(['source','publisher','outlet','site'], 3),
           risk:   col(['risk_level','risk level','risk','level'], 4),
-          date:   col(['published','pub_date','date','updated'], 5)
+          date:   col(['published','pub_date','date','updated'], 5),
+          theme:  col(['theme','topic'], -1)
         };
         console.log('News header:', JSON.stringify(hdr), 'column map:', JSON.stringify(C));
         function cell(r, i) { return i > -1 ? (r[i] || '').trim() : ''; }
@@ -2625,7 +2631,7 @@ function loadData() {
           if (d && (!newsUpdated || d > parseNewsDate(newsUpdated))) newsUpdated = dateStr;
           if (!newsData[comm]) newsData[comm] = [];
           newsData[comm].push({ headline: head, detail: detail, source: src, url: url, findUrl: findUrl,
-                                date: dateStr, ts: d ? d.getTime() : 0, risk_level: riskCode(cell(r, C.risk)) });
+                                date: dateStr, ts: d ? d.getTime() : 0, theme: cell(r, C.theme), risk_level: riskCode(cell(r, C.risk)) });
         });
         // Newest first
         Object.keys(newsData).forEach(function(k){ newsData[k].sort(function(x, y){ return y.ts - x.ts; }); });
