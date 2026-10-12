@@ -260,6 +260,8 @@ input[type=range] { flex: 1; max-width: 140px; accent-color: var(--forest); curs
 .risk-chip i { display: inline-block; width: 14px; height: 0; border-top: 2px solid; }
 .risk-chip i.uk { border-top-width: 3px; }
 .risk-chip i.dash { border-top-style: dashed; }
+.risk-empty { grid-column: 1 / -1; font-size: 11.5px; line-height: 1.5; color: var(--ink); background: var(--mist); border-radius: 6px; padding: 12px 14px; }
+.risk-empty b { font-weight: 600; }
 .risk-foot { font-size: 10px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
 .card-sub { font-size: 10px; color: var(--muted); margin-bottom: 10px; line-height: 1.5; }
 .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
@@ -887,7 +889,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
     </div>
     <div class="com-meta">
       <div class="com-meta-label" id="com-period"></div>
-      <div class="com-meta-value">RASFF: daily &nbsp;·&nbsp; News: daily &nbsp;·&nbsp; Prices: quarterly &nbsp;·&nbsp; fiin data: quarterly</div>
+      <div class="com-meta-value">RASFF: daily &nbsp;·&nbsp; News: daily &nbsp;·&nbsp; Prices: monthly (HMRC imports) &nbsp;·&nbsp; fiin data: quarterly</div>
     </div>
   </div>
 
@@ -988,7 +990,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
     </div>
     <div class="section-header" style="margin-top:32px">
       <div class="section-header-label">Product intelligence</div>
-      <div class="section-header-sub">Select a product to view price data and market news</div>
+      <div class="section-header-sub">Select a product to view price risk signals and supply chain news</div>
       <div class="section-header-line"></div>
     </div>
 
@@ -998,77 +1000,37 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
         <select id="prod-select" class="cat-select" style="font-size:13px;border-width:1.5px;border-radius:5px;padding:5px 28px 5px 10px;min-width:180px"></select>
         <span id="prod-sources" style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace"></span>
       </div>
-      <div class="stats" id="stats"></div>
-      <div id="price-alerts"></div>
-
-      <!-- Price charts + comparison table -->
-      <div class="period-row" style="margin:14px 0 10px">
-        <label>Period shown</label>
-        <input type="range" id="period-slider" min="0" max="2" step="1" value="1">
-        <span class="period-val" id="period-label">12 months</span>
-      </div>
-
-      <div class="two-col">
+      <div class="two-col" style="margin-top:14px">
         <div class="left">
 
           <!-- Price risk signals from HMRC UK import data (prototype) -->
-          <div class="card risk-card" id="risk-card" style="display:none;margin-bottom:14px;">
+          <div class="card risk-card" id="risk-card" style="margin-bottom:14px;">
             <div class="card-title">
               <span>Price risk signals &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="risk-prod" style="color:var(--forest)"></span></span>
               <span class="risk-badge">UK IMPORTS · HMRC</span>
             </div>
             <div class="card-sub" id="risk-sub"></div>
             <div class="risk-lights" id="risk-lights"></div>
+            <div id="risk-chart-block">
             <div class="risk-chart-head">
               <span class="risk-chart-title">Import price per kg: UK average vs main origins</span>
               <span class="legend" id="risk-legend"></span>
             </div>
             <div style="position:relative;height:210px"><canvas id="riskChart"></canvas></div>
+            </div>
             <div class="risk-foot" id="risk-foot"></div>
           </div>
 
-          <div class="card" id="data-tier-banner" style="margin-bottom:14px;"></div>
-
-          <div class="card" id="wholesale-card">
-            <div class="card-title">
-              <span id="price-chart-title">Price by origin</span>
-              <span id="wholesale-badge" style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#FAEEDA;color:#633806;margin-left:8px;">UK/EU WHOLESALE</span>
-            </div>
-            <div class="card-sub" id="chart1-sub"></div>
-            <div class="legend" id="legend1"></div>
-            <div style="position:relative;height:200px">
-              <canvas id="trendChart"></canvas>
-            </div>
-            <div id="chart1-asof" style="font-size:11px;color:var(--muted);margin-top:8px;font-family:'DM Mono',monospace"></div>
-          </div>
-
-          <div class="card" id="import-card">
-            <div class="card-title">
-              <span id="price-chart-title-import">Export price by origin</span>
-              <span id="import-badge" style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#E6F1FB;color:#0C447C;margin-left:8px;">EXPORT PRICE VS BENCHMARK</span>
-            </div>
-            <div class="card-sub" id="chart1-sub-import">Customs import value ÷ quantity, per kg, by origin country — HMRC</div>
-            <div class="legend" id="legend1-import"></div>
-            <div style="position:relative;height:185px">
-              <canvas id="trendChartImport"></canvas>
-            </div>
-            <div id="chart2-asof" style="font-size:11px;color:var(--muted);margin-top:8px;font-family:'DM Mono',monospace"></div>
-          </div>
-
-          <div class="card">
-            <div class="sources-row">
-              <span class="src-badge src-fiin">fiin analysis</span>
-              <span class="src-badge src-ext" id="src-label"></span>
-            </div>
-          </div>
 
           <div class="explainer">
-            <strong>How to read this:</strong> Every figure above states its exact source and the date
-            it was last reported. <strong>Live</strong> means a dated figure loaded from fiin's
-            connected Sheets; <strong>Sourced</strong> means a legitimate source is confirmed but a current
-            figure hasn't been pulled yet — treat it as a status, not a price; <strong>Not tracked</strong>
-            means no reliable source exists. <strong>RASFF alerts</strong> below reflect EU/UK
-            enforcement notifications for the whole category, not just this product.
+            <strong>How to read this:</strong> The three lights compare what UK importers paid per kg
+            (HMRC customs data) across countries and over the last two years.
+            <strong>Price swing</strong> flags unusual price moves; <strong>Origin shift</strong> flags a country
+            suddenly supplying much more, or becoming much cheaper; <strong>Price gap</strong> flags an origin far
+            cheaper than the UK average. <span style="color:#A02828;font-weight:600">Red</span> and
+            <span style="color:#7A4800;font-weight:600">amber</span> are prompts to check suppliers, specifications
+            and testing — not proof of fraud. Figures are averages across grades and arrive about two months after
+            the month ends. <strong>RASFF alerts</strong> below cover the whole category, not just this product.
           </div>
 
         </div>
@@ -1102,7 +1064,8 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
 // ─────────────────────────────────────────────────────────────────────────────
 // CONFIGURATION — paste your Google Sheet CSV URLs here after setup
 // ─────────────────────────────────────────────────────────────────────────────
-var PRICE_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR68kbziTvBGmuCrsqLB8m_MbCKs6JrSidcoLtiybXwZHkyvaGwCtslyJtPeiN5pJCyMAbE-LydRyO1/pub?gid=1313679453&single=true&output=csv';
+// Old price-sheet feed — replaced by the HMRC trade tab (TRADE_CSV_URL) and no longer displayed
+var PRICE_CSV_URL = null;
 // 'https://docs.google.com/spreadsheets/d/YOUR_ID/gviz/tq?tqx=out:csv&sheet=prices'
 
 var RASFF_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR68kbziTvBGmuCrsqLB8m_MbCKs6JrSidcoLtiybXwZHkyvaGwCtslyJtPeiN5pJCyMAbE-LydRyO1/pub?gid=203457174&single=true&output=csv';
@@ -2080,20 +2043,28 @@ function renderTradeRisk() {
   if (!card) return;
   var prod = typeof curProd !== 'undefined' ? curProd : null;
   var t = prod ? tradeData[prod] : null;
-  var tierEl = document.getElementById('data-tier-banner'), statsEl = document.getElementById('stats');
+  var chartBlock = document.getElementById('risk-chart-block');
+  document.getElementById('risk-prod').textContent = prod || '';
   if (!t || t.months.length < 12) {
-    card.style.display = 'none';
-    if (tierEl) tierEl.style.display = '';
-    if (statsEl) statsEl.style.display = '';
+    // Not covered yet: say so plainly and list what is
+    var covered = Object.keys(tradeData).filter(function(p){ return tradeData[p].months.length >= 12; });
+    if (riskChart) { riskChart.destroy(); riskChart = null; }
+    chartBlock.style.display = 'none';
+    document.getElementById('risk-sub').textContent = '';
+    document.getElementById('risk-lights').innerHTML = '<div class="risk-empty">' +
+      (!TRADE_CSV_URL ? 'Price risk signals are not connected yet.'
+       : !tradeLoaded ? 'Loading price risk signals&hellip;'
+       : '<b>Coming soon for ' + escHtml(prod) + '.</b> Price risk signals are being trialled on ' +
+         (covered.length ? covered.map(escHtml).join(', ') : 'a small set of products') +
+         ' before rolling out to every product. Meanwhile, see the supply chain news and RASFF alerts for this category.') +
+      '</div>';
+    document.getElementById('risk-foot').innerHTML = '';
     return;
   }
-  card.style.display = '';
-  if (tierEl) tierEl.style.display = 'none';   // the risk card replaces the "sourced / pending" status
-  if (statsEl) statsEl.style.display = 'none';
+  chartBlock.style.display = '';
 
   var sig = computeRiskSignals(prod, t);
   var M = t.months;
-  document.getElementById('risk-prod').textContent = prod;
   document.getElementById('risk-sub').textContent =
     'What UK importers paid per kg, by country of origin. ' + fmtMonth(M[0]) + ' – ' + fmtMonth(M[M.length - 1]) +
     ' (HMRC publishes about 2 months after the month ends).';
@@ -2470,10 +2441,7 @@ function render() {
   var live    = tier === 'live' ? LIVE_DATA[curProd] : null;
   var unit    = prod ? prod.unit : '';
 
-  // Everything pricing-related is wrapped in try/catch — a bug here must
-  // never be able to take down RASFF, News, Supply chain, Resources, TSG or
-  // the Testing panel below. If something breaks, it breaks visibly in the
-  // console and shows a clear on-page error state, not a silent halt.
+  // Header text — wrapped so a problem here can never stop the panels below
   try {
 
   // Commodity header
@@ -2486,131 +2454,8 @@ function render() {
   if (catSubEl) catSubEl.textContent = c.label + ' · TSG Quarterly Recommendations & Information · Supply chain fraud map · RASFF alerts (last 6 months)';
   document.getElementById('com-period').textContent  = lbls[0] + ' – ' + lbls[lbls.length-1];
 
-  // Tier banner — states plainly what confidence level this product's data has
-  var tierEl = document.getElementById('data-tier-banner');
-  if (tier === 'live') {
-    tierEl.innerHTML = '<span style="font-family:\'DM Mono\',monospace;font-size:11px;font-weight:600;padding:4px 10px;border-radius:4px;background:#E6F3EA;color:#1F5C33;">● LIVE DATA</span> <span style="font-size:12px;color:var(--muted);margin-left:8px">Figures from your connected Sheets — see the date on each figure below.</span>';
-  } else if (tier === 'sourced') {
-    tierEl.innerHTML = '<span style="font-family:\'DM Mono\',monospace;font-size:11px;font-weight:600;padding:4px 10px;border-radius:4px;background:#FAEEDA;color:#633806;">○ SOURCED — FIGURE PENDING</span> <span style="font-size:12px;color:var(--muted);margin-left:8px">A legitimate source is confirmed (' + (prod ? prod.sources : '') + ') but no current figure has been independently pulled yet. Not a price — a status.</span>';
-  } else {
-    tierEl.innerHTML = '<span style="font-family:\'DM Mono\',monospace;font-size:11px;font-weight:600;padding:4px 10px;border-radius:4px;background:#F1EFE8;color:#5F5E5A;">— NOT TRACKED</span> <span style="font-size:12px;color:var(--muted);margin-left:8px">No reliable public source has been found for ' + curProd + '.</span>';
-  }
-
-  var wholesaleCardEl = document.getElementById('wholesale-card');
-  var importCardEl    = document.getElementById('import-card');
-
-  if (tier === 'live') {
-    wholesaleCardEl.style.display = '';
-    importCardEl.style.display = live.origins && live.origins.length ? '' : 'none';
-    document.getElementById('src-label').textContent = 'Sources: ' + live.benchmarkSource + (live.ukSource ? ' · ' + live.ukSource : '');
-
-    // Chart 1: UK/EU wholesale — CURRENT VALUES ONLY, not a time series.
-    // We only have a single snapshot per origin (AHDB's latest week, EU API's
-    // latest week) — plotting that as a flat line across months would imply
-    // a trend that doesn't exist. A bar of current values is the honest form.
-    var wholesaleList = live.wholesale || (live.ukWholesaleGBP ? [{ n:'UK', gbp:live.ukWholesaleGBP, asOf:live.ukAsOf, source:'AHDB' }] : []);
-    document.getElementById('chart1-sub').textContent = wholesaleList.length
-      ? curProd + ' — deadweight/farmgate price paid to producers, ' + unit + '. Bars show the most recent reported figure per country — this is not a price trend, each is a single snapshot.'
-      : curProd + ' — no UK or EU wholesale/farmgate figure has been pulled for this product yet.';
-    document.getElementById('chart1-asof').textContent = wholesaleList.length
-      ? wholesaleList.map(function(w){ return w.n + ': ' + w.gbp + ' ' + unit + ', ' + w.asOf + (w.spec ? ' (' + w.spec + ')' : '') + ' — ' + (w.source||''); }).join(' · ')
-      : '';
-
-    var COVE = ['#eda100','#2a78d6','#eb6834','#1baf7a','#e87ba4','#008300','#4a3aa7'];
-    document.getElementById('legend1').innerHTML = ''; // bar labels carry the identity directly, no separate legend needed
-    if (tChart) tChart.destroy();
-    if (wholesaleList.length) {
-      tChart = new Chart(document.getElementById('trendChart'), {
-        type:'bar',
-        data:{ labels: wholesaleList.map(function(w){ return w.n + ' (' + w.asOf + ')'; }),
-               datasets:[{ data: wholesaleList.map(function(w){ return w.gbp; }), backgroundColor: wholesaleList.map(function(w,i){ return COVE[i%COVE.length]; }), borderRadius:4, barThickness:26 }] },
-        options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-          scales:{ x:{grid:{color:grd},ticks:{color:txt,font:{size:10}},border:{color:'transparent'}},
-                   y:{grid:{display:false},ticks:{color:txt,font:{size:11}},border:{color:'transparent'}} } }
-      });
-    }
-
-    // Chart 2: export price by origin, shown as DIVERGENCE from the global benchmark —
-    // answers "which origin is priced oddly" directly, rather than just listing absolutes
-    if (live.origins && live.origins.length && live.benchmarkSeries) {
-      var benchLatestUSD = live.benchmarkSeries.usd[live.benchmarkSeries.usd.length-1];
-      var benchLatestLabel = live.benchmarkSeries.labels[live.benchmarkSeries.labels.length-1];
-      document.getElementById('price-chart-title-import').textContent = 'Export price — divergence from global benchmark';
-      document.getElementById('chart1-sub-import').textContent = curProd + ' — % difference from global benchmark (' + toGBP(benchLatestUSD) + ' ' + unit + ', ' + benchLatestLabel + ')';
-      var divOrigins = live.origins.slice().sort(function(a,b){ return b.usd - a.usd; });
-      document.getElementById('legend1-import').innerHTML =
-        '<span class="leg"><span class="leg-swatch" style="background:#2a78d6"></span>Above benchmark</span>' +
-        '<span class="leg"><span class="leg-swatch" style="background:#e34948"></span>Below benchmark</span>';
-      document.getElementById('chart2-asof').textContent = 'Benchmark: ' + live.benchmarkSource + '. Each origin dated individually — see origin labels. Export (FOB) price — not the same market level as the wholesale panel above.';
-      var divLabels = divOrigins.map(function(o){ return o.n + ' (' + o.asOf + ')'; });
-      var divValues = divOrigins.map(function(o){ return Math.round(((o.usd - benchLatestUSD)/benchLatestUSD)*1000)/10; });
-      var divColors = divValues.map(function(v){ return v>=0 ? '#2a78d6' : '#e34948'; });
-      if (tChartImport) tChartImport.destroy();
-      tChartImport = new Chart(document.getElementById('trendChartImport'), {
-        type:'bar',
-        data:{ labels:divLabels, datasets:[{ data:divValues, backgroundColor:divColors, borderRadius:4, barThickness:26 }] },
-        options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
-          plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:function(ctx){ return (ctx.raw>=0?'+':'')+ctx.raw+'% vs benchmark'; } } } },
-          scales:{ x:{grid:{color:grd},ticks:{color:txt,font:{size:10},callback:function(v){return (v>=0?'+':'')+v+'%';}},border:{color:'transparent'}},
-                   y:{grid:{display:false},ticks:{color:txt,font:{size:11}},border:{color:'transparent'}} } }
-      });
-    } else if (live.origins && live.origins.length) {
-      // Live export data exists but no benchmark to diverge against (e.g. a
-      // product added purely from a live CSV pull, not in the hardcoded set)
-      document.getElementById('price-chart-title-import').textContent = 'Export price by origin';
-      document.getElementById('chart1-sub-import').textContent = curProd + ' — export price (FOB), ' + unit + ' — no global benchmark available to compare against';
-      var expLabels = live.origins.map(function(o){ return o.n + ' (' + o.asOf + ')'; });
-      var expValues = live.origins.map(function(o){ return toGBP(o.usd); });
-      document.getElementById('legend1-import').innerHTML = '';
-      document.getElementById('chart2-asof').textContent = 'UN Comtrade, export unit value. No IMF/FRED benchmark confirmed for this product yet — showing absolute prices, not divergence.';
-      if (tChartImport) tChartImport.destroy();
-      tChartImport = new Chart(document.getElementById('trendChartImport'), {
-        type:'bar',
-        data:{ labels:expLabels, datasets:[{ data:expValues, backgroundColor:'#2a78d6', borderRadius:4, barThickness:26 }] },
-        options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-          scales:{ x:{grid:{color:grd},ticks:{color:txt,font:{size:10}},border:{color:'transparent'}},
-                   y:{grid:{display:false},ticks:{color:txt,font:{size:11}},border:{color:'transparent'}} } }
-      });
-    }
-
-    // Stats — computed only from real live data
-    var benchStat = live.benchmarkSeries
-      ? stat('Global benchmark', toGBP(live.benchmarkSeries.usd[live.benchmarkSeries.usd.length-1]) + ' ' + unit, 'as of ' + live.benchmarkSeries.labels[live.benchmarkSeries.labels.length-1], 55, '#2D6B2D')
-      : stat('Global benchmark', 'n/a', 'Not yet confirmed for this product', 0, '#5F5E5A');
-    document.getElementById('stats').innerHTML = [
-      benchStat,
-      stat('Origins tracked', (live.origins||[]).length, 'live, dated figures', 40, '#2D6B2D'),
-      stat('Data tier', 'Live', 'From connected Sheets', 100, '#1F5C33')
-    ].join('');
-    document.getElementById('price-alerts').innerHTML = '';
-
-  } else if (tier === 'sourced') {
-    wholesaleCardEl.style.display = 'none';
-    importCardEl.style.display = 'none';
-    document.getElementById('src-label').textContent = 'Confirmed source: ' + (prod ? prod.sources : '') + ' — figure not yet pulled';
-    document.getElementById('stats').innerHTML = [
-      stat('Status', 'Sourced', 'No live figure yet', 0, '#7A4800'),
-      stat('Confirmed source', prod ? prod.sources : '—', 'See monthly update SOP', 0, '#7A4800')
-    ].join('');
-    document.getElementById('price-alerts').innerHTML = '';
-
-  } else {
-    wholesaleCardEl.style.display = 'none';
-    importCardEl.style.display = 'none';
-    document.getElementById('src-label').textContent = 'No source found';
-    document.getElementById('stats').innerHTML = stat('Status', 'Not tracked', 'No reliable source exists', 0, '#5F5E5A');
-    document.getElementById('price-alerts').innerHTML = '';
-  }
-
   } catch (e) {
-    console.error('Pricing panel error for ' + curProd + ':', e);
-    var banner = document.getElementById('data-tier-banner');
-    if (banner) banner.innerHTML = '<span style="font-family:\'DM Mono\',monospace;font-size:11px;font-weight:600;padding:4px 10px;border-radius:4px;background:#FCEBEB;color:#791F1F;">⚠ DISPLAY ERROR</span> <span style="font-size:12px;color:var(--muted);margin-left:8px">Something went wrong rendering this product\'s pricing — check the browser console. The rest of the page is unaffected.</span>';
-    var ws = document.getElementById('wholesale-card'), im = document.getElementById('import-card');
-    if (ws) ws.style.display = 'none';
-    if (im) im.style.display = 'none';
-    document.getElementById('stats').innerHTML = '';
-    document.getElementById('price-alerts').innerHTML = '';
+    console.error('Header update error:', e);
   }
 
   // RASFF
@@ -2968,8 +2813,8 @@ function loadData() {
   if (TRADE_CSV_URL) {
     fetch(TRADE_CSV_URL)
       .then(function(r){ return r.text(); })
-      .then(function(txt) { loadTradeCsv(txt); tradeLoaded = true; renderTradeRisk(); })
-      .catch(function(e){ console.error('Trade data fetch error:', e); });
+      .then(function(txt) { loadTradeCsv(txt); tradeLoaded = true; rebuildProductDropdown(); renderTradeRisk(); })
+      .catch(function(e){ console.error('Trade data fetch error:', e); tradeLoaded = true; renderTradeRisk(); });
   }
 
   if (FRAUD_CSV_URL) {
@@ -3279,9 +3124,9 @@ function rebuildProductDropdown() {
   sel.innerHTML = '';
   Object.keys(COMM[cur].products).forEach(function(p) {
     var opt = document.createElement('option');
-    var t = getTier(cur, p);
+    var hasRisk = tradeData[p] && tradeData[p].months.length >= 12;
     opt.value = p;
-    opt.textContent = t==='live' ? '● ' + p : t==='sourced' ? '○ ' + p + ' (sourced, pending)' : p + ' (not tracked)';
+    opt.textContent = hasRisk ? '\u25CF ' + p + '  (price signals)' : p;
     if (p === curProd) opt.selected = true;
     sel.appendChild(opt);
   });
@@ -3294,15 +3139,9 @@ document.getElementById('prod-select').addEventListener('change', function() {
 
 rebuildProductDropdown();
 
-document.getElementById('period-slider').addEventListener('input', function() {
-  period = parseInt(this.value);
-  document.getElementById('period-label').textContent = PERIODS[period];
-  render();
-});
 
 render();
 loadData();
-loadLiveData(); // fetches Comtrade/EU sheets if CSV_URLs are configured above, re-renders on success
 
 // Auto-refresh — Google Sheets' "publish to web" CSV links always serve the
 // current sheet contents on every request (no manual republish step needed
@@ -3311,7 +3150,6 @@ loadLiveData(); // fetches Comtrade/EU sheets if CSV_URLs are configured above, 
 var REFRESH_INTERVAL_MINUTES = 30;
 setInterval(function() {
   loadData();
-  loadLiveData();
 }, REFRESH_INTERVAL_MINUTES * 60 * 1000);
 
 // ── fiin testing data placeholder chart ──────────────────────────────────────
