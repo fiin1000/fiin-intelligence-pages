@@ -262,6 +262,7 @@ input[type=range] { flex: 1; max-width: 140px; accent-color: var(--forest); curs
 .risk-chip i.dash { border-top-style: dashed; }
 .risk-empty { grid-column: 1 / -1; font-size: 11.5px; line-height: 1.5; color: var(--ink); background: var(--mist); border-radius: 6px; padding: 12px 14px; }
 .risk-empty b { font-weight: 600; }
+.risk-note { display: block; color: #7A4800; font-weight: 500; margin-bottom: 2px; }
 .risk-foot { font-size: 10px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
 .card-sub { font-size: 10px; color: var(--muted); margin-bottom: 10px; line-height: 1.5; }
 .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
@@ -1889,8 +1890,57 @@ document.addEventListener('click', function(e) {
 var tradeData = {};      // product → { months:[], origins:{name:{m:{v,kg}}}, label, updated }
 var tradeLoaded = false;
 var riskChart = null;
-// What the HMRC code actually covers, for use in sentences (defaults to the product name)
-var TRADE_NOUNS = { 'Blossom honey': 'honey', 'Prawns (warm water)': 'warm-water prawn', 'Beef': 'boneless beef', 'Pistachios': 'pistachio' };
+// Products that share one HMRC dataset, because customs codes do not split them
+var TRADE_SHARED = {
+  'Blossom honey':  { from: 'Honey (all types)', note: 'Customs data does not separate honey by type: this shows all natural honey imports.' },
+  'Manuka honey':   { from: 'Honey (all types)', note: 'Customs data does not separate honey by type: this shows all natural honey imports.' },
+  'Acacia honey':   { from: 'Honey (all types)', note: 'Customs data does not separate honey by type: this shows all natural honey imports.' },
+  'Heather honey':  { from: 'Honey (all types)', note: 'Customs data does not separate honey by type: this shows all natural honey imports.' },
+  'Clover honey':   { from: 'Honey (all types)', note: 'Customs data does not separate honey by type: this shows all natural honey imports.' },
+  'Blended honey':  { from: 'Honey (all types)', note: 'Customs data does not separate honey by type: this shows all natural honey imports.' },
+  'Paprika':        { from: 'Dried capsicum (paprika and chilli)', note: 'Customs data does not separate paprika from dried chilli: this shows both.' },
+  'Chilli':         { from: 'Dried capsicum (paprika and chilli)', note: 'Customs data does not separate dried chilli from paprika: this shows both.' },
+  'Chocolate (dark)': { from: 'Chocolate (blocks and bars)', note: 'Customs data does not separate dark from milk chocolate: this shows all chocolate blocks and bars.' },
+  'Chocolate (milk)': { from: 'Chocolate (blocks and bars)', note: 'Customs data does not separate milk from dark chocolate: this shows all chocolate blocks and bars.' },
+  'Eggs (free range)': { from: 'Eggs in shell', note: 'Customs data does not record the welfare system: this shows all hens’ eggs in shell.' },
+  'Eggs (barn/caged)': { from: 'Eggs in shell', note: 'Customs data does not record the welfare system: this shows all hens’ eggs in shell.' }
+};
+// Products with no usable HMRC code, and why
+var TRADE_NOT_COVERED = {
+  'Veal':                   'Customs codes group veal with all other beef.',
+  'Venison':                'Customs codes group venison with other game meat.',
+  'Oregano':                'Customs codes group oregano with other dried herbs and plants.',
+  'Basil':                  'Customs codes group basil with other herbs.',
+  'Rosemary':               'Customs codes group rosemary with other herbs.',
+  'Ready meals (chilled)':  'There is no customs code for ready meals as a group.',
+  'Ready meals (frozen)':   'There is no customs code for ready meals as a group.',
+  'Ethnic ready meals':     'There is no customs code for ready meals as a group.',
+  'Pasta sauces':           'Customs codes group pasta sauces with all other sauces.',
+  'Cakes':                  'Customs codes group cakes with other bakery products.',
+  'Vitamin supplements':    'Customs codes group supplements with other food preparations.',
+  'Sports nutrition bars':  'Customs codes group nutrition bars with other food preparations.',
+  'Meal replacements':      'Customs codes group meal replacements with other food preparations.',
+  'Gluten-free products':   'There is no customs code for gluten-free products.',
+  'Pumpkin seeds':          'Customs codes group pumpkin seeds with other oil seeds.',
+  'Energy drinks':          'Customs codes group energy drinks with other non-alcoholic drinks.',
+  'Coconut water':          'Customs codes group coconut water with other fruit juices.'
+};
+var OTHER_ORIGINS = 'Other origins';
+// The HMRC dataset behind a page product, and any note about what it covers
+function tradeFor(prod) {
+  var sh = TRADE_SHARED[prod];
+  var t = tradeData[sh ? sh.from : prod] || tradeData[prod];   // falls back to an older per-product tab
+  if (!t || t.months.length < 12) return null;
+  return { t: t, note: sh ? sh.note : (t.note || '') };
+}
+// Plural for sentences such as "Apples from Italy averaged…": mass nouns stay as they are
+var MASS_NOUNS = /(honey|beef|pork|meat|chicken|turkey|duck|goose|salmon|cod|haddock|tuna|mackerel|cuttlefish|crab|saffron|cumin|capsicum|turmeric|cinnamon|white pepper|wheat|rice|barley|maize|rye|milk|cream|butter|cheddar|mozzarella|yoghurt|powder|chocolate|confectionery|whey|juice|water|garlic|broccoli|oats|albumin|liquid egg|dried egg|soup)$/i;
+function nounPlural(n) {
+  if (MASS_NOUNS.test(n)) return n;
+  if (/(tomato|potato)$/i.test(n)) return n + 'es';
+  if (/[^aeiou]y$/i.test(n)) return n.slice(0, -1) + 'ies';
+  return /s$/i.test(n) ? n : n + 's';
+}
 function possessive(name) { return /s$/i.test(name) ? name + '\u2019' : name + '\u2019s'; }
 
 // Thresholds — kept here so fiin's technical group can tune them
@@ -1908,19 +1958,21 @@ function loadTradeCsv(txt) {
   var hdr = (all[0] || []).map(function(h){ return (h || '').toLowerCase().trim(); });
   var ix = function(n){ return hdr.indexOf(n); };
   var P = ix('product'), M = ix('month'), O = ix('origin'), V = ix('value_gbp'), K = ix('kg'),
-      L = ix('hmrc_codes'), U = ix('updated');
+      L = ix('hmrc_codes'), U = ix('updated'), N = ix('noun'), T = ix('note');
   tradeData = {};
   all.slice(1).forEach(function(r) {
     var p = (r[P] || '').trim(), m = (r[M] || '').trim(), o = (r[O] || '').trim();
     var v = parseFloat(r[V]), kg = parseFloat(r[K]);
     if (!p || !/^\d{4}-\d{2}$/.test(m) || !o || !(v > 0) || !(kg > 0)) return;
-    var t = tradeData[p] || (tradeData[p] = { months: {}, origins: {}, label: '', updated: '' });
+    var t = tradeData[p] || (tradeData[p] = { months: {}, origins: {}, label: '', updated: '', noun: '', note: '' });
     t.months[m] = true;
     var oo = t.origins[o] || (t.origins[o] = {});
     var cell = oo[m] || (oo[m] = { v: 0, kg: 0 });
     cell.v += v; cell.kg += kg;
     if (L > -1 && r[L]) t.label = r[L];
     if (U > -1 && r[U]) t.updated = r[U];
+    if (N > -1 && r[N]) t.noun = r[N];
+    if (T > -1 && r[T]) t.note = r[T];
   });
   Object.keys(tradeData).forEach(function(p) {
     tradeData[p].months = Object.keys(tradeData[p].months).sort().slice(-24);
@@ -1958,7 +2010,7 @@ function fmtMonth(m) {
 function computeRiskSignals(prodName, t) {
   var M = t.months, n = M.length;
   var last3 = M.slice(-3), last6 = M.slice(-6), prev12 = M.slice(Math.max(0, n - 18), n - 6);
-  var noun = TRADE_NOUNS[prodName] || prodName.toLowerCase();
+  var noun = t.noun || prodName.toLowerCase();
 
   // ── 1. Price swing: UK average now vs its 2-year average, and recent spread ──
   var ukNow = tradeSum(t, null, last3).p, ukAvg = tradeSum(t, null, M).p;
@@ -1977,7 +2029,7 @@ function computeRiskSignals(prodName, t) {
 
   // ── 2. Origin shift: change in share of UK volume, and origins getting cheaper ──
   var totNow = tradeSum(t, null, last6), totBefore = tradeSum(t, null, prev12);
-  var origins = Object.keys(t.origins).map(function(o) {
+  var origins = Object.keys(t.origins).filter(function(o){ return o !== OTHER_ORIGINS; }).map(function(o) {
     var a = tradeSum(t, o, last6), b = tradeSum(t, o, prev12);
     return { o: o, now: a, before: b,
              shareNow: totNow.kg ? a.kg / totNow.kg : 0, shareBefore: totBefore.kg ? b.kg / totBefore.kg : 0 };
@@ -2025,7 +2077,7 @@ function computeRiskSignals(prodName, t) {
   gap.flag = gap.level !== 'g' ? g0.x.o : null;
   gap.text = !g0 ? 'Not enough volume to compare origins.'
     : gap.level !== 'g'
-      ? escHtml((noun.charAt(0).toUpperCase() + noun.slice(1)).replace(/ prawn$/, ' prawns').replace(/^Pistachio$/, 'Pistachios')) + ' from <b>' + escHtml(g0.x.o) + '</b> averaged <b>' + fmtGBP(g0.x.now.p) + '/kg</b>, ' +
+      ? escHtml(nounPlural(noun.charAt(0).toUpperCase() + noun.slice(1))) + ' from <b>' + escHtml(g0.x.o) + '</b> averaged <b>' + fmtGBP(g0.x.now.p) + '/kg</b>, ' +
         fmtPct(g0.gap) + ' below the UK average of ' + fmtGBP(totNow.p) + '/kg (last 6 months, ' + fmtPct(g0.x.shareNow) + ' of volume).' +
         ' Gaps this large can signal substitution, dilution or a lower grade sold as premium.'
       : 'No major origin is far below the UK average of ' + fmtGBP(totNow.p) + '/kg. Cheapest: ' +
@@ -2042,21 +2094,22 @@ function renderTradeRisk() {
   var card = document.getElementById('risk-card');
   if (!card) return;
   var prod = typeof curProd !== 'undefined' ? curProd : null;
-  var t = prod ? tradeData[prod] : null;
+  var hit = prod ? tradeFor(prod) : null, t = hit ? hit.t : null;
   var chartBlock = document.getElementById('risk-chart-block');
   document.getElementById('risk-prod').textContent = prod || '';
-  if (!t || t.months.length < 12) {
+  if (!t) {
     // Not covered yet: say so plainly and list what is
-    var covered = Object.keys(tradeData).filter(function(p){ return tradeData[p].months.length >= 12; });
     if (riskChart) { riskChart.destroy(); riskChart = null; }
     chartBlock.style.display = 'none';
     document.getElementById('risk-sub').textContent = '';
+    var covered = Object.keys(COMM).reduce(function(n, c){ return n + Object.keys(COMM[c].products).filter(function(p){ return tradeFor(p); }).length; }, 0);
     document.getElementById('risk-lights').innerHTML = '<div class="risk-empty">' +
       (!TRADE_CSV_URL ? 'Price risk signals are not connected yet.'
        : !tradeLoaded ? 'Loading price risk signals&hellip;'
-       : '<b>Coming soon for ' + escHtml(prod) + '.</b> Price risk signals are being trialled on ' +
-         (covered.length ? covered.map(escHtml).join(', ') : 'a small set of products') +
-         ' before rolling out to every product. Meanwhile, see the supply chain news and RASFF alerts for this category.') +
+       : TRADE_NOT_COVERED[prod] ? '<b>Not available for ' + escHtml(prod) + '.</b> ' + escHtml(TRADE_NOT_COVERED[prod]) +
+           ' HMRC import data can only be shown where a product has its own customs code. See the supply chain news and RASFF alerts for this category.'
+       : '<b>No HMRC import data yet for ' + escHtml(prod) + '.</b> It will appear after the next monthly update' +
+           (covered ? ' (' + covered + ' products currently covered).' : '.')) +
       '</div>';
     document.getElementById('risk-foot').innerHTML = '';
     return;
@@ -2065,7 +2118,7 @@ function renderTradeRisk() {
 
   var sig = computeRiskSignals(prod, t);
   var M = t.months;
-  document.getElementById('risk-sub').textContent =
+  document.getElementById('risk-sub').innerHTML = (hit.note ? '<span class="risk-note">' + escHtml(hit.note) + '</span> ' : '') +
     'What UK importers paid per kg, by country of origin. ' + fmtMonth(M[0]) + ' – ' + fmtMonth(M[M.length - 1]) +
     ' (HMRC publishes about 2 months after the month ends).';
   document.getElementById('risk-lights').innerHTML = sig.lights.map(function(l) {
@@ -3124,7 +3177,7 @@ function rebuildProductDropdown() {
   sel.innerHTML = '';
   Object.keys(COMM[cur].products).forEach(function(p) {
     var opt = document.createElement('option');
-    var hasRisk = tradeData[p] && tradeData[p].months.length >= 12;
+    var hasRisk = !!tradeFor(p);
     opt.value = p;
     opt.textContent = hasRisk ? '\u25CF ' + p + '  (price signals)' : p;
     if (p === curProd) opt.selected = true;
