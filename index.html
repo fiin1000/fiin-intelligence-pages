@@ -2391,10 +2391,10 @@ function parseRasffCsv(txt) {
     // fiin RASFF rules — only alerts relating to potential fraud are shown.
     // The Apps Script applies the same rules when it collects alerts; repeating them here keeps older rows in line.
     // 1. Free-text exclusions: alerts whose title contains any of these (lower-case) phrases are hidden
-    var EXCLUDED_TITLE_TERMS = ['salmonel', 'infantis', 'campylobacter',
+    var EXCLUDED_TITLE_TERMS = ['salmonel', 'infantis', 'campylobacter', 'pesticide',
       'aflatoxin', 'mycotoxin', 'ochratoxin', 'deoxynivalenol', 'fumonisin', 'zearalenone'];
     // 2. Residues reported above a maximum residue limit (MRL) are hidden: only illegal or prohibited residues are kept
-    var MRL_EXCEEDED = /(exceed\w*|above|over|higher than|in excess of|>|≥)\s*(the\s+)?(eu\s+|permitted\s+|legal\s+|maximum\s+)*(mrls?\b|maximum residue (level|limit)s?)|\b(mrls?|maximum residue (level|limit)s?)\s*(\([^)]*\)\s*)?(is\s+|was\s+|were\s+|being\s+)?exceed/i;
+    var MRL_EXCEEDED = /(exceed\w*|above|over|higher than|in excess of|>|≥)\s*(of\s+|for\s+)?(the\s+)?(eu\s+|permitted\s+|legal\s+|maximum\s+)*(mrls?\b|maximum residue (level|limit)s?)|\b(mrls?|maximum residue (level|limit)s?)\s*(\([^)]*\)\s*)?(is\s+|was\s+|were\s+|being\s+)?exceed/i;
     // 3. Veterinary residues are placed at the first stage of the category's supply chain
     var VET_RESIDUE = /veterinar|antibiotic|antimicrobial|withdrawal period|hormone|chloramphenicol|thiamphenicol|florfenicol|nitrofura|semicarbazide|\b(sem|amoz|aoz|ahd)\b|floxacin|quinolone|cyclines?\b|doksycyklin|sulf[ao](dia|meth|thia|mer|quin|nil|dox|namid)|sulphonamid|sulfonamid|trimethoprim|metronidazole|dimetridazole|ronidazole|nitroimidazole|malachite|crystal violet|gentian violet|dapsone|ractopamine|clenbuterol|beta-agonist|stilben|coccidiostat|nicarbazin|lasalocid|monensin|salinomycin|narasin|diclazuril|toltrazuril|ivermectin|streptomycin|tylosin|lincomycin|fipronil|furazolidone|furaltadone|nifursol|dexamethasone|flumequine|oxolinic|amoxicillin|ampicillin|penicillin|colistin|neomycin|gentamicin|kanamycin|erythromycin|carbadox|olaquindox|phenylbutazone|levamisole|albendazole|fenbendazole|avermectin|emamectin|praziquantel|medicinal product|pharmacologically active|prohibited substance/i;
 
