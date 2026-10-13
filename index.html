@@ -190,6 +190,7 @@ body {
   .rasff-open, .rasff-close, .rasff-link-row { display: none !important; }
   .rasff-dialog-body { overflow: visible !important; }
   body.printing-rasff #unplaced-dialog:not(:has(.sc-unplaced-item)) { display: none !important; }
+  body.printing-rasff #zone-dialog { display: none !important; }
   .print-head { display: block !important; border-bottom: 2px solid #1A3D1A; padding-bottom: 8px; margin-bottom: 10px; }
   .ph-title { font-size: 18px; font-weight: 700; color: #1A3D1A; }
   .ph-meta { font-size: 10.5px; color: #333; margin-top: 3px; line-height: 1.5; }
@@ -640,6 +641,19 @@ tr:hover td { background: var(--mist); }
 .sc-zone-count { color: var(--muted); }
 .sc-zone-badge { min-width: 18px; height: 18px; border-radius: 9px; font-size: 10px; font-weight: 700; font-family: 'DM Mono', monospace; display: inline-flex; align-items: center; justify-content: center; padding: 0 5px; color: white; }
 .sc-zone-arrow { align-self: center; }
+.sc-zone-click { cursor: pointer; transition: box-shadow .15s; }
+.sc-zone-click:hover, .sc-zone-click:focus-visible { box-shadow: 0 0 0 2px var(--pine); outline: none; }
+#zone-body { padding: 4px 16px 12px; font-size: 12px; }
+.zone-sec { font-family: 'DM Mono', monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--forest); margin: 14px 0 4px; font-weight: 600; }
+.zone-sec span { background: var(--mist); border-radius: 8px; padding: 1px 6px; margin-left: 4px; }
+.zone-sec i { text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--muted); margin-left: 4px; }
+.zone-item { padding: 8px 0; border-bottom: 1px solid var(--border); line-height: 1.45; }
+.zone-item a { font-size: 11px; color: var(--pine); text-decoration: none; }
+.zone-item a:hover { text-decoration: underline; }
+.zone-meta { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-bottom: 2px; }
+.zone-sev { border-radius: 3px; padding: 0 5px; margin-left: 4px; }
+.zone-sev-r { background: #F6E3E3; color: #8B2020; } .zone-sev-a { background: #FBEEDC; color: #7A4800; } .zone-sev-g { background: #E6F1E0; color: #2D6B2D; }
+.zone-empty { color: var(--muted); font-style: italic; padding: 4px 0 8px; }
 .sc-zone-counts { display: flex; gap: 8px; margin-left: auto; }
 .sc-zone-count { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; color: var(--muted); }
 .sc-zone-zero { background: #E4E8E0; color: #8A948A !important; }
@@ -1061,6 +1075,14 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
       <div class="sc-sub" id="sc-sub"></div>
       <div class="sc-map" id="sc-map"></div>
       <div class="sc-unplaced-link" id="sc-unplaced" style="display:none"></div>
+      <dialog class="rasff-dialog" id="zone-dialog" aria-labelledby="zone-title">
+        <div class="rasff-list-head">
+          <span class="rasff-list-title" id="zone-title"></span>
+          <button type="button" class="rasff-close" id="zone-close" aria-label="Close">✕</button>
+        </div>
+        <div class="rasff-dialog-body" id="zone-body"></div>
+        <div class="rasff-list-foot">Placed by fiin as the most likely part of the supply chain — an estimate, not where the issue was confirmed. fiin authenticity concerns are example data until member data is live.</div>
+      </dialog>
       <dialog class="rasff-dialog" id="unplaced-dialog" aria-labelledby="unplaced-title">
         <div class="rasff-list-head">
           <span class="rasff-list-title" id="unplaced-title">Not placed on the map &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="unplaced-com" style="color:var(--forest)"></span></span>
@@ -1828,7 +1850,7 @@ function rasffZoneLabel(cat, node) {
 
 // ── Render supply chain map ───────────────────────────────────────────────────
 var SC_SUB_TEXT = 'Shows RASFF alerts and fiin data that could indicate potential fraud, grouped by the part of the supply chain they most likely relate to. ' +
-  'Hover a zone for details, or a stage for known risks, determined by the TSG.';
+  'Click a zone for details, or hover a stage for known risks, determined by the TSG.';
 function renderSupplyChain() {
   var mapEl = document.getElementById('sc-map');
   var nodes = SUPPLY_CHAIN[scKey(cur)] || [];
@@ -1860,6 +1882,7 @@ function renderSupplyChain() {
   }
   var ZONE_BG = { r: 'background:#FDF0EF;border-color:#E7B4B4;', a: 'background:#FDF6EC;border-color:#EBCB98;', g: 'background:#EEF6E8;border-color:#B5D3A8;' };
 
+  mapEl._zones = zones;
   try {
     mapEl.innerHTML = zones.filter(function(z){ return z.nodes.length; }).map(function(z, zi, all) {
       var n = z.alerts.length, w = worst(z.alerts), nf = z.fiin.length;
@@ -1872,7 +1895,7 @@ function renderSupplyChain() {
           '<div class="sc-node" data-node="' + node.replace(/"/g,'&quot;') + '"' + risksAttr + '><div class="sc-box">' + node + '</div></div>' +
           (idx < z.nodes.length - 1 ? '<div class="sc-arrow">›</div>' : '') + '</div>';
       }).join('');
-      return '<div class="sc-zone-wrap"><div class="sc-zone" style="' + (n ? ZONE_BG[w] : '') + '">' +
+      return '<div class="sc-zone-wrap"><div class="sc-zone' + (n || nf ? ' sc-zone-click' : '') + '" data-zi="' + zones.indexOf(z) + '" style="' + (n ? ZONE_BG[w] : '') + '"' + (n || nf ? ' role="button" tabindex="0" title="Click to see everything placed here"' : '') + '>' +
           '<div class="sc-zone-nodes">' + nodesHtml + '</div>' +
           '<div class="sc-zone-foot" data-zone="' + escHtml(z.label) + '" data-count="' + n + '" data-more="' + Math.max(0, n - 6) + '"' +
             ' data-fcount="' + nf + '" data-fmore="' + Math.max(0, nf - 4) + '"' +
@@ -1952,7 +1975,7 @@ function renderSupplyChain() {
       '<div class="sc-tip-section-head">fiin authenticity concerns \u2014 ' + fcount + ' \u00b7 example data</div>' +
       (fcount ? list(fiin, 110) : '<div class="sc-tip-empty">None placed here</div>') +
       (fmore > 0 ? '<div class="sc-tip-empty">+ ' + fmore + ' more in fiin member testing data</div>' : '') +
-      '<div class="sc-tip-footer">Placed by fiin as the most likely part of the chain \u2014 an estimate, not where the issue was confirmed</div>');
+      '<div class="sc-tip-footer"><b>Click the zone to see them all, with links.</b> Placement is fiin\u2019s estimate, not where the issue was confirmed.</div>');
   });
 
   function positionTip(e) {
@@ -1968,6 +1991,41 @@ function renderSupplyChain() {
   var subEl = document.getElementById('sc-sub');
   subEl.innerHTML = SC_SUB_TEXT;
 }
+
+// Zone pop-up: everything placed in one zone, scrollable, with links
+function openZoneDialog(zi) {
+  var z = (document.getElementById('sc-map')._zones || [])[zi], d = document.getElementById('zone-dialog');
+  if (!z || !d) return;
+  document.getElementById('zone-title').innerHTML = escHtml(z.label) + ' &nbsp;<span style="color:var(--muted);font-weight:400">\u2014</span>&nbsp; <span style="color:var(--forest)">' + escHtml(COMM[cur].label) + '</span>';
+  var sevCls = function(sv){ sv = (sv || '').toLowerCase(); return /serious|alert/.test(sv) ? 'r' : /border/.test(sv) ? 'g' : 'a'; };
+  document.getElementById('zone-body').innerHTML =
+    '<div class="zone-sec">RASFF alerts relating to potential fraud <span>' + z.alerts.length + '</span></div>' +
+    (z.alerts.length ? z.alerts.map(function(r) {
+      return '<div class="zone-item"><div class="zone-meta">' + escHtml(r.date || '') + (r.country ? ' \u00b7 ' + escHtml(r.country) : '') +
+        (r.node ? ' \u00b7 stage: ' + escHtml(r.node) : '') + (r.severity ? ' <span class="zone-sev zone-sev-' + sevCls(r.severity) + '">' + escHtml(r.severity) + '</span>' : '') + '</div>' +
+        '<div>' + escHtml(r.title) + '</div>' +
+        (r.link ? '<a href="' + escHtml(r.link) + '" target="_blank" rel="noopener">View on RASFF portal \u2192</a>' : '') + '</div>';
+    }).join('') : '<div class="zone-empty">None placed here.</div>') +
+    '<div class="zone-sec">fiin authenticity concerns <span>' + z.fiin.length + '</span> <i>example data</i></div>' +
+    (z.fiin.length ? z.fiin.map(function(c) {
+      return '<div class="zone-item"><div class="zone-meta">' + escHtml(c.q) + (c.node ? ' \u00b7 stage: ' + escHtml(c.node) : '') + ' \u00b7 anonymised</div><div>' + escHtml(c.text) + '</div></div>';
+    }).join('') : '<div class="zone-empty">None placed here.</div>');
+  document.getElementById('sc-float-tip').style.display = 'none';
+  if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+  document.getElementById('zone-body').scrollTop = 0;
+}
+document.addEventListener('click', function(e) {
+  var z = e.target.closest && e.target.closest('.sc-zone-click');
+  if (z) { openZoneDialog(+z.getAttribute('data-zi')); return; }
+  var d = document.getElementById('zone-dialog');
+  if (!d) return;
+  if (e.target.closest && e.target.closest('#zone-close')) d.close ? d.close() : d.removeAttribute('open');
+  else if (e.target === d) d.close();
+});
+document.addEventListener('keydown', function(e) {
+  var z = e.target.closest && e.target.closest('.sc-zone-click');
+  if (z && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openZoneDialog(+z.getAttribute('data-zi')); }
+});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MARKET INTELLIGENCE
