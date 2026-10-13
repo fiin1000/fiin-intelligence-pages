@@ -631,6 +631,27 @@ tr:hover td { background: var(--mist); }
 .sc-badge-a  { background: #D4820A; }
 .sc-badge-g  { background: #2D6B2D; }
 
+.sc-zone-wrap { display: flex; align-items: stretch; flex-shrink: 0; margin-bottom: 8px; }
+.sc-zone { display: flex; flex-direction: column; border: 1.5px dashed var(--border); border-radius: 9px; padding: 8px 8px 6px; background: #FAFBF8; }
+.sc-zone-nodes { display: flex; align-items: center; }
+.sc-zone-foot { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 7px; padding-top: 6px; border-top: 1px solid rgba(0,0,0,.08); font-size: 10.5px; }
+.sc-zone-label { font-weight: 600; color: var(--ink); }
+.sc-zone-count { color: var(--muted); }
+.sc-zone-badge { min-width: 18px; height: 18px; border-radius: 9px; font-size: 10px; font-weight: 700; font-family: 'DM Mono', monospace; display: inline-flex; align-items: center; justify-content: center; padding: 0 5px; color: white; }
+.sc-zone-arrow { align-self: center; }
+.sc-zone { width: min-content; min-width: 128px; }
+.sc-zone-nodes { flex: 1; align-items: flex-start !important; }
+#sc-map { align-items: stretch; }
+.sc-zone .sc-box { width: 76px; }
+.sc-zone .sc-arrow { width: 13px; }
+.sc-unplaced { margin-top: 10px; padding: 10px 12px; border: 1.5px dashed var(--border); border-radius: 8px; font-size: 11px; color: var(--ink); }
+.sc-unplaced-head { font-weight: 600; margin-bottom: 2px; }
+.sc-unplaced-head span { font-family: 'DM Mono', monospace; font-size: 10px; background: var(--mist); border-radius: 8px; padding: 1px 6px; margin-left: 4px; }
+.sc-unplaced-sub { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+.sc-unplaced-item { display: flex; gap: 8px; padding: 2px 0; line-height: 1.4; }
+.sc-unplaced-item span { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); white-space: nowrap; padding-top: 1px; }
+.sc-unplaced-item a { color: var(--pine); text-decoration: none; }
+.sc-unplaced-item a:hover { text-decoration: underline; }
 .sc-arrow {
   width: 20px;
   flex-shrink: 0;
@@ -988,7 +1009,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
   <div class="com-body">
     <div class="section-header" style="margin-top:4px;margin-bottom:6px">
       <div class="section-header-label">Category intelligence</div>
-      <div class="section-header-sub" id="cat-section-sub">TSG Quarterly Recommendations &amp; Information &nbsp;·&nbsp; Supply chain fraud map &nbsp;·&nbsp; RASFF alerts relating to potential fraud</div>
+      <div class="section-header-sub" id="cat-section-sub">TSG Quarterly Recommendations &amp; Information &nbsp;·&nbsp; Supply chain map &nbsp;·&nbsp; RASFF alerts relating to potential fraud</div>
       <div class="section-header-line"></div>
     </div>
     <div class="tsg-resources-row">
@@ -1022,9 +1043,10 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
 
     <!-- Supply chain map + Indicators -->
     <div class="card sc-section" id="sc-section" style="margin-top:14px">
-      <div class="sc-title">Supply chain fraud hotspot map</div>
-      <div class="sc-sub" id="sc-sub">RASFF alerts relating to potential fraud, plotted by supply chain stage · Badge colour: red = serious/alert, amber = information, green = border rejection</div>
+      <div class="sc-title">Supply chain map — where alerts most likely relate</div>
+      <div class="sc-sub" id="sc-sub"></div>
       <div class="sc-map" id="sc-map"></div>
+      <div class="sc-unplaced" id="sc-unplaced" style="display:none"></div>
       <div style="display:none">
         <div id="fiin-indicators-body"></div>
       </div>
@@ -1034,7 +1056,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
         <span class="sc-leg-item"><span class="sc-leg-dot" style="background:#D4820A"></span>Information</span>
         <span class="sc-leg-item"><span class="sc-leg-dot" style="background:#2D6B2D"></span>Border rejection</span>
         <span class="sc-leg-item"><span class="sc-leg-dot" style="background:var(--border)"></span>No alerts</span>
-        <span style="margin-left:auto;font-size:10px;color:var(--muted)">Hover node to see alerts · <em>Unknown</em> nodes need manual mapping in Sheet</span>
+        <span style="margin-left:auto;font-size:10px;color:var(--muted)">Badge colour = RASFF classification · placement is fiin’s estimate, not confirmed</span>
       </div>
 
     </div>
@@ -1735,151 +1757,138 @@ var SUPPLY_CHAIN = {
   drinks:        ['Ingredient Supply','Processing & Blending','Bottling','Packaging & Labelling','Warehouse','Distribution','Import/Border','Retail','Consumer']
 };
 
+// Broad zones used to place RASFF alerts on the map. One number per stage above, in the same order:
+// 0 = first zone, 1 = second… Labels below; a category can have its own labels.
+var SUPPLY_ZONE_LABELS = {
+  _default: ['Production', 'Processing & packing', 'Import, storage & distribution', 'Retail & consumer'],
+  cocoa:    ['Production & import', 'Processing & packing', 'Storage & distribution', 'Retail & consumer']
+};
+var SUPPLY_ZONES = {
+  poultry:        [0,1,1,1,1,2,2,2,3,3],
+  red_meat:       [0,1,1,1,1,2,2,2,3,3],
+  fish_shellfish: [0,0,1,1,1,1,2,2,2,3,3],
+  honey:          [0,1,1,1,1,2,2,2,3,3],
+  herbs_spices:   [0,0,1,1,2,2,2,3,3],
+  cereals:        [0,0,0,1,1,2,2,3,3],
+  fruit_veg:      [0,0,1,2,2,2,3,3],
+  dairy:          [0,0,1,1,1,2,2,2,3,3],
+  cocoa:          [0,0,0,0,1,1,1,2,2,3,3],
+  nuts:           [0,0,0,1,1,2,2,2,3,3],
+  eggs:           [0,1,1,2,2,2,3,3],
+  drinks:         [0,1,1,1,2,2,2,3,3]
+};
+// The zone an alert's stage belongs to, or '' when the stage is unknown / not on this category's map
+function rasffZoneLabel(cat, node) {
+  var k = scKey(cat), chain = SUPPLY_CHAIN[k] || [], i = chain.indexOf(node);
+  if (i < 0 || !SUPPLY_ZONES[k]) return '';
+  return (SUPPLY_ZONE_LABELS[k] || SUPPLY_ZONE_LABELS._default)[SUPPLY_ZONES[k][i]] || '';
+}
+
 // ── Render supply chain map ───────────────────────────────────────────────────
+var SC_SUB_TEXT = '<b>RASFF alerts relating to potential fraud</b>, grouped by the part of the supply chain they most likely relate to. ' +
+  '<b>This placement is fiin\u2019s estimate from the alert wording</b> \u2014 RASFF records where a problem was found, not where it happened. ' +
+  'Hover a zone for its alerts, or a stage for known risks.';
 function renderSupplyChain() {
   var mapEl = document.getElementById('sc-map');
   var nodes = SUPPLY_CHAIN[scKey(cur)] || [];
   var rasffCats = (COMM[cur].rasffCategories || []).map(function(c){ return c.toLowerCase(); });
 
-  // Get RASFF alerts for this category that have a node assigned
-  var alerts = rasffData.filter(function(r) {
-    var comm = (r.commodity||'').toLowerCase().trim();
-    var matchesCat = rasffCats.some(function(c){ return comm === c.trim(); });
-    return matchesCat && r.node && r.node !== 'Unknown – needs review' && r.node !== '';
+  // RASFF alerts for this category; each is counted against the broad zone its most likely stage sits in
+  var k = scKey(cur);
+  var zoneOf = SUPPLY_ZONES[k] || nodes.map(function(){ return 0; });
+  var labels = SUPPLY_ZONE_LABELS[k] || SUPPLY_ZONE_LABELS._default;
+  var zones = labels.map(function(l){ return { label: l, nodes: [], alerts: [] }; });
+  nodes.forEach(function(n, i){ zones[zoneOf[i]].nodes.push(n); });
+  var unplaced = [];
+  rasffData.filter(function(r) {
+    return rasffCats.indexOf((r.commodity || '').toLowerCase().trim()) > -1;
+  }).sort(function(a, b){ return (b.date || '').localeCompare(a.date || ''); }).forEach(function(r) {
+    var i = r.node ? nodes.indexOf(r.node) : -1;
+    if (i > -1) zones[zoneOf[i]].alerts.push(r); else unplaced.push(r);
   });
 
-  // Group alerts by node
-  var byNode = {};
-  nodes.forEach(function(n) { byNode[n] = []; });
-  alerts.forEach(function(r) {
-    if (byNode[r.node]) byNode[r.node].push(r);
-    // If not in known nodes, still group it (will show as unmatched)
-  });
-
-  // Count unknowns
-  var unknowns = rasffData.filter(function(r) {
-    var comm = (r.commodity||'').toLowerCase().trim();
-    var matchesCat = rasffCats.some(function(c){ return comm === c.trim(); });
-    return matchesCat && (!r.node || r.node === 'Unknown – needs review');
-  });
-
-  // Store alert data for tooltip lookup
-  mapEl._alertsByNode = byNode;
-
-  // Build node HTML — risks tags above each node, RASFF badge below
-  var nodeRisks = KNOWN_RISKS[scKey(cur)] || {};
+  function worst(list) {
+    if (list.some(function(a){ return /serious|alert/i.test(a.severity || ''); })) return 'r';
+    if (list.some(function(a){ return /info/i.test(a.severity || ''); })) return 'a';
+    return 'g';
+  }
+  var ZONE_BG = { r: 'background:#FDF0EF;border-color:#E7B4B4;', a: 'background:#FDF6EC;border-color:#EBCB98;', g: 'background:#EEF6E8;border-color:#B5D3A8;' };
 
   try {
-    mapEl.innerHTML = nodes.map(function(node, idx) {
-      var nodeAlerts = byNode[node] || [];
-      var count = nodeAlerts.length;
-
-      var badgeClass = 'sc-badge-g';
-      var hasSerious = nodeAlerts.some(function(a) {
-        var s = (a.severity||'').toLowerCase();
-        return s.indexOf('serious') > -1 || s.indexOf('alert') > -1;
-      });
-      var hasInfo = nodeAlerts.some(function(a) {
-        return (a.severity||'').toLowerCase().indexOf('info') > -1;
-      });
-      if (hasSerious) badgeClass = 'sc-badge-r';
-      else if (hasInfo) badgeClass = 'sc-badge-a';
-
-      var boxBg = '', boxBorder = '';
-      if (count > 0) {
-        if (badgeClass === 'sc-badge-r') { boxBg = 'background:#FDF0EF;'; boxBorder = 'border-color:#C84040;'; }
-        else if (badgeClass === 'sc-badge-a') { boxBg = 'background:#FDF6EC;'; boxBorder = 'border-color:#D4820A;'; }
-        else { boxBg = 'background:#EEF6E8;'; boxBorder = 'border-color:#2D6B2D;'; }
-      }
-
-      var arrow = idx < nodes.length - 1 ? '<div class="sc-arrow">›</div>' : '';
-
-      var moreCount = count > 6 ? count - 6 : 0;
-      var alertJson = '';
-      if (count > 0) {
-        var alertsArr = nodeAlerts.slice(0,6).map(function(a){
-          return {d:a.date||'', t:(a.title||'').slice(0,90)};
-        });
-        try { alertJson = " data-alerts='" + JSON.stringify(alertsArr).replace(/'/g,'&#39;') + "'"; } catch(e2) {}
-      }
-
-      // Encode known risks for this node into data attribute for tooltip
-      var thisNodeRisks = (KNOWN_RISKS[scKey(cur)] || {})[node] || [];
-      var risksAttr = thisNodeRisks.length ? " data-risks='" + JSON.stringify(thisNodeRisks).replace(/'/g,'&#39;') + "'" : '';
-
-      return '<div class="sc-node-wrap">' +
-        '<div class="sc-node" data-node="' + node.replace(/"/g,'&quot;') + '" data-count="' + count + '" data-more="' + moreCount + '"' + alertJson + risksAttr + '>' +
-          '<div class="sc-box" style="' + boxBg + boxBorder + '">' +
-            (count > 0 ? '<span class="sc-badge ' + badgeClass + '">' + count + '</span>' : '') +
-            node +
+    mapEl.innerHTML = zones.filter(function(z){ return z.nodes.length; }).map(function(z, zi, all) {
+      var n = z.alerts.length, w = worst(z.alerts);
+      var alertsArr = z.alerts.slice(0, 6).map(function(a){ return { d: a.date || '', t: (a.title || '').slice(0, 90) }; });
+      var nodesHtml = z.nodes.map(function(node, idx) {
+        var thisNodeRisks = (KNOWN_RISKS[k] || {})[node] || [];
+        var risksAttr = thisNodeRisks.length ? " data-risks='" + JSON.stringify(thisNodeRisks).replace(/'/g,'&#39;') + "'" : '';
+        return '<div class="sc-node-wrap">' +
+          '<div class="sc-node" data-node="' + node.replace(/"/g,'&quot;') + '"' + risksAttr + '><div class="sc-box">' + node + '</div></div>' +
+          (idx < z.nodes.length - 1 ? '<div class="sc-arrow">›</div>' : '') + '</div>';
+      }).join('');
+      return '<div class="sc-zone-wrap"><div class="sc-zone" style="' + (n ? ZONE_BG[w] : '') + '">' +
+          '<div class="sc-zone-nodes">' + nodesHtml + '</div>' +
+          '<div class="sc-zone-foot" data-zone="' + escHtml(z.label) + '" data-count="' + n + '" data-more="' + Math.max(0, n - 6) + '"' +
+            " data-alerts='" + JSON.stringify(alertsArr).replace(/'/g,'&#39;') + "'>" +
+            (n ? '<span class="sc-zone-badge sc-badge-' + w + '">' + n + '</span>' : '') +
+            '<span class="sc-zone-label">' + escHtml(z.label) + '</span>' +
+            '<span class="sc-zone-count">' + (n ? n + ' alert' + (n === 1 ? '' : 's') : 'no alerts') + '</span>' +
           '</div>' +
-        '</div>' +
-        arrow +
-      '</div>';
+        '</div>' + (zi < all.length - 1 ? '<div class="sc-arrow sc-zone-arrow">›</div>' : '') + '</div>';
     }).join('');
   } catch(mapErr) {
     console.error('Supply chain map render error:', mapErr);
     mapEl.innerHTML = '<div style="padding:20px;color:red;font-size:12px">Map render error: ' + mapErr.message + '</div>';
   }
 
+  // Alerts whose wording doesn't point to a likely stage: listed, not forced onto the map
+  var upEl = document.getElementById('sc-unplaced');
+  if (upEl) {
+    upEl.style.display = unplaced.length ? '' : 'none';
+    upEl.innerHTML = unplaced.length ?
+      '<div class="sc-unplaced-head">Not placed on the map <span>' + unplaced.length + '</span></div>' +
+      '<div class="sc-unplaced-sub">The alert wording doesn\u2019t point to a likely stage, so these are listed rather than placed.</div>' +
+      unplaced.slice(0, 5).map(function(r) {
+        return '<div class="sc-unplaced-item"><span>' + escHtml(r.date || '') + '</span>' +
+          (r.link ? '<a href="' + escHtml(r.link) + '" target="_blank" rel="noopener">' + escHtml(r.title) + '</a>' : escHtml(r.title)) + '</div>';
+      }).join('') +
+      (unplaced.length > 5 ? '<div class="sc-unplaced-sub">+ ' + (unplaced.length - 5) + ' more in the alerts list below</div>' : '')
+      : '';
+  }
+
   // Attach mouse events for floating tooltip — shows Known Risks + Indicators
   var tip = document.getElementById('sc-float-tip');
-  mapEl.querySelectorAll('.sc-node').forEach(function(el) {
-    var count  = parseInt(el.getAttribute('data-count') || '0');
-    var risks  = [];
-    var alerts = [];
-    try { risks  = JSON.parse((el.getAttribute('data-risks')  || '[]').replace(/&#39;/g,"'")); } catch(e2) {}
-    try { alerts = JSON.parse((el.getAttribute('data-alerts') || '[]').replace(/&#39;/g,"'")); } catch(e2) {}
-
-    var hasContent = risks.length > 0 || count > 0;
-    if (!hasContent) return;
+  function showTip(el, html) {
     el.style.cursor = 'help';
-
-    el.addEventListener('mouseenter', function(e) {
-      var node = el.getAttribute('data-node');
-      var more = parseInt(el.getAttribute('data-more') || '0');
-      var html = '<div class="sc-tip-node-title">' + node + '</div>';
-
-      // Known Risks section
-      if (risks.length) {
-        html += '<div class="sc-tip-section-head">Known risks</div>';
-        html += risks.map(function(r) {
-          var cls = r.l === 'high' ? 'high' : r.l === 'med' ? 'med' : '';
-          return '<div class="sc-tip-risk ' + cls + '">' + (r.t || '') + '</div>';
-        }).join('');
-      }
-
-      // Indicators section
-      html += '<div class="sc-tip-divider"></div>';
-      html += '<div class="sc-tip-section-head">Indicators</div>';
-
-      var fiinItems = FIIN_DUMMY[scKey(cur)] || [];
-      if (fiinItems.length) {
-        html += '<div style="padding:2px 13px 1px;font-size:10px;opacity:.5;font-family:DM Mono,monospace;text-transform:uppercase;letter-spacing:.06em">fiin example data</div>';
-        html += fiinItems.slice(0, 2).map(function(txt) {
-          return '<div class="sc-tip-item">' + txt + '</div>';
-        }).join('');
-      }
-
-
-      if (count > 0) {
-        html += '<div style="padding:4px 13px 1px;font-size:10px;opacity:.5;font-family:DM Mono,monospace;text-transform:uppercase;letter-spacing:.06em">RASFF data — ' + count + ' alert' + (count!==1?'s':'') + '</div>';
-        html += alerts.map(function(a) {
-          return '<div class="sc-tip-item"><div class="sc-tip-meta">' + a.d + '</div>' + a.t + (a.t.length >= 90 ? '&hellip;' : '') + '</div>';
-        }).join('');
-        if (more > 0) html += '<div class="sc-tip-empty">+ ' + more + ' more alerts</div>';
-      } else {
-        html += '<div class="sc-tip-empty">No RASFF alerts at this stage</div>';
-      }
-
-      html += '<div class="sc-tip-footer">fiin TSG · RASFF/European Commission</div>';
-      tip.innerHTML = html;
-      tip.style.display = 'flex';
-      positionTip(e);
-    });
-
+    el.addEventListener('mouseenter', function(e) { tip.innerHTML = html; tip.style.display = 'flex'; positionTip(e); });
     el.addEventListener('mousemove', function(e) { positionTip(e); });
     el.addEventListener('mouseleave', function() { tip.style.display = 'none'; });
+  }
+  // Stages: known risks (fiin TSG)
+  mapEl.querySelectorAll('.sc-node').forEach(function(el) {
+    var risks = [];
+    try { risks = JSON.parse((el.getAttribute('data-risks') || '[]').replace(/&#39;/g,"'")); } catch(e2) {}
+    if (!risks.length) return;
+    showTip(el, '<div class="sc-tip-node-title">' + el.getAttribute('data-node') + '</div>' +
+      '<div class="sc-tip-section-head">Known risks</div>' +
+      risks.map(function(r) {
+        var cls = r.l === 'high' ? 'high' : r.l === 'med' ? 'med' : '';
+        return '<div class="sc-tip-risk ' + cls + '">' + (r.t || '') + '</div>';
+      }).join('') +
+      '<div class="sc-tip-footer">fiin TSG</div>');
+  });
+  // Zones: the RASFF alerts placed there
+  mapEl.querySelectorAll('.sc-zone-foot').forEach(function(el) {
+    var count = parseInt(el.getAttribute('data-count') || '0', 10), more = parseInt(el.getAttribute('data-more') || '0', 10);
+    if (!count) return;
+    var alerts = [];
+    try { alerts = JSON.parse((el.getAttribute('data-alerts') || '[]').replace(/&#39;/g,"'")); } catch(e2) {}
+    showTip(el, '<div class="sc-tip-node-title">' + escHtml(el.getAttribute('data-zone')) + '</div>' +
+      '<div class="sc-tip-section-head">RASFF alerts most likely relating to this part of the chain</div>' +
+      alerts.map(function(a) {
+        return '<div class="sc-tip-item"><div class="sc-tip-meta">' + escHtml(a.d) + '</div>' + escHtml(a.t) + (a.t.length >= 90 ? '&hellip;' : '') + '</div>';
+      }).join('') +
+      (more > 0 ? '<div class="sc-tip-empty">+ ' + more + ' more in the alerts list</div>' : '') +
+      '<div class="sc-tip-footer">Placed by fiin from the alert wording \u2014 an estimate, not where the issue was confirmed</div>');
   });
 
   function positionTip(e) {
@@ -1891,14 +1900,9 @@ function renderSupplyChain() {
     tip.style.top  = y + 'px';
   }
 
-  // Show unknown count if any
+  // Subtitle
   var subEl = document.getElementById('sc-sub');
-  if (unknowns.length > 0) {
-    subEl.innerHTML = '<b>RASFF alerts relating to potential fraud</b> (contamination-only alerts are filtered out) · ' +
-      '<span style="color:#D4820A;font-weight:600">' + unknowns.length + ' alert' + (unknowns.length!==1?'s':'') + ' need supply chain node mapping</span> — open your Google Sheet rasff tab and fill in the <strong>node_override</strong> column for rows marked "Unknown – needs review"';
-  } else {
-    subEl.innerHTML = '<b>RASFF alerts relating to potential fraud</b> (contamination-only alerts are filtered out) · Hover any node to see alerts · Badge colour: <span style="color:#8B2020">red</span> = serious, <span style="color:#D4820A">amber</span> = information, <span style="color:#2D6B2D">green</span> = border rejection';
-  }
+  subEl.innerHTML = SC_SUB_TEXT;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2679,9 +2683,9 @@ function buildSnapshotCsvRows(cat, now) {
     var d = parseNewsDate(r.date);
     return cats.indexOf((r.commodity || '').toLowerCase()) > -1 && d && d >= sixMonthsAgo;
   }).sort(function(a, b){ return parseNewsDate(b.date) - parseNewsDate(a.date); });
-  rows.push(['Date', 'Alert', 'Origin', 'Classification', 'Hazard', 'Supply chain stage', 'Link']);
+  rows.push(['Date', 'Alert', 'Origin', 'Classification', 'Hazard', 'Most likely part of supply chain (fiin estimate)', 'Link']);
   if (alerts.length) alerts.forEach(function(r) {
-    rows.push([r.date, vaStrip(r.title), r.country || '', r.severity || '', r.hazard || '', r.node || '', r.link || '']);
+    rows.push([r.date, vaStrip(r.title), r.country || '', r.severity || '', r.hazard || '', rasffZoneLabel(cat, r.node) || 'Not placed', r.link || '']);
   });
   else rows.push(['', 'No fraud-related RASFF alerts in the last 6 months.']);
 
@@ -3091,7 +3095,7 @@ function render() {
   var intelProdEl = document.getElementById('intel-prod-label');
   if (intelProdEl) intelProdEl.textContent = curProd;
   var catSubEl = document.getElementById('cat-section-sub');
-  if (catSubEl) catSubEl.textContent = c.label + ' · TSG Quarterly Recommendations & Information · Supply chain fraud map · RASFF alerts relating to potential fraud (last 6 months)';
+  if (catSubEl) catSubEl.textContent = c.label + ' · TSG Quarterly Recommendations & Information · Supply chain map · RASFF alerts relating to potential fraud (last 6 months)';
   var latestM = '';
   Object.keys(c.products).forEach(function(p){ var h = tradeFor(p); if (h) { var m = h.t.months[h.t.months.length - 1]; if (m > latestM) latestM = m; } });
   document.getElementById('com-period').textContent = latestM ? 'Latest HMRC prices: ' + fmtMonth(latestM) : '';
