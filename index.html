@@ -641,8 +641,10 @@ tr:hover td { background: var(--mist); }
 .sc-zone-count { color: var(--muted); }
 .sc-zone-badge { min-width: 18px; height: 18px; border-radius: 9px; font-size: 10px; font-weight: 700; font-family: 'DM Mono', monospace; display: inline-flex; align-items: center; justify-content: center; padding: 0 5px; color: white; }
 .sc-zone-arrow { align-self: center; }
-.sc-zone-click { cursor: pointer; transition: box-shadow .15s; }
-.sc-zone-click:hover, .sc-zone-click:focus-visible { box-shadow: 0 0 0 2px var(--pine); outline: none; }
+.sc-zone-view { white-space: nowrap; background: white; border: 1px solid var(--border); border-radius: 12px; padding: 2px 8px 2px 3px; font: inherit; cursor: pointer; }
+.sc-zone-view:hover, .sc-zone-view:focus-visible { border-color: var(--pine); outline: none; }
+.sc-zone-view:hover .sc-zone-viewtxt { text-decoration: underline; }
+.sc-zone-viewtxt { font-size: 10.5px; font-weight: 600; color: var(--pine); }
 #zone-body { padding: 4px 16px 12px; font-size: 12px; }
 .zone-sec { font-family: 'DM Mono', monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--forest); margin: 14px 0 4px; font-weight: 600; }
 .zone-sec span { background: var(--mist); border-radius: 8px; padding: 1px 6px; margin-left: 4px; }
@@ -662,7 +664,7 @@ tr:hover td { background: var(--mist); }
 .sc-src-rasff { background: #F1E3E3; color: #8B2020; }
 .sc-src-fiin { background: #E3ECF6; color: #1A5FA5; }
 .sc-ex { color: var(--muted); font-size: 10px; }
-.sc-zone { width: min-content; min-width: 128px; }
+.sc-zone { width: min-content; min-width: 168px; }
 .sc-zone-nodes { flex: 1; align-items: flex-start !important; }
 #sc-map { align-items: stretch; }
 .sc-zone .sc-box { width: 76px; }
@@ -1850,7 +1852,7 @@ function rasffZoneLabel(cat, node) {
 
 // ── Render supply chain map ───────────────────────────────────────────────────
 var SC_SUB_TEXT = 'Shows RASFF alerts and fiin data that could indicate potential fraud, grouped by the part of the supply chain they most likely relate to. ' +
-  'Click a zone for details, or hover a stage for known risks, determined by the TSG.';
+  'Hover a stage for known risks, determined by the TSG, or click View on a zone for its RASFF alerts and fiin data.';
 function renderSupplyChain() {
   var mapEl = document.getElementById('sc-map');
   var nodes = SUPPLY_CHAIN[scKey(cur)] || [];
@@ -1895,17 +1897,17 @@ function renderSupplyChain() {
           '<div class="sc-node" data-node="' + node.replace(/"/g,'&quot;') + '"' + risksAttr + '><div class="sc-box">' + node + '</div></div>' +
           (idx < z.nodes.length - 1 ? '<div class="sc-arrow">›</div>' : '') + '</div>';
       }).join('');
-      return '<div class="sc-zone-wrap"><div class="sc-zone' + (n || nf ? ' sc-zone-click' : '') + '" data-zi="' + zones.indexOf(z) + '" style="' + (n ? ZONE_BG[w] : '') + '"' + (n || nf ? ' role="button" tabindex="0" title="Click to see everything placed here"' : '') + '>' +
+      return '<div class="sc-zone-wrap"><div class="sc-zone" style="' + (n ? ZONE_BG[w] : '') + '">' +
           '<div class="sc-zone-nodes">' + nodesHtml + '</div>' +
           '<div class="sc-zone-foot" data-zone="' + escHtml(z.label) + '" data-count="' + n + '" data-more="' + Math.max(0, n - 6) + '"' +
             ' data-fcount="' + nf + '" data-fmore="' + Math.max(0, nf - 4) + '"' +
             " data-alerts='" + JSON.stringify(alertsArr).replace(/'/g,'&#39;') + "'" +
             " data-fiin='" + JSON.stringify(fiinArr).replace(/'/g,'&#39;') + "'>" +
             '<span class="sc-zone-label">' + escHtml(z.label) + '</span>' +
-            '<span class="sc-zone-counts">' +
+            '<' + (n || nf ? 'button type="button" class="sc-zone-counts sc-zone-view" data-zi="' + zones.indexOf(z) + '" title="See the RASFF alerts and fiin concerns placed here"' : 'span class="sc-zone-counts"') + '>' +
               '<span class="sc-zone-count" title="RASFF alerts">' + (n ? '<span class="sc-zone-badge sc-badge-' + w + '">' + n + '</span>' : '<span class="sc-zone-badge sc-zone-zero">0</span>') + 'RASFF</span>' +
               '<span class="sc-zone-count" title="fiin authenticity concerns (example data)">' + '<span class="sc-zone-badge ' + (nf ? 'sc-badge-fiin' : 'sc-zone-zero') + '">' + nf + '</span>fiin</span>' +
-            '</span>' +
+              (n || nf ? '<span class="sc-zone-viewtxt">View \u2192</span></button>' : '</span>') +
           '</div>' +
         '</div>' + (zi < all.length - 1 ? '<div class="sc-arrow sc-zone-arrow">›</div>' : '') + '</div>';
     }).join('');
@@ -1935,8 +1937,7 @@ function renderSupplyChain() {
 
   // Attach mouse events for floating tooltip — shows Known Risks + Indicators
   var tip = document.getElementById('sc-float-tip');
-  // Black hover previews: a stage with known risks shows those; anywhere else in a zone shows the zone's
-  // alerts and concerns (click the zone for the full, scrollable list)
+  // Black hover boxes: known risks for each stage (fiin TSG). RASFF and fiin data open from each zone's "View" link.
   function showTip(el, html) { el._tipHtml = html; if (el.classList.contains('sc-node')) el.style.cursor = 'help'; }
   // Stages: known risks (fiin TSG)
   mapEl.querySelectorAll('.sc-node').forEach(function(el) {
@@ -1952,34 +1953,10 @@ function renderSupplyChain() {
       '<div class="sc-tip-footer">fiin TSG</div>');
   });
   // Zones: the RASFF alerts placed there
-  mapEl.querySelectorAll('.sc-zone-foot').forEach(function(el) {
-    var zoneEl = el.closest('.sc-zone');
-    var count = parseInt(el.getAttribute('data-count') || '0', 10), more = parseInt(el.getAttribute('data-more') || '0', 10);
-    var fcount = parseInt(el.getAttribute('data-fcount') || '0', 10), fmore = parseInt(el.getAttribute('data-fmore') || '0', 10);
-    if (!count && !fcount) return;
-    var alerts = [], fiin = [];
-    try { alerts = JSON.parse((el.getAttribute('data-alerts') || '[]').replace(/&#39;/g,"'")); } catch(e2) {}
-    try { fiin = JSON.parse((el.getAttribute('data-fiin') || '[]').replace(/&#39;/g,"'")); } catch(e2) {}
-    var list = function(arr, cut) {
-      return arr.map(function(a) {
-        return '<div class="sc-tip-item"><div class="sc-tip-meta">' + escHtml(a.d) + '</div>' + escHtml(a.t) + (a.t.length >= cut ? '&hellip;' : '') + '</div>';
-      }).join('');
-    };
-    showTip(zoneEl, '<div class="sc-tip-node-title">' + escHtml(el.getAttribute('data-zone')) + '</div>' +
-      '<div class="sc-tip-section-head">RASFF alerts relating to potential fraud \u2014 ' + count + '</div>' +
-      (count ? list(alerts, 90) : '<div class="sc-tip-empty">None placed here</div>') +
-      (more > 0 ? '<div class="sc-tip-empty">+ ' + more + ' more in the alerts list</div>' : '') +
-      '<div class="sc-tip-divider"></div>' +
-      '<div class="sc-tip-section-head">fiin authenticity concerns \u2014 ' + fcount + ' \u00b7 example data</div>' +
-      (fcount ? list(fiin, 110) : '<div class="sc-tip-empty">None placed here</div>') +
-      (fmore > 0 ? '<div class="sc-tip-empty">+ ' + fmore + ' more in fiin member testing data</div>' : '') +
-      '<div class="sc-tip-footer"><b>Click the zone to see them all, with links.</b> Placement is fiin\u2019s estimate, not where the issue was confirmed.</div>');
-  });
-
   var tipShown = null;
   mapEl.onmousemove = function(e) {
     var t = e.target.closest ? e.target : null;
-    var src = t && (t.closest('.sc-node') && t.closest('.sc-node')._tipHtml ? t.closest('.sc-node') : t.closest('.sc-zone'));
+    var src = t && t.closest('.sc-node');
     if (!src || !src._tipHtml) { tip.style.display = 'none'; tipShown = null; return; }
     if (tipShown !== src) { tip.innerHTML = src._tipHtml; tipShown = src; }
     tip.style.display = 'flex';
@@ -2024,16 +2001,12 @@ function openZoneDialog(zi) {
   document.getElementById('zone-body').scrollTop = 0;
 }
 document.addEventListener('click', function(e) {
-  var z = e.target.closest && e.target.closest('.sc-zone-click');
+  var z = e.target.closest && e.target.closest('.sc-zone-view');
   if (z) { openZoneDialog(+z.getAttribute('data-zi')); return; }
   var d = document.getElementById('zone-dialog');
   if (!d) return;
   if (e.target.closest && e.target.closest('#zone-close')) d.close ? d.close() : d.removeAttribute('open');
   else if (e.target === d) d.close();
-});
-document.addEventListener('keydown', function(e) {
-  var z = e.target.closest && e.target.closest('.sc-zone-click');
-  if (z && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openZoneDialog(+z.getAttribute('data-zi')); }
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
