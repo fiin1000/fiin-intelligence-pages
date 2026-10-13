@@ -979,15 +979,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
     </div>
     <div class="com-meta">
       <div class="com-meta-label" id="com-period"></div>
-      <div class="va-wrap">
-        <button type="button" class="print-btn" id="va-btn" aria-haspopup="true">Download for vulnerability assessment ▾</button>
-        <div class="va-menu" id="va-menu" hidden>
-          <button type="button" data-va="cat">This category (CSV)</button>
-          <button type="button" data-va="all">All products (CSV)</button>
-          <button type="button" data-va="live" id="va-live" hidden>Copy live link for Excel / Google Sheets</button>
-          <div class="va-note">One row per product. Columns are always in the same order, so you can map them into your own template once.</div>
-        </div>
-      </div>
+      <button type="button" class="print-btn" id="csv-btn" onclick="downloadCsv()" title="This category’s TSG recommendations, RASFF alerts, fiin member data, price risk signals and news, in sections">Download CSV</button>
       <button type="button" class="print-btn" onclick="printSnapshot()">Print / save as PDF</button>
       <div class="com-meta-value">RASFF: daily &nbsp;·&nbsp; News: daily &nbsp;·&nbsp; Prices: monthly (HMRC imports) &nbsp;·&nbsp; fiin data: quarterly</div>
     </div>
@@ -2657,43 +2649,105 @@ function vaToCsv(rows) {
   }).join('\r\n');
 }
 
+// ── Category CSV: the page's sections stacked vertically, like the printed snapshot ──
+// Sections: TSG recommendations · RASFF alerts relating to potential fraud · fiin member data ·
+// price risk signals (HMRC) · supply chain news. Returns an array of rows (arrays of cells).
+function buildSnapshotCsvRows(cat, now) {
+  var C = COMM[cat], rows = [], blank = function(){ rows.push([]); };
+  var today = vaDate(now), sixMonthsAgo = new Date(now.getTime()), d30 = now.getTime() - 30 * 864e5;
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  var section = function(n, title, note) { blank(); rows.push([n + '. ' + title.toUpperCase()]); if (note) rows.push([note]); };
+
+  rows.push(['fiin Commodity Intelligence — ' + C.label]);
+  rows.push(['Downloaded', today]);
+  rows.push(['Page', VA_PAGE_URL + '#' + cat]);
+  rows.push(['For fiin member use only. Evidence of horizon scanning, not a vulnerability assessment in itself.']);
+
+  // 1. TSG recommendations
+  section(1, 'TSG quarterly recommendations');
+  var tsg = TSG_GUIDANCE[cat] || [];
+  rows.push(['#', 'Recommendation']);
+  if (tsg.length) tsg.forEach(function(t, i){ rows.push([i + 1, vaStrip(t)]); });
+  else rows.push(['', 'No TSG recommendations for this category yet.']);
+
+  // 2. RASFF
+  section(2, 'RASFF alerts relating to potential fraud (last 6 months)',
+    'Filtered part of the RASFF feed, not every alert: pathogens (including Salmonella, S. Infantis, Campylobacter), pesticide residues, mycotoxins, ' +
+    'natural toxins, biotoxins, foreign bodies, industrial contaminants and residues above an MRL are excluded. Covers the whole category.');
+  var cats = (C.rasffCategories || []).map(function(c){ return c.toLowerCase(); });
+  var alerts = (rasffData || []).filter(function(r) {
+    var d = parseNewsDate(r.date);
+    return cats.indexOf((r.commodity || '').toLowerCase()) > -1 && d && d >= sixMonthsAgo;
+  }).sort(function(a, b){ return parseNewsDate(b.date) - parseNewsDate(a.date); });
+  rows.push(['Date', 'Alert', 'Origin', 'Classification', 'Hazard', 'Supply chain stage', 'Link']);
+  if (alerts.length) alerts.forEach(function(r) {
+    rows.push([r.date, vaStrip(r.title), r.country || '', r.severity || '', r.hazard || '', r.node || '', r.link || '']);
+  });
+  else rows.push(['', 'No fraud-related RASFF alerts in the last 6 months.']);
+
+  // 3. fiin member data
+  section(3, 'fiin member testing data', 'EXAMPLE DATA — not real results; real member data to follow.');
+  var ft = (typeof FIIN_TESTING !== 'undefined' && FIIN_TESTING[cat]) || null;
+  if (ft && ft.results && ft.results.length) {
+    rows.push(['Quarter', 'Anonymised authenticity concern']);
+    ft.results.forEach(function(r){ rows.push([r.q, vaStrip(r.text)]); });
+  } else rows.push(['', 'No fiin member data for this category yet.']);
+
+  // 4. Price risk signals (HMRC)
+  section(4, 'Price risk signals — UK imports (HMRC)',
+    'Red and amber are prompts to check suppliers, specifications and testing, not proof of fraud. Prices are volume-weighted averages; HMRC publishes about 2 months after the month ends.');
+  rows.push(['Product', 'HMRC data used', 'Latest month', 'UK import price £/kg (last 3 months)', '2-year average £/kg',
+             'Price swing', 'Price swing detail', 'Origin shift', 'Origin shift detail', 'Price gap', 'Price gap detail',
+             'Main origins (share of kg, £/kg, CPI score) — last 6 months', 'Note']);
+  Object.keys(C.products).forEach(function(p) {
+    var hit = tradeFor(p);
+    if (!hit) { rows.push([p, '', '', '', '', '', '', '', '', '', '', '', TRADE_NOT_COVERED[p] || 'No HMRC import data available yet.']); return; }
+    var t = hit.t, M = t.months, sig = computeRiskSignals(p, t), L = sig.lights;
+    var last6 = M.slice(-6), tot6 = tradeSum(t, null, last6);
+    var origins = Object.keys(t.origins).filter(function(o){ return o !== OTHER_ORIGINS; }).map(function(o) {
+      var a = tradeSum(t, o, last6);
+      return { o: o, kg: a.kg, p: a.p, cpi: t.cpi ? t.cpi[o] : null };
+    }).filter(function(x){ return x.kg > 0; }).sort(function(a, b){ return b.kg - a.kg; }).slice(0, 6);
+    rows.push([p, t.label, M[M.length - 1], vaNum(tradeSum(t, null, M.slice(-3)).p, 2), vaNum(tradeSum(t, null, M).p, 2),
+      vaLevel(L[0].level), vaStrip(L[0].text), vaLevel(L[1].level), vaStrip(L[1].text), vaLevel(L[2].level), vaStrip(L[2].text),
+      origins.map(function(x) {
+        return x.o + ' ' + fmtPct(tot6.kg ? x.kg / tot6.kg : 0) + ', ' + fmtGBP(x.p) + '/kg' + (x.cpi != null ? ', CPI ' + x.cpi : '');
+      }).join('; '),
+      hit.note || '']);
+  });
+
+  // 5. News
+  section(5, 'Supply chain news (last 30 days)', 'Headlines found for each product; links go to the original articles.');
+  rows.push(['Product', 'Date', 'Theme', 'Headline', 'Source', 'Trade press', 'Link']);
+  var any = false;
+  Object.keys(C.products).forEach(function(p) {
+    var seen = {};
+    (newsData[newsKey(p)] || []).filter(function(n){ return n.ts >= d30; }).slice()
+      .sort(function(a, b){ return b.ts - a.ts; })
+      .forEach(function(n) {
+        var k = (n.headline || '').toLowerCase().slice(0, 70);
+        if (seen[k]) return; seen[k] = true; any = true;
+        rows.push([p, n.date || '', n.theme || '', vaStrip(n.headline), n.source || '', n.tier === 'trade' ? 'Yes' : '', n.url || '']);
+      });
+  });
+  if (!any) rows.push(['', '', '', 'No supply chain news for these products in the last 30 days.']);
+
+  blank();
+  rows.push(['Sources and licences', VA_SOURCES]);
+  return rows.map(function(r){ return r.map(function(v){ return typeof v === 'string' && v.length > 32000 ? v.slice(0, 31980) + ' … (truncated)' : v; }); });
+}
+
 // ── Download button (browser only) ──────────────────────────────────────────
-function downloadVa(scope) {
-  var keys = scope === 'all' ? Object.keys(COMM) : [cur];
-  var csv = '﻿' + vaToCsv(buildVaRows(keys, new Date()));
+function downloadCsv() {
+  var csv = '﻿' + vaToCsv(buildSnapshotCsvRows(cur, new Date()));
   var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'fiin-vulnerability-evidence-' + (scope === 'all' ? 'all-products' : cur.replace(/_/g, '-')) + '-' + vaDate(new Date()) + '.csv';
+  a.download = 'fiin-commodity-intelligence-' + cur.replace(/_/g, '-') + '-' + vaDate(new Date()) + '.csv';
   document.body.appendChild(a); a.click();
   setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-  closeVaMenu();
 }
-function closeVaMenu() { var m = document.getElementById('va-menu'); if (m) m.hidden = true; }
-document.addEventListener('click', function(e) {
-  var m = document.getElementById('va-menu');
-  if (!m) return;
-  if (e.target.closest && e.target.closest('#va-btn')) {
-    m.hidden = !m.hidden;
-    var l = document.getElementById('va-live');
-    if (l) l.hidden = !VA_EXPORT_CSV_URL;
-    return;
-  }
-  if (e.target.closest && e.target.closest('#va-menu')) {
-    var act = e.target.closest('[data-va]');
-    if (!act) return;
-    var k = act.getAttribute('data-va');
-    if (k === 'cat' || k === 'all') downloadVa(k);
-    if (k === 'live' && VA_EXPORT_CSV_URL) {
-      var done = function(){ act.textContent = 'Link copied ✓'; setTimeout(function(){ act.textContent = 'Copy live link for Excel / Google Sheets'; }, 2000); };
-      if (navigator.clipboard) navigator.clipboard.writeText(VA_EXPORT_CSV_URL).then(done, function(){ window.prompt('Copy this link:', VA_EXPORT_CSV_URL); });
-      else window.prompt('Copy this link:', VA_EXPORT_CSV_URL);
-    }
-    return;
-  }
-  closeVaMenu();
-});
-document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeVaMenu(); });
+
 
 // ── Render market intelligence section ──────────────────────────────────────
 function renderNews() {
