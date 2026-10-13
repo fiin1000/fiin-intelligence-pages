@@ -639,6 +639,14 @@ tr:hover td { background: var(--mist); }
 .sc-zone-count { color: var(--muted); }
 .sc-zone-badge { min-width: 18px; height: 18px; border-radius: 9px; font-size: 10px; font-weight: 700; font-family: 'DM Mono', monospace; display: inline-flex; align-items: center; justify-content: center; padding: 0 5px; color: white; }
 .sc-zone-arrow { align-self: center; }
+.sc-zone-counts { display: flex; gap: 8px; margin-left: auto; }
+.sc-zone-count { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; color: var(--muted); }
+.sc-zone-zero { background: #E4E8E0; color: #8A948A !important; }
+.sc-badge-fiin { background: #1A5FA5; }
+.sc-src { font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 600; border-radius: 3px; padding: 1px 4px; height: fit-content; white-space: nowrap; }
+.sc-src-rasff { background: #F1E3E3; color: #8B2020; }
+.sc-src-fiin { background: #E3ECF6; color: #1A5FA5; }
+.sc-ex { color: var(--muted); font-size: 10px; }
 .sc-zone { width: min-content; min-width: 128px; }
 .sc-zone-nodes { flex: 1; align-items: flex-start !important; }
 #sc-map { align-items: stretch; }
@@ -1043,7 +1051,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
 
     <!-- Supply chain map + Indicators -->
     <div class="card sc-section" id="sc-section" style="margin-top:14px">
-      <div class="sc-title">Supply chain map — where alerts most likely relate</div>
+      <div class="sc-title">Supply chain map — where alerts and authenticity concerns most likely relate</div>
       <div class="sc-sub" id="sc-sub"></div>
       <div class="sc-map" id="sc-map"></div>
       <div class="sc-unplaced" id="sc-unplaced" style="display:none"></div>
@@ -1055,8 +1063,8 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
         <span class="sc-leg-item"><span class="sc-leg-dot" style="background:#8B2020"></span>Serious / Alert</span>
         <span class="sc-leg-item"><span class="sc-leg-dot" style="background:#D4820A"></span>Information</span>
         <span class="sc-leg-item"><span class="sc-leg-dot" style="background:#2D6B2D"></span>Border rejection</span>
-        <span class="sc-leg-item"><span class="sc-leg-dot" style="background:var(--border)"></span>No alerts</span>
-        <span style="margin-left:auto;font-size:10px;color:var(--muted)">Badge colour = RASFF classification · placement is fiin’s estimate, not confirmed</span>
+        <span class="sc-leg-item"><span class="sc-leg-dot" style="background:#1A5FA5"></span>fiin authenticity concern (example data)</span>
+        <span style="margin-left:auto;font-size:10px;color:var(--muted)">RASFF badge colour = RASFF classification · placement is fiin’s estimate, not confirmed</span>
       </div>
 
     </div>
@@ -1116,7 +1124,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
           </div>
           <div class="tp-fiin-area" id="tp-fiin-area">
             <div class="tp-fiin-title">fiin member data <span style="font-size:10px;font-weight:400;color:var(--muted)">(example data)</span></div>
-            <div class="tp-fiin-sub">Anonymised authenticity concerns</div>
+            <div class="tp-fiin-sub">Anonymised authenticity concerns: anomalous lab results or traceability findings thought likely to affect authenticity</div>
             <div class="tp-results" id="tp-results"></div>
           </div>
         </div>
@@ -1778,6 +1786,26 @@ var SUPPLY_ZONES = {
   drinks:         [0,1,1,1,2,2,2,3,3]
 };
 // The zone an alert's stage belongs to, or '' when the stage is unknown / not on this category's map
+// fiin authenticity concerns for the map. An authenticity concern is an anomalous lab result or
+// traceability activity thought likely to affect authenticity. When member data is live each concern
+// will carry the supply chain stage it most likely relates to (same stage names as the map).
+// Until then the EXAMPLE results below are placed by a simple reading of their wording.
+function fiinConcernsForMap(cat) {
+  var ft = (typeof FIIN_TESTING !== 'undefined' && FIIN_TESTING[cat]) || null;
+  return ft && ft.results ? ft.results.map(function(r) {
+    return { q: r.q, text: vaStrip(r.text), node: r.node || '', zone: r.node ? null : exampleConcernZone(r.text), example: true };
+  }) : [];
+}
+function exampleConcernZone(text) {
+  var t = String(text || '').toLowerCase();
+  if (/use-by|best before|date code|shelf life|re-?dat/.test(t)) return 1;                       // packing & labelling
+  if (/relabel|re-label|repack|imported .* (as|labelled)|passed off/.test(t)) return 2;           // trading / import
+  if (/syrup|adulterat|dna|pcr|species|water|dilut|substitut|undeclared|bulked|filler|extended|enhance/.test(t)) return 1; // processing
+  if (/free.range|organic|welfare|outdoor|barn|grass.fed|pasture|breed|wild.caught|farmed|feeding|sugar.fed|umf|methylglyoxal|pollen|monofloral|veal classification|older animal|harvest/.test(t)) return 0;
+  if (/origin|isotope|british|country|geographic|pdo|pgi/.test(t)) return 2;                     // origin claims: trading / import
+  if (/content|composition|mixture|added/.test(t)) return 1;
+  return null;                                                                                    // not placed
+}
 function rasffZoneLabel(cat, node) {
   var k = scKey(cat), chain = SUPPLY_CHAIN[k] || [], i = chain.indexOf(node);
   if (i < 0 || !SUPPLY_ZONES[k]) return '';
@@ -1785,9 +1813,10 @@ function rasffZoneLabel(cat, node) {
 }
 
 // ── Render supply chain map ───────────────────────────────────────────────────
-var SC_SUB_TEXT = '<b>RASFF alerts relating to potential fraud</b>, grouped by the part of the supply chain they most likely relate to. ' +
-  '<b>This placement is fiin\u2019s estimate from the alert wording</b> \u2014 RASFF records where a problem was found, not where it happened. ' +
-  'Hover a zone for its alerts, or a stage for known risks.';
+var SC_SUB_TEXT = 'Shows <b>RASFF alerts relating to potential fraud</b> and <b>fiin authenticity concerns</b> \u2014 anomalous lab results or traceability findings ' +
+  'thought likely to affect authenticity (<i>example data until member data is live</i>) \u2014 grouped by the part of the supply chain they most likely relate to. ' +
+  '<b>Placement is fiin\u2019s estimate</b>, not where an issue was confirmed: a RASFF alert records where a problem was found and a test result where a sample was taken. ' +
+  'Hover a zone for details, or a stage for known risks.';
 function renderSupplyChain() {
   var mapEl = document.getElementById('sc-map');
   var nodes = SUPPLY_CHAIN[scKey(cur)] || [];
@@ -1799,7 +1828,12 @@ function renderSupplyChain() {
   var labels = SUPPLY_ZONE_LABELS[k] || SUPPLY_ZONE_LABELS._default;
   var zones = labels.map(function(l){ return { label: l, nodes: [], alerts: [] }; });
   nodes.forEach(function(n, i){ zones[zoneOf[i]].nodes.push(n); });
-  var unplaced = [];
+  zones.forEach(function(z){ z.fiin = []; });
+  var unplaced = [], unplacedFiin = [];
+  fiinConcernsForMap(cur).forEach(function(c) {
+    var zi = c.node ? (nodes.indexOf(c.node) > -1 ? zoneOf[nodes.indexOf(c.node)] : null) : c.zone;
+    if (zi != null && zones[zi]) zones[zi].fiin.push(c); else unplacedFiin.push(c);
+  });
   rasffData.filter(function(r) {
     return rasffCats.indexOf((r.commodity || '').toLowerCase().trim()) > -1;
   }).sort(function(a, b){ return (b.date || '').localeCompare(a.date || ''); }).forEach(function(r) {
@@ -1816,7 +1850,8 @@ function renderSupplyChain() {
 
   try {
     mapEl.innerHTML = zones.filter(function(z){ return z.nodes.length; }).map(function(z, zi, all) {
-      var n = z.alerts.length, w = worst(z.alerts);
+      var n = z.alerts.length, w = worst(z.alerts), nf = z.fiin.length;
+      var fiinArr = z.fiin.slice(0, 4).map(function(c){ return { d: c.q, t: c.text.slice(0, 110) }; });
       var alertsArr = z.alerts.slice(0, 6).map(function(a){ return { d: a.date || '', t: (a.title || '').slice(0, 90) }; });
       var nodesHtml = z.nodes.map(function(node, idx) {
         var thisNodeRisks = (KNOWN_RISKS[k] || {})[node] || [];
@@ -1828,10 +1863,14 @@ function renderSupplyChain() {
       return '<div class="sc-zone-wrap"><div class="sc-zone" style="' + (n ? ZONE_BG[w] : '') + '">' +
           '<div class="sc-zone-nodes">' + nodesHtml + '</div>' +
           '<div class="sc-zone-foot" data-zone="' + escHtml(z.label) + '" data-count="' + n + '" data-more="' + Math.max(0, n - 6) + '"' +
-            " data-alerts='" + JSON.stringify(alertsArr).replace(/'/g,'&#39;') + "'>" +
-            (n ? '<span class="sc-zone-badge sc-badge-' + w + '">' + n + '</span>' : '') +
+            ' data-fcount="' + nf + '" data-fmore="' + Math.max(0, nf - 4) + '"' +
+            " data-alerts='" + JSON.stringify(alertsArr).replace(/'/g,'&#39;') + "'" +
+            " data-fiin='" + JSON.stringify(fiinArr).replace(/'/g,'&#39;') + "'>" +
             '<span class="sc-zone-label">' + escHtml(z.label) + '</span>' +
-            '<span class="sc-zone-count">' + (n ? n + ' alert' + (n === 1 ? '' : 's') : 'no alerts') + '</span>' +
+            '<span class="sc-zone-counts">' +
+              '<span class="sc-zone-count" title="RASFF alerts">' + (n ? '<span class="sc-zone-badge sc-badge-' + w + '">' + n + '</span>' : '<span class="sc-zone-badge sc-zone-zero">0</span>') + 'RASFF</span>' +
+              '<span class="sc-zone-count" title="fiin authenticity concerns (example data)">' + '<span class="sc-zone-badge ' + (nf ? 'sc-badge-fiin' : 'sc-zone-zero') + '">' + nf + '</span>fiin</span>' +
+            '</span>' +
           '</div>' +
         '</div>' + (zi < all.length - 1 ? '<div class="sc-arrow sc-zone-arrow">›</div>' : '') + '</div>';
     }).join('');
@@ -1843,15 +1882,19 @@ function renderSupplyChain() {
   // Alerts whose wording doesn't point to a likely stage: listed, not forced onto the map
   var upEl = document.getElementById('sc-unplaced');
   if (upEl) {
-    upEl.style.display = unplaced.length ? '' : 'none';
-    upEl.innerHTML = unplaced.length ?
-      '<div class="sc-unplaced-head">Not placed on the map <span>' + unplaced.length + '</span></div>' +
-      '<div class="sc-unplaced-sub">The alert wording doesn\u2019t point to a likely stage, so these are listed rather than placed.</div>' +
+    var nUp = unplaced.length + unplacedFiin.length;
+    upEl.style.display = nUp ? '' : 'none';
+    upEl.innerHTML = nUp ?
+      '<div class="sc-unplaced-head">Not placed on the map <span>' + nUp + '</span></div>' +
+      '<div class="sc-unplaced-sub">The information doesn\u2019t point to a likely stage, so these are listed rather than placed.</div>' +
       unplaced.slice(0, 5).map(function(r) {
-        return '<div class="sc-unplaced-item"><span>' + escHtml(r.date || '') + '</span>' +
+        return '<div class="sc-unplaced-item"><span>' + escHtml(r.date || '') + '</span><b class="sc-src sc-src-rasff">RASFF</b>' +
           (r.link ? '<a href="' + escHtml(r.link) + '" target="_blank" rel="noopener">' + escHtml(r.title) + '</a>' : escHtml(r.title)) + '</div>';
       }).join('') +
-      (unplaced.length > 5 ? '<div class="sc-unplaced-sub">+ ' + (unplaced.length - 5) + ' more in the alerts list below</div>' : '')
+      (unplaced.length > 5 ? '<div class="sc-unplaced-sub">+ ' + (unplaced.length - 5) + ' more RASFF alerts in the alerts list below</div>' : '') +
+      unplacedFiin.slice(0, 5).map(function(c) {
+        return '<div class="sc-unplaced-item"><span>' + escHtml(c.q) + '</span><b class="sc-src sc-src-fiin">fiin</b>' + escHtml(c.text) + (c.example ? ' <i class="sc-ex">(example)</i>' : '') + '</div>';
+      }).join('')
       : '';
   }
 
@@ -1879,16 +1922,25 @@ function renderSupplyChain() {
   // Zones: the RASFF alerts placed there
   mapEl.querySelectorAll('.sc-zone-foot').forEach(function(el) {
     var count = parseInt(el.getAttribute('data-count') || '0', 10), more = parseInt(el.getAttribute('data-more') || '0', 10);
-    if (!count) return;
-    var alerts = [];
+    var fcount = parseInt(el.getAttribute('data-fcount') || '0', 10), fmore = parseInt(el.getAttribute('data-fmore') || '0', 10);
+    if (!count && !fcount) return;
+    var alerts = [], fiin = [];
     try { alerts = JSON.parse((el.getAttribute('data-alerts') || '[]').replace(/&#39;/g,"'")); } catch(e2) {}
+    try { fiin = JSON.parse((el.getAttribute('data-fiin') || '[]').replace(/&#39;/g,"'")); } catch(e2) {}
+    var list = function(arr, cut) {
+      return arr.map(function(a) {
+        return '<div class="sc-tip-item"><div class="sc-tip-meta">' + escHtml(a.d) + '</div>' + escHtml(a.t) + (a.t.length >= cut ? '&hellip;' : '') + '</div>';
+      }).join('');
+    };
     showTip(el, '<div class="sc-tip-node-title">' + escHtml(el.getAttribute('data-zone')) + '</div>' +
-      '<div class="sc-tip-section-head">RASFF alerts most likely relating to this part of the chain</div>' +
-      alerts.map(function(a) {
-        return '<div class="sc-tip-item"><div class="sc-tip-meta">' + escHtml(a.d) + '</div>' + escHtml(a.t) + (a.t.length >= 90 ? '&hellip;' : '') + '</div>';
-      }).join('') +
+      '<div class="sc-tip-section-head">RASFF alerts relating to potential fraud \u2014 ' + count + '</div>' +
+      (count ? list(alerts, 90) : '<div class="sc-tip-empty">None placed here</div>') +
       (more > 0 ? '<div class="sc-tip-empty">+ ' + more + ' more in the alerts list</div>' : '') +
-      '<div class="sc-tip-footer">Placed by fiin from the alert wording \u2014 an estimate, not where the issue was confirmed</div>');
+      '<div class="sc-tip-divider"></div>' +
+      '<div class="sc-tip-section-head">fiin authenticity concerns \u2014 ' + fcount + ' \u00b7 example data</div>' +
+      (fcount ? list(fiin, 110) : '<div class="sc-tip-empty">None placed here</div>') +
+      (fmore > 0 ? '<div class="sc-tip-empty">+ ' + fmore + ' more in fiin member testing data</div>' : '') +
+      '<div class="sc-tip-footer">Placed by fiin as the most likely part of the chain \u2014 an estimate, not where the issue was confirmed</div>');
   });
 
   function positionTip(e) {
@@ -2693,8 +2745,13 @@ function buildSnapshotCsvRows(cat, now) {
   section(3, 'fiin member testing data', 'EXAMPLE DATA — not real results; real member data to follow.');
   var ft = (typeof FIIN_TESTING !== 'undefined' && FIIN_TESTING[cat]) || null;
   if (ft && ft.results && ft.results.length) {
-    rows.push(['Quarter', 'Anonymised authenticity concern']);
-    ft.results.forEach(function(r){ rows.push([r.q, vaStrip(r.text)]); });
+    rows.push(['An authenticity concern is an anomalous lab result or traceability activity thought likely to affect authenticity.']);
+    rows.push(['Quarter', 'Anonymised authenticity concern', 'Most likely part of supply chain (fiin estimate)']);
+    var zl = SUPPLY_ZONE_LABELS[scKey(cat)] || SUPPLY_ZONE_LABELS._default;
+    fiinConcernsForMap(cat).forEach(function(c) {
+      var z = c.node ? rasffZoneLabel(cat, c.node) : (c.zone != null ? zl[c.zone] : '');
+      rows.push([c.q, c.text, z || 'Not placed']);
+    });
   } else rows.push(['', 'No fiin member data for this category yet.']);
 
   // 4. Price risk signals (HMRC)
