@@ -1813,10 +1813,8 @@ function rasffZoneLabel(cat, node) {
 }
 
 // ── Render supply chain map ───────────────────────────────────────────────────
-var SC_SUB_TEXT = 'Shows <b>RASFF alerts relating to potential fraud</b> and <b>fiin authenticity concerns</b> \u2014 anomalous lab results or traceability findings ' +
-  'thought likely to affect authenticity (<i>example data until member data is live</i>) \u2014 grouped by the part of the supply chain they most likely relate to. ' +
-  '<b>Placement is fiin\u2019s estimate</b>, not where an issue was confirmed: a RASFF alert records where a problem was found and a test result where a sample was taken. ' +
-  'Hover a zone for details, or a stage for known risks.';
+var SC_SUB_TEXT = 'Shows RASFF alerts and fiin data that could indicate potential fraud, grouped by the part of the supply chain they most likely relate to. ' +
+  'Hover a zone for details, or a stage for known risks, determined by the TSG.';
 function renderSupplyChain() {
   var mapEl = document.getElementById('sc-map');
   var nodes = SUPPLY_CHAIN[scKey(cur)] || [];
