@@ -189,6 +189,7 @@ body {
   body.printing-rasff .rasff-dialog { display: block !important; position: static; width: auto; max-height: none; box-shadow: none; margin-top: 14px; }
   .rasff-open, .rasff-close, .rasff-link-row { display: none !important; }
   .rasff-dialog-body { overflow: visible !important; }
+  body.printing-rasff #unplaced-dialog:not(:has(.sc-unplaced-item)) { display: none !important; }
   .print-head { display: block !important; border-bottom: 2px solid #1A3D1A; padding-bottom: 8px; margin-bottom: 10px; }
   .ph-title { font-size: 18px; font-weight: 700; color: #1A3D1A; }
   .ph-meta { font-size: 10.5px; color: #333; margin-top: 3px; line-height: 1.5; }
@@ -652,6 +653,11 @@ tr:hover td { background: var(--mist); }
 #sc-map { align-items: stretch; }
 .sc-zone .sc-box { width: 76px; }
 .sc-zone .sc-arrow { width: 13px; }
+.sc-unplaced-link { margin-top: 8px; }
+.sc-unplaced-link button { background: none; border: none; padding: 0; font: inherit; font-size: 11px; font-weight: 500; color: var(--pine); cursor: pointer; }
+.sc-unplaced-link button:hover { text-decoration: underline; }
+#unplaced-body { padding: 10px 16px; font-size: 12px; }
+#unplaced-body .sc-unplaced-item { padding: 6px 0; border-bottom: 1px solid var(--border); }
 .sc-unplaced { margin-top: 10px; padding: 10px 12px; border: 1.5px dashed var(--border); border-radius: 8px; font-size: 11px; color: var(--ink); }
 .sc-unplaced-head { font-weight: 600; margin-bottom: 2px; }
 .sc-unplaced-head span { font-family: 'DM Mono', monospace; font-size: 10px; background: var(--mist); border-radius: 8px; padding: 1px 6px; margin-left: 4px; }
@@ -1054,7 +1060,15 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
       <div class="sc-title">Supply chain map — where alerts and authenticity concerns most likely relate</div>
       <div class="sc-sub" id="sc-sub"></div>
       <div class="sc-map" id="sc-map"></div>
-      <div class="sc-unplaced" id="sc-unplaced" style="display:none"></div>
+      <div class="sc-unplaced-link" id="sc-unplaced" style="display:none"></div>
+      <dialog class="rasff-dialog" id="unplaced-dialog" aria-labelledby="unplaced-title">
+        <div class="rasff-list-head">
+          <span class="rasff-list-title" id="unplaced-title">Not placed on the map &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="unplaced-com" style="color:var(--forest)"></span></span>
+          <button type="button" class="rasff-close" id="unplaced-close" aria-label="Close">✕</button>
+        </div>
+        <div class="rasff-dialog-body" id="unplaced-body"></div>
+        <div class="rasff-list-foot">The information in these doesn’t point to a likely part of the supply chain, so they are listed here rather than placed on the map. They are still included in the alert counts and the CSV.</div>
+      </dialog>
       <div style="display:none">
         <div id="fiin-indicators-body"></div>
       </div>
@@ -1882,19 +1896,19 @@ function renderSupplyChain() {
   if (upEl) {
     var nUp = unplaced.length + unplacedFiin.length;
     upEl.style.display = nUp ? '' : 'none';
-    upEl.innerHTML = nUp ?
-      '<div class="sc-unplaced-head">Not placed on the map <span>' + nUp + '</span></div>' +
-      '<div class="sc-unplaced-sub">The information doesn\u2019t point to a likely stage, so these are listed rather than placed.</div>' +
-      unplaced.slice(0, 5).map(function(r) {
+    upEl.innerHTML = nUp ? '<button type="button" id="unplaced-open">' + nUp + ' not placed on the map \u2192</button>' : '';
+    var com = document.getElementById('unplaced-com'); if (com) com.textContent = COMM[cur].label;
+    var body = document.getElementById('unplaced-body');
+    if (body) body.innerHTML =
+      unplaced.map(function(r) {
         return '<div class="sc-unplaced-item"><span>' + escHtml(r.date || '') + '</span><b class="sc-src sc-src-rasff">RASFF</b>' +
           (r.link ? '<a href="' + escHtml(r.link) + '" target="_blank" rel="noopener">' + escHtml(r.title) + '</a>' : escHtml(r.title)) + '</div>';
       }).join('') +
-      (unplaced.length > 5 ? '<div class="sc-unplaced-sub">+ ' + (unplaced.length - 5) + ' more RASFF alerts in the alerts list below</div>' : '') +
-      unplacedFiin.slice(0, 5).map(function(c) {
-        return '<div class="sc-unplaced-item"><span>' + escHtml(c.q) + '</span><b class="sc-src sc-src-fiin">fiin</b>' + escHtml(c.text) + (c.example ? ' <i class="sc-ex">(example)</i>' : '') + '</div>';
-      }).join('')
-      : '';
+      unplacedFiin.map(function(c) {
+        return '<div class="sc-unplaced-item"><span>' + escHtml(c.q) + '</span><b class="sc-src sc-src-fiin">fiin</b>' + escHtml(c.text) + (c.example ? ' <i class="sc-ex">(example data)</i>' : '') + '</div>';
+      }).join('');
   }
+
 
   // Attach mouse events for floating tooltip — shows Known Risks + Indicators
   var tip = document.getElementById('sc-float-tip');
@@ -3324,6 +3338,10 @@ document.addEventListener('click', function(e) {
   if (!d) return;
   if (e.target.closest && e.target.closest('#rasff-open')) { if (d.showModal) d.showModal(); else d.setAttribute('open', ''); }
   else if (e.target.closest && e.target.closest('#rasff-close')) d.close ? d.close() : d.removeAttribute('open');
+  var u = document.getElementById('unplaced-dialog');
+  if (u && e.target.closest && e.target.closest('#unplaced-open')) { if (u.showModal) u.showModal(); else u.setAttribute('open', ''); }
+  else if (u && e.target.closest && e.target.closest('#unplaced-close')) u.close ? u.close() : u.removeAttribute('open');
+  else if (u && e.target === u) u.close();
   else if (e.target === d) d.close();   // click on the dimmed background
 });
 
