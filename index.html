@@ -2358,7 +2358,7 @@ function renderGlance() {
     });
     parts.push(glanceItem(n ? 'a' : 'n', '<b>' + n + '</b> fraud-related RASFF alert' + (n === 1 ? '' : 's') + ' in 30 days'));
   }
-  // Fraud & integrity news in the last 30 days (category + its products)
+  // Fraud & integrity news in the last 30 days (all products in this category)
   if (newsLoaded) {
     var keys = [newsKey(cur)].concat(Object.keys(COMM[cur].products).map(newsKey)), heads = {};
     keys.forEach(function(k) {
@@ -2622,9 +2622,9 @@ function buildVaRows(catKeys, now) {
         row.hmrc_coverage_note = TRADE_NOT_COVERED[p] || 'No HMRC import data available yet.';
       }
 
-      // News evidence (product + its category, last 30 days)
+      // News evidence (this product's own news, last 30 days)
       var seen = {}, items = [];
-      [newsData[newsKey(p)] || [], newsData[newsKey(cat)] || []].forEach(function(list) {
+      [newsData[newsKey(p)] || []].forEach(function(list) {
         list.forEach(function(n) {
           var k = (n.headline || '').toLowerCase().slice(0, 70);
           if (seen[k] || !(n.ts >= d30)) return;
@@ -2701,10 +2701,10 @@ function renderNews() {
   var items   = document.getElementById('intel-items');
   var meta    = document.getElementById('intel-meta');
 
-  // Live Sheet news: the product's own items plus its category's, without duplicates
+  // Live Sheet news for the product selected in the dropdown only (the script searches each product separately)
   var prodKey = typeof curProd !== 'undefined' ? curProd : cur;
   var seenHead = {}, commNews = [];
-  [newsData[newsKey(prodKey)] || [], newsData[newsKey(cur)] || []].forEach(function(list) {
+  [newsData[newsKey(prodKey)] || []].forEach(function(list) {
     list.forEach(function(n) {
       var k = (n.headline || '').toLowerCase().slice(0, 70);
       if (seenHead[k]) return;
