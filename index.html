@@ -475,6 +475,7 @@ tr:hover td { background: var(--mist); }
 .rasff-status a { color: var(--blue); text-decoration: none; }
 .rasff-status a:hover { text-decoration: underline; }
 .rasff-link-row { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 12px 16px; background: white; border: 1px solid var(--border); border-radius: 10px; font-size: 12.5px; color: var(--ink); }
+.rasff-scope-tag { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .05em; text-transform: uppercase; background: #FFF4E0; color: #7A4800; border: 1px solid #E8C48A; border-radius: 4px; padding: 2px 7px; }
 .rasff-link-row a { font-weight: 500; color: var(--pine); text-decoration: none; }
 .rasff-open { background: var(--pine); color: white; border: none; border-radius: 5px; padding: 6px 12px; font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; }
 .rasff-open:hover { background: var(--forest); }
@@ -995,7 +996,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
   <div class="com-body">
     <div class="section-header" style="margin-top:4px;margin-bottom:6px">
       <div class="section-header-label">Category intelligence</div>
-      <div class="section-header-sub" id="cat-section-sub">TSG Quarterly Recommendations &amp; Information &nbsp;·&nbsp; Supply chain fraud map &nbsp;·&nbsp; RASFF alerts</div>
+      <div class="section-header-sub" id="cat-section-sub">TSG Quarterly Recommendations &amp; Information &nbsp;·&nbsp; Supply chain fraud map &nbsp;·&nbsp; RASFF alerts relating to potential fraud</div>
       <div class="section-header-line"></div>
     </div>
     <div class="tsg-resources-row">
@@ -1030,7 +1031,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
     <!-- Supply chain map + Indicators -->
     <div class="card sc-section" id="sc-section" style="margin-top:14px">
       <div class="sc-title">Supply chain fraud hotspot map</div>
-      <div class="sc-sub" id="sc-sub">RASFF alerts plotted by supply chain stage · Badge colour: red = serious/alert, amber = information, green = border rejection</div>
+      <div class="sc-sub" id="sc-sub">RASFF alerts relating to potential fraud, plotted by supply chain stage · Badge colour: red = serious/alert, amber = information, green = border rejection</div>
       <div class="sc-map" id="sc-map"></div>
       <div style="display:none">
         <div id="fiin-indicators-body"></div>
@@ -1047,7 +1048,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
     </div>
     <!-- RASFF: link to the alerts already collected for this category -->
     <div class="rasff-link-row" id="rasff-link-row">
-      <span>RASFF alerts for <span id="rasff-com" style="text-transform:lowercase"></span>:</span>
+      <span class="rasff-scope-tag">Fraud-related only</span><span>RASFF alerts relating to potential fraud — <span id="rasff-com" style="text-transform:lowercase"></span>:</span>
       <button type="button" class="rasff-open" id="rasff-open">View alerts →</button>
       <span class="rasff-link-sep">·</span>
       <a id="rasff-portal-link" href="https://webgate.ec.europa.eu/rasff-window/screen/search" target="_blank" rel="noopener">Search RASFF Window</a>
@@ -1055,12 +1056,12 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
     </div>
     <dialog class="rasff-dialog" id="rasff-dialog" aria-labelledby="rasff-dialog-title">
       <div class="rasff-list-head">
-        <span class="rasff-list-title" id="rasff-dialog-title">RASFF alerts &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="rasff-dialog-com" style="color:var(--forest)"></span></span>
+        <span class="rasff-list-title" id="rasff-dialog-title">RASFF alerts relating to potential fraud &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="rasff-dialog-com" style="color:var(--forest)"></span></span>
         <span class="rasff-list-meta"><span id="rasff-count"></span></span>
         <button type="button" class="rasff-close" id="rasff-close" aria-label="Close">✕</button>
       </div>
       <div class="rasff-dialog-body" id="rasff-body"></div>
-      <div class="rasff-list-foot">EU/UK enforcement notifications for the whole category from the last 6 months, newest first, as collected for this page. Excludes pathogens, pesticides, mycotoxins and other contamination-only alerts. Source: RASFF Window, © European Union.</div>
+      <div class="rasff-list-foot"><b>This is a filtered part of the RASFF feed, not every alert.</b> EU/UK enforcement notifications for the whole category from the last 6 months, newest first, as collected for this page. Excludes alerts that are about contamination rather than fraud: pathogens (including <i>Salmonella</i>, <i>S.</i> Infantis, <i>Campylobacter</i>, <i>Listeria</i> and <i>E. coli</i>), pesticide residues, mycotoxins, natural toxins, biotoxins, foreign bodies, industrial contaminants, and residues reported above a maximum residue limit (MRL). Veterinary residues are kept only where illegal or prohibited, and are shown at the first stage of the supply chain. Use “Search RASFF Window” for the full feed. Source: RASFF Window, © European Union.</div>
     </dialog>
 
     <!-- EU Agri-Food Fraud Network monthly report: this category's entries -->
@@ -1150,7 +1151,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
             when it turns red or amber. <span style="color:#A02828;font-weight:600">Red</span> and
             <span style="color:#7A4800;font-weight:600">amber</span> are prompts to check suppliers, specifications and testing,
             not proof of fraud. Prices are averages across grades and arrive about two months after the month ends.
-            RASFF alerts on the supply chain map above cover the whole category, not just this product.
+            RASFF alerts on the supply chain map above are those relating to potential fraud, and cover the whole category, not just this product.
           </div>
 
         </div>
@@ -1901,10 +1902,10 @@ function renderSupplyChain() {
   // Show unknown count if any
   var subEl = document.getElementById('sc-sub');
   if (unknowns.length > 0) {
-    subEl.innerHTML = 'RASFF alerts plotted by supply chain stage · ' +
+    subEl.innerHTML = '<b>RASFF alerts relating to potential fraud</b> (contamination-only alerts are filtered out) · ' +
       '<span style="color:#D4820A;font-weight:600">' + unknowns.length + ' alert' + (unknowns.length!==1?'s':'') + ' need supply chain node mapping</span> — open your Google Sheet rasff tab and fill in the <strong>node_override</strong> column for rows marked "Unknown – needs review"';
   } else {
-    subEl.innerHTML = 'RASFF alerts plotted by supply chain stage · Hover any node to see alerts · Badge colour: <span style="color:#8B2020">red</span> = serious, <span style="color:#D4820A">amber</span> = information, <span style="color:#2D6B2D">green</span> = border rejection';
+    subEl.innerHTML = '<b>RASFF alerts relating to potential fraud</b> (contamination-only alerts are filtered out) · Hover any node to see alerts · Badge colour: <span style="color:#8B2020">red</span> = serious, <span style="color:#D4820A">amber</span> = information, <span style="color:#2D6B2D">green</span> = border rejection';
   }
 }
 
@@ -2355,7 +2356,7 @@ function renderGlance() {
       var d = parseNewsDate(r.date);
       if (d && d.getTime() >= since) n++;
     });
-    parts.push(glanceItem(n ? 'a' : 'n', '<b>' + n + '</b> RASFF alert' + (n === 1 ? '' : 's') + ' in 30 days'));
+    parts.push(glanceItem(n ? 'a' : 'n', '<b>' + n + '</b> fraud-related RASFF alert' + (n === 1 ? '' : 's') + ' in 30 days'));
   }
   // Fraud & integrity news in the last 30 days (category + its products)
   if (newsLoaded) {
@@ -2387,9 +2388,15 @@ function parseRasffCsv(txt) {
       'pathogenic micro-organisms',
       'pesticide residues'
     ];
-    // Alerts whose title contains any of these (lower-case) phrases are hidden.
-    // Was referenced but never defined, which crashed the RASFF load. Add terms as needed.
-    var EXCLUDED_TITLE_TERMS = [];
+    // fiin RASFF rules — only alerts relating to potential fraud are shown.
+    // The Apps Script applies the same rules when it collects alerts; repeating them here keeps older rows in line.
+    // 1. Free-text exclusions: alerts whose title contains any of these (lower-case) phrases are hidden
+    var EXCLUDED_TITLE_TERMS = ['salmonel', 'infantis', 'campylobacter',
+      'aflatoxin', 'mycotoxin', 'ochratoxin', 'deoxynivalenol', 'fumonisin', 'zearalenone'];
+    // 2. Residues reported above a maximum residue limit (MRL) are hidden: only illegal or prohibited residues are kept
+    var MRL_EXCEEDED = /(exceed\w*|above|over|higher than|in excess of|>|≥)\s*(the\s+)?(eu\s+|permitted\s+|legal\s+|maximum\s+)*(mrls?\b|maximum residue (level|limit)s?)|\b(mrls?|maximum residue (level|limit)s?)\s*(\([^)]*\)\s*)?(is\s+|was\s+|were\s+|being\s+)?exceed/i;
+    // 3. Veterinary residues are placed at the first stage of the category's supply chain
+    var VET_RESIDUE = /veterinar|antibiotic|antimicrobial|withdrawal period|hormone|chloramphenicol|thiamphenicol|florfenicol|nitrofura|semicarbazide|\b(sem|amoz|aoz|ahd)\b|floxacin|quinolone|cyclines?\b|doksycyklin|sulf[ao](dia|meth|thia|mer|quin|nil|dox|namid)|sulphonamid|sulfonamid|trimethoprim|metronidazole|dimetridazole|ronidazole|nitroimidazole|malachite|crystal violet|gentian violet|dapsone|ractopamine|clenbuterol|beta-agonist|stilben|coccidiostat|nicarbazin|lasalocid|monensin|salinomycin|narasin|diclazuril|toltrazuril|ivermectin|streptomycin|tylosin|lincomycin|fipronil/i;
 
     // Normalise short commodity keys from old Apps Script to full RASFF labels
     var SHEET_ALIASES = {
@@ -2407,26 +2414,6 @@ function parseRasffCsv(txt) {
       'drinks':          'non-alcholic beverages'
     };
 
-    // Vet residues first-node mapping
-    var VET_FIRST_NODE = {
-      'poultry meat and poultry meat products': 'Rearing Farm',
-      'poultry':                                'Rearing Farm',
-      'meat and meat products (other than poultry)': 'Farm/Ranch',
-      'fish and fish products':                 'Farm/Fishing Vessel',
-      'cephalopods and products thereof':       'Farm/Fishing Vessel',
-      'crustaceans and products thereof':       'Farm/Fishing Vessel',
-      'bivalve molluscs and products thereof':  'Farm/Fishing Vessel',
-      'honey and royal jelly':                  'Apiary/Hive',
-      'herbs and spices':                       'Growing Region',
-      'cereals and bakery products':            'Arable Farm',
-      'prepared dishes and snacks':             'Ingredient Supply',
-      'fruits and vegetables':                  'Farm/Orchard',
-      'milk and milk products':                 'Dairy Farm',
-      'nuts, nut products and seeds':           'Orchard',
-      'eggs and egg products':                  'Laying Farm',
-      'non-alcholic beverages':                 'Ingredient Supply'
-    };
-
     var out = rows.map(function(r) {
       var rawCommodity = (r[0]||'').trim();
       var normCommodity = SHEET_ALIASES[rawCommodity.toLowerCase()] || rawCommodity;
@@ -2438,24 +2425,23 @@ function parseRasffCsv(txt) {
         severity:  (r[5]||'').trim(),
         hazard:    (r[6]||'').trim(),
         node:      (r[8]||r[7]||'').trim(),
+        override:  !!(r[8]||'').trim(),
         ref:       '',
         link:      (r[9]||'').trim()
       };
     });
 
-    // Apply vet residues first-node override where node is unknown or missing
+    // Vet residues: first stage of the supply chain for the category (a manual node_override still wins)
     out.forEach(function(r) {
-      if ((r.hazard || '').toLowerCase().indexOf('vet residues') === -1) return;
-      if (r.node && r.node !== '' && r.node !== 'Unknown – needs review') return; // already mapped
-      var commLower = (r.commodity || '').toLowerCase();
-      var vetNode = VET_FIRST_NODE[commLower];
-      if (!vetNode) {
-        // Try partial match
-        Object.keys(VET_FIRST_NODE).forEach(function(k) {
-          if (!vetNode && commLower.indexOf(k) > -1) vetNode = VET_FIRST_NODE[k];
-        });
-      }
-      if (vetNode) r.node = vetNode;
+      if (!VET_RESIDUE.test(r.title)) return;
+      r.hazard = 'Vet Residues';
+      if (r.override) return;
+      var commLower = r.commodity.toLowerCase();
+      Object.keys(COMM).forEach(function(k) {
+        var cats = (COMM[k].rasffCategories || []).map(function(c){ return c.toLowerCase(); });
+        var chain = SUPPLY_CHAIN[scKey(k)];
+        if (cats.indexOf(commLower) > -1 && chain && chain.length) r.node = chain[0];
+      });
     });
 
     out = out.filter(function(r) {
@@ -2464,6 +2450,7 @@ function parseRasffCsv(txt) {
       if (EXCLUDED_HAZARDS.some(function(ex) { return hazardLower === ex; })) return false;
       var titleLower = r.title.toLowerCase();
       if (EXCLUDED_TITLE_TERMS.some(function(t) { return titleLower.indexOf(t) > -1; })) return false;
+      if (MRL_EXCEEDED.test(r.title)) return false;
       return true;
     });
     return out;
@@ -2565,7 +2552,7 @@ var VA_COLUMNS = [
 ];
 var VA_SOURCES = 'HMRC Overseas Trade Statistics (Crown copyright, Open Government Licence v3.0); ' +
   'Corruption Perceptions Index (© Transparency International, CC BY-ND 4.0, scores unchanged); ' +
-  'RASFF Window (© European Union); news headlines via Google News (links to original articles); ' +
+  'RASFF Window (© European Union; fraud-related alerts only: pathogens, pesticide and other contaminants, and residues above an MRL excluded); news headlines via Google News (links to original articles); ' +
   'TSG guidance, known risks and resources © fiin, for member use only.';
 
 function vaStrip(v) { return String(v == null ? '' : v).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim(); }
@@ -3050,7 +3037,7 @@ function render() {
   var intelProdEl = document.getElementById('intel-prod-label');
   if (intelProdEl) intelProdEl.textContent = curProd;
   var catSubEl = document.getElementById('cat-section-sub');
-  if (catSubEl) catSubEl.textContent = c.label + ' · TSG Quarterly Recommendations & Information · Supply chain fraud map · RASFF alerts (last 6 months)';
+  if (catSubEl) catSubEl.textContent = c.label + ' · TSG Quarterly Recommendations & Information · Supply chain fraud map · RASFF alerts relating to potential fraud (last 6 months)';
   var latestM = '';
   Object.keys(c.products).forEach(function(p){ var h = tradeFor(p); if (h) { var m = h.t.months[h.t.months.length - 1]; if (m > latestM) latestM = m; } });
   document.getElementById('com-period').textContent = latestM ? 'Latest HMRC prices: ' + fmtMonth(latestM) : '';
