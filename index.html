@@ -175,11 +175,17 @@ body {
 .com-meta-label { font-size: 10px; color: rgba(255,255,255,.4); font-family: 'DM Mono', monospace; }
 .print-btn { display: inline-block; margin: 4px 0 6px; background: rgba(255,255,255,.1); color: white; border: 1px solid rgba(255,255,255,.35); border-radius: 5px; padding: 5px 11px; font: inherit; font-size: 11.5px; font-weight: 600; cursor: pointer; }
 .print-btn:hover { background: rgba(255,255,255,.2); }
+.va-wrap { position: relative; display: inline-block; margin-right: 6px; }
+.va-menu { position: absolute; right: 0; top: calc(100% + 4px); z-index: 120; width: 280px; background: white; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.18); padding: 6px; text-align: left; }
+.va-menu button { display: block; width: 100%; text-align: left; background: none; border: none; border-radius: 5px; padding: 8px 10px; font: inherit; font-size: 12.5px; font-weight: 500; color: var(--ink); cursor: pointer; }
+.va-menu button:hover { background: var(--mist); }
+.va-menu button[hidden] { display: none; }
+.va-note { font-size: 11px; color: var(--muted); padding: 6px 10px 4px; border-top: 1px solid var(--border); margin-top: 4px; line-height: 1.45; }
 .print-head { display: none; }
 @media print {
   @page { size: A4 portrait; margin: 12mm; }
   body { background: white !important; }
-  .header, .print-btn, #pw-gate, .setup-notice, .intel-more, .rasff-more, .tsg-more, .risk-info, footer { display: none !important; }
+  .header, .print-btn, .va-wrap, #pw-gate, .setup-notice, .intel-more, .rasff-more, .tsg-more, .risk-info, footer { display: none !important; }
   body.printing-rasff .rasff-dialog { display: block !important; position: static; width: auto; max-height: none; box-shadow: none; margin-top: 14px; }
   .rasff-open, .rasff-close, .rasff-link-row { display: none !important; }
   .rasff-dialog-body { overflow: visible !important; }
@@ -972,6 +978,15 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
     </div>
     <div class="com-meta">
       <div class="com-meta-label" id="com-period"></div>
+      <div class="va-wrap">
+        <button type="button" class="print-btn" id="va-btn" aria-haspopup="true">Download for vulnerability assessment ▾</button>
+        <div class="va-menu" id="va-menu" hidden>
+          <button type="button" data-va="cat">This category (CSV)</button>
+          <button type="button" data-va="all">All products (CSV)</button>
+          <button type="button" data-va="live" id="va-live" hidden>Copy live link for Excel / Google Sheets</button>
+          <div class="va-note">One row per product. Columns are always in the same order, so you can map them into your own template once.</div>
+        </div>
+      </div>
       <button type="button" class="print-btn" onclick="printSnapshot()">Print / save as PDF</button>
       <div class="com-meta-value">RASFF: daily &nbsp;·&nbsp; News: daily &nbsp;·&nbsp; Prices: monthly (HMRC imports) &nbsp;·&nbsp; fiin data: quarterly</div>
     </div>
@@ -1184,6 +1199,8 @@ var FRAUD_CSV_URL = null;
 // Price risk signals: publish the Sheet's "trade" tab as CSV and paste the link here
 // EU Agri-Food Fraud Network monthly report: publish the Sheet's "eu_fraud" tab as CSV and paste the link here
 var EU_FRAUD_CSV_URL = null;
+// Live vulnerability-assessment export: publish the Sheet's "va_export" tab as CSV and paste the link here
+var VA_EXPORT_CSV_URL = null;
 var TRADE_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR68kbziTvBGmuCrsqLB8m_MbCKs6JrSidcoLtiybXwZHkyvaGwCtslyJtPeiN5pJCyMAbE-LydRyO1/pub?gid=56413450&single=true&output=csv';
 // var FRAUD_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/YOUR_PUBLISHED_ID/pub?gid=YOUR_GID&single=true&output=csv';
 
@@ -2033,12 +2050,12 @@ function tradeRolling(t, origin) {
 
 function fmtGBP(p) {
   if (p == null || isNaN(p)) return '—';
-  return '£' + (p >= 100 ? Math.round(p).toLocaleString('en-GB') : p.toFixed(2));
+  return '£' + (p >= 100 ? String(Math.round(p)).replace(/\B(?=(\d{3})+(?!\d))/g, ',') : p.toFixed(2));
 }
+var MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 function fmtPct(x) { return Math.round(Math.abs(x) * 100) + '%'; }
 function fmtMonth(m) {
-  var d = new Date(+m.slice(0, 4), +m.slice(5, 7) - 1, 1);
-  return d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+  return MONTHS_SHORT[+m.slice(5, 7) - 1] + ' ' + m.slice(0, 4);
 }
 
 // Plain-English explanation behind each light's i (thresholds read from RISK)
@@ -2355,6 +2372,342 @@ function glanceItem(dot, html) {
   return '<span class="com-glance-item">' + html + '</span>';
 }
 
+// Parse the published rasff tab into alert objects (shared with the Apps Script export)
+function parseRasffCsv(txt) {
+    var rows = parseCSV(txt);
+    var EXCLUDED_HAZARDS = [
+      'biological contaminants',
+      'biotoxins',
+      'industrial contaminants',
+      'foreign bodies',
+      'mycotoxins',
+      'natural toxins',
+      'non pathogenic micro-organisms',
+      'parasitic infestation',
+      'pathogenic micro-organisms',
+      'pesticide residues'
+    ];
+    // Alerts whose title contains any of these (lower-case) phrases are hidden.
+    // Was referenced but never defined, which crashed the RASFF load. Add terms as needed.
+    var EXCLUDED_TITLE_TERMS = [];
+
+    // Normalise short commodity keys from old Apps Script to full RASFF labels
+    var SHEET_ALIASES = {
+      'honey':           'honey and royal jelly',
+      'cocoa':           'cocoa',
+      'poultry':         'poultry meat and poultry meat products',
+      'red_meat':        'meat and meat products (other than poultry)',
+      'fish_shellfish':  'fish and fish products',
+      'herbs_spices':    'herbs and spices',
+      'cereals':         'cereals and bakery products',
+      'fruit_veg':       'fruits and vegetables',
+      'dairy':           'milk and milk products',
+      'nuts':            'nuts, nut products and seeds',
+      'eggs':            'eggs and egg products',
+      'drinks':          'non-alcholic beverages'
+    };
+
+    // Vet residues first-node mapping
+    var VET_FIRST_NODE = {
+      'poultry meat and poultry meat products': 'Rearing Farm',
+      'poultry':                                'Rearing Farm',
+      'meat and meat products (other than poultry)': 'Farm/Ranch',
+      'fish and fish products':                 'Farm/Fishing Vessel',
+      'cephalopods and products thereof':       'Farm/Fishing Vessel',
+      'crustaceans and products thereof':       'Farm/Fishing Vessel',
+      'bivalve molluscs and products thereof':  'Farm/Fishing Vessel',
+      'honey and royal jelly':                  'Apiary/Hive',
+      'herbs and spices':                       'Growing Region',
+      'cereals and bakery products':            'Arable Farm',
+      'prepared dishes and snacks':             'Ingredient Supply',
+      'fruits and vegetables':                  'Farm/Orchard',
+      'milk and milk products':                 'Dairy Farm',
+      'nuts, nut products and seeds':           'Orchard',
+      'eggs and egg products':                  'Laying Farm',
+      'non-alcholic beverages':                 'Ingredient Supply'
+    };
+
+    var out = rows.map(function(r) {
+      var rawCommodity = (r[0]||'').trim();
+      var normCommodity = SHEET_ALIASES[rawCommodity.toLowerCase()] || rawCommodity;
+      return {
+        commodity: normCommodity,
+        title:     (r[1]||'').trim(),
+        date:      (r[2]||'').trim(),
+        country:   (r[3]||'').trim(),
+        severity:  (r[5]||'').trim(),
+        hazard:    (r[6]||'').trim(),
+        node:      (r[8]||r[7]||'').trim(),
+        ref:       '',
+        link:      (r[9]||'').trim()
+      };
+    });
+
+    // Apply vet residues first-node override where node is unknown or missing
+    out.forEach(function(r) {
+      if ((r.hazard || '').toLowerCase().indexOf('vet residues') === -1) return;
+      if (r.node && r.node !== '' && r.node !== 'Unknown – needs review') return; // already mapped
+      var commLower = (r.commodity || '').toLowerCase();
+      var vetNode = VET_FIRST_NODE[commLower];
+      if (!vetNode) {
+        // Try partial match
+        Object.keys(VET_FIRST_NODE).forEach(function(k) {
+          if (!vetNode && commLower.indexOf(k) > -1) vetNode = VET_FIRST_NODE[k];
+        });
+      }
+      if (vetNode) r.node = vetNode;
+    });
+
+    out = out.filter(function(r) {
+      if (!r.commodity || r.commodity === '_none') return false;
+      var hazardLower = r.hazard.toLowerCase();
+      if (EXCLUDED_HAZARDS.some(function(ex) { return hazardLower === ex; })) return false;
+      var titleLower = r.title.toLowerCase();
+      if (EXCLUDED_TITLE_TERMS.some(function(t) { return titleLower.indexOf(t) > -1; })) return false;
+      return true;
+    });
+    return out;
+}
+
+// Parse the published news tab (shared with the Apps Script export)
+function parseNewsCsv(txt) {
+    // Read columns by HEADER NAME, so the sheet's column order doesn't matter.
+    // Falls back to the old fixed order: commodity, headline, detail, source, risk_level, updated
+    var all = parseCSV('x\n' + txt);
+    var hdr = (all[0] || []).map(function(h){ return (h||'').toLowerCase().trim(); });
+    var rows = all.slice(1);
+    var knownHeader = hdr.some(function(h){ return /headline|title|commodity|product|summary|lead|url|link/.test(h); });
+    function col(names, fallback) {
+      for (var n = 0; n < names.length; n++) {
+        for (var i = 0; i < hdr.length; i++) if (hdr[i] === names[n]) return i;
+      }
+      for (var n2 = 0; n2 < names.length; n2++) {
+        for (var j = 0; j < hdr.length; j++) if (hdr[j].indexOf(names[n2]) > -1) return j;
+      }
+      return knownHeader ? -1 : fallback; // only use fixed positions if the sheet has no recognisable header
+    }
+    var C = {
+      comm:   col(['commodity','product','category','key'], 0),
+      head:   col(['headline','title'], 1),
+      detail: col(['lead','lead paragraph','summary','description','snippet','excerpt','detail','body','text'], 2),
+      url:    col(['url','link','article url','href'], -1),
+      source: col(['source','publisher','outlet','site'], 3),
+      risk:   col(['risk_level','risk level','risk','level'], 4),
+      date:   col(['published','pub_date','date','updated'], 5),
+      theme:  col(['theme','topic'], -1),
+      tier:   col(['tier'], -1)
+    };
+    console.log('News header:', JSON.stringify(hdr), 'column map:', JSON.stringify(C));
+    function cell(r, i) { return i > -1 ? (r[i] || '').trim() : ''; }
+    function isUrl(v) { return /^https?:\/\//i.test(v); }
+    var newsData = {}, newsUpdated = '';
+    rows.forEach(function(r) {
+      var comm = newsKey(cell(r, C.comm));
+      var head = decodeEntities(cell(r, C.head));
+      if (!comm || comm === '_none' || !head) return;
+      var detail = cell(r, C.detail), url = cell(r, C.url), src = cell(r, C.source);
+      var artDate = '';
+      // Google News RSS: source arrives as "Publisher · 8 Apr 2026" — split out the article date
+      var sm = src.match(/^(.*?)\s*[·|]\s*(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}|\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{4})\s*$/);
+      if (sm) { src = sm[1].trim(); artDate = sm[2]; }
+      // Google News RSS: detail is an (often HTML-escaped, truncated) link, not a paragraph
+      var dRaw = decodeEntities(detail);
+      if (/<a\s|<\/?[a-z][^>]*>/i.test(dRaw)) {
+        var hm = dRaw.match(/href="([^"]+)"/i);
+        if (hm && !url) url = hm[1];
+        detail = '';
+      }
+      // A link cut short by the sheet ("...") won't open — don't use it
+      if (url && /(\.\.\.|…)$/.test(url)) url = '';
+      if (url && !/^https?:\/\//i.test(url)) url = '';
+      // Headlines from Google News end with " - Publisher": drop the repeat
+      if (src) {
+        var tail = ' - ' + src;
+        if (head.slice(-tail.length).toLowerCase() === tail.toLowerCase()) head = head.slice(0, -tail.length);
+      }
+      head = head.replace(/\s+-\s+[^-]{2,60}$/, function(m){ return src && m.toLowerCase().indexOf(src.toLowerCase().split(' ')[0]) > -1 ? '' : m; });
+      // Never show a bare link as the paragraph or source text
+      if (isUrl(detail)) { if (!url) url = detail; detail = ''; }
+      if (isUrl(src))    { if (!url) url = src;    src = ''; }
+      if (!src && url) { src = (url.match(/^https?:\/\/([^\/?#]+)/i) || [])[1] || ''; src = src.replace(/^www\./, ''); }
+      // No working link: search for the headline instead
+      var findUrl = url ? '' : 'https://news.google.com/search?q=' + encodeURIComponent('"' + head + '"');
+      // Prefer the article's own date over the sheet's "updated" (fetch) date
+      var dateStr = artDate || cell(r, C.date), d = parseNewsDate(dateStr);
+      if (d && (!newsUpdated || d > parseNewsDate(newsUpdated))) newsUpdated = dateStr;
+      if (!newsData[comm]) newsData[comm] = [];
+      newsData[comm].push({ headline: head, detail: detail, source: src, url: url, findUrl: findUrl,
+                            date: dateStr, ts: d ? d.getTime() : 0, theme: cell(r, C.theme), tier: cell(r, C.tier).toLowerCase(), risk_level: riskCode(cell(r, C.risk)) });
+    });
+    // Newest first
+    Object.keys(newsData).forEach(function(k){ newsData[k].sort(function(x, y){ return y.ts - x.ts; }); });
+    return { data: newsData, updated: newsUpdated };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VULNERABILITY ASSESSMENT EXPORT
+// One row per product, columns in a FIXED order (VA_COLUMNS). New columns are only
+// ever added at the end, so members' formulas and imports keep working.
+// buildVaRows() is copied unchanged into the Apps Script (runExport), so the
+// download and the live link always contain exactly the same thing.
+// ═══════════════════════════════════════════════════════════════════════════
+var VA_PAGE_URL = 'https://fiin1000.github.io/fiin-intelligence-pages/';
+var VA_COLUMNS = [
+  'extract_date', 'category', 'product', 'hmrc_data_used', 'hmrc_coverage_note', 'latest_hmrc_month',
+  'uk_import_price_gbp_per_kg', 'uk_2yr_avg_price_gbp_per_kg',
+  'price_swing_level', 'price_swing_detail',
+  'origin_shift_level', 'origin_shift_origin', 'origin_shift_detail',
+  'price_gap_level', 'price_gap_origin', 'price_gap_pct_below_uk_avg', 'price_gap_detail',
+  'main_origins', 'lowest_cpi_main_origin', 'lowest_cpi_score', 'cpi_year',
+  'rasff_alerts_6m', 'rasff_alert_notifications_6m', 'rasff_alerts_detail',
+  'fraud_news_30d', 'fraud_news_detail', 'supply_news_themes_30d',
+  'tsg_guidance', 'known_risks_by_stage', 'fiin_resources', 'page_link', 'sources_and_licences'
+];
+var VA_SOURCES = 'HMRC Overseas Trade Statistics (Crown copyright, Open Government Licence v3.0); ' +
+  'Corruption Perceptions Index (© Transparency International, CC BY-ND 4.0, scores unchanged); ' +
+  'RASFF Window (© European Union); news headlines via Google News (links to original articles); ' +
+  'TSG guidance, known risks and resources © fiin, for member use only.';
+
+function vaStrip(v) { return String(v == null ? '' : v).replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim(); }
+function vaLevel(l) { return l === 'r' ? 'Red' : l === 'a' ? 'Amber' : l === 'g' ? 'Green' : ''; }
+function vaDate(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function vaNum(x, dp) { return x == null || isNaN(x) ? '' : Math.round(x * Math.pow(10, dp)) / Math.pow(10, dp); }
+
+// catKeys: category keys to include, in page order. now: a Date. Returns [VA_COLUMNS, row, row, ...]
+function buildVaRows(catKeys, now) {
+  var out = [VA_COLUMNS.slice()];
+  var today = vaDate(now), sixMonthsAgo = new Date(now.getTime()), d30 = now.getTime() - 30 * 864e5;
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  catKeys.forEach(function(cat) {
+    var C = COMM[cat];
+    if (!C) return;
+    // Category-level evidence (shared by every product in the category)
+    var cats = (C.rasffCategories || []).map(function(c){ return c.toLowerCase(); });
+    var alerts = (rasffData || []).filter(function(r) {
+      var d = parseNewsDate(r.date);
+      return cats.indexOf((r.commodity || '').toLowerCase()) > -1 && d && d >= sixMonthsAgo;
+    }).sort(function(a, b){ return parseNewsDate(b.date) - parseNewsDate(a.date); });
+    var alertNotes = alerts.filter(function(r){ return /alert|serious/i.test(r.severity || ''); }).length;
+    var alertDetail = alerts.map(function(r) {
+      return [r.date, vaStrip(r.title), r.country ? 'origin ' + r.country : '', r.severity, r.link].filter(Boolean).join(' · ');
+    }).join(' | ');
+    var tsg = (TSG_GUIDANCE[cat] || []).map(vaStrip).join(' | ');
+    var kr = KNOWN_RISKS[scKey(cat)] || {};
+    var known = Object.keys(kr).map(function(stage) {
+      return stage + ': ' + kr[stage].map(function(x){ return vaStrip(x.t) + (x.l ? ' (' + (x.l === 'med' ? 'medium' : x.l) + ')' : ''); }).join(', ');
+    }).join('; ');
+    var res = (RESOURCES[cat] || []).map(function(r){ return vaStrip(r.name); }).join('; ');
+
+    Object.keys(C.products).forEach(function(p) {
+      var row = {};
+      VA_COLUMNS.forEach(function(c){ row[c] = ''; });
+      row.extract_date = today; row.category = C.label; row.product = p;
+      row.page_link = VA_PAGE_URL + '#' + cat; row.sources_and_licences = VA_SOURCES;
+      row.rasff_alerts_6m = alerts.length; row.rasff_alert_notifications_6m = alertNotes; row.rasff_alerts_detail = alertDetail;
+      row.tsg_guidance = tsg; row.known_risks_by_stage = known; row.fiin_resources = res;
+
+      // Price evidence (HMRC)
+      var hit = tradeFor(p);
+      if (hit) {
+        var t = hit.t, M = t.months, sig = computeRiskSignals(p, t), L = sig.lights;
+        var last3 = M.slice(-3), last6 = M.slice(-6), tot6 = tradeSum(t, null, last6);
+        row.hmrc_data_used = t.label; row.hmrc_coverage_note = hit.note || '';
+        row.latest_hmrc_month = M[M.length - 1];
+        row.uk_import_price_gbp_per_kg = vaNum(tradeSum(t, null, last3).p, 2);
+        row.uk_2yr_avg_price_gbp_per_kg = vaNum(tradeSum(t, null, M).p, 2);
+        row.price_swing_level = vaLevel(L[0].level); row.price_swing_detail = vaStrip(L[0].text);
+        row.origin_shift_level = vaLevel(L[1].level); row.origin_shift_origin = L[1].level !== 'g' ? (sig.shiftFlag || '') : ''; row.origin_shift_detail = vaStrip(L[1].text);
+        row.price_gap_level = vaLevel(L[2].level); row.price_gap_origin = L[2].level !== 'g' ? (sig.gapFlag || '') : ''; row.price_gap_detail = vaStrip(L[2].text);
+        if (sig.gapFlag && L[2].level !== 'g') {
+          var g = tradeSum(t, sig.gapFlag, last6);
+          if (g.p && tot6.p) row.price_gap_pct_below_uk_avg = Math.round((1 - g.p / tot6.p) * 100);
+        }
+        var origins = Object.keys(t.origins).filter(function(o){ return o !== OTHER_ORIGINS; }).map(function(o) {
+          var a = tradeSum(t, o, last6);
+          return { o: o, kg: a.kg, p: a.p, cpi: t.cpi ? t.cpi[o] : null };
+        }).filter(function(x){ return x.kg > 0; }).sort(function(a, b){ return b.kg - a.kg; }).slice(0, 6);
+        row.main_origins = origins.map(function(x) {
+          return x.o + ' ' + fmtPct(tot6.kg ? x.kg / tot6.kg : 0) + ', ' + fmtGBP(x.p) + '/kg' + (x.cpi != null ? ', CPI ' + x.cpi : '');
+        }).join('; ');
+        var withCpi = origins.filter(function(x){ return x.cpi != null; }).sort(function(a, b){ return a.cpi - b.cpi; });
+        if (withCpi.length) { row.lowest_cpi_main_origin = withCpi[0].o; row.lowest_cpi_score = withCpi[0].cpi; row.cpi_year = t.cpiYear || ''; }
+      } else {
+        row.hmrc_coverage_note = TRADE_NOT_COVERED[p] || 'No HMRC import data available yet.';
+      }
+
+      // News evidence (product + its category, last 30 days)
+      var seen = {}, items = [];
+      [newsData[newsKey(p)] || [], newsData[newsKey(cat)] || []].forEach(function(list) {
+        list.forEach(function(n) {
+          var k = (n.headline || '').toLowerCase().slice(0, 70);
+          if (seen[k] || !(n.ts >= d30)) return;
+          seen[k] = true; items.push(n);
+        });
+      });
+      items.sort(function(a, b){ return b.ts - a.ts; });
+      var fraud = items.filter(function(n){ return n.theme === 'Fraud & integrity'; });
+      row.fraud_news_30d = fraud.length;
+      row.fraud_news_detail = fraud.map(function(n){ return [n.date, vaStrip(n.headline), n.source, n.url].filter(Boolean).join(' · '); }).join(' | ');
+      var themes = {};
+      items.forEach(function(n){ var th = n.theme || 'Other'; if (th !== 'Fraud & integrity') themes[th] = (themes[th] || 0) + 1; });
+      row.supply_news_themes_30d = Object.keys(themes).sort(function(a, b){ return themes[b] - themes[a]; })
+        .map(function(th){ return th + ': ' + themes[th]; }).join('; ');
+
+      // Keep every cell inside Excel's limit (32,767 characters)
+      out.push(VA_COLUMNS.map(function(c){ var v = row[c]; return typeof v === 'string' && v.length > 32000 ? v.slice(0, 31980) + ' \u2026 (truncated)' : v; }));
+    });
+  });
+  return out;
+}
+
+// CSV text, every text cell quoted
+function vaToCsv(rows) {
+  return rows.map(function(r) {
+    return r.map(function(v) {
+      if (typeof v === 'number') return String(v);
+      return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+    }).join(',');
+  }).join('\r\n');
+}
+
+// ── Download button (browser only) ──────────────────────────────────────────
+function downloadVa(scope) {
+  var keys = scope === 'all' ? Object.keys(COMM) : [cur];
+  var csv = '﻿' + vaToCsv(buildVaRows(keys, new Date()));
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'fiin-vulnerability-evidence-' + (scope === 'all' ? 'all-products' : cur.replace(/_/g, '-')) + '-' + vaDate(new Date()) + '.csv';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  closeVaMenu();
+}
+function closeVaMenu() { var m = document.getElementById('va-menu'); if (m) m.hidden = true; }
+document.addEventListener('click', function(e) {
+  var m = document.getElementById('va-menu');
+  if (!m) return;
+  if (e.target.closest && e.target.closest('#va-btn')) {
+    m.hidden = !m.hidden;
+    var l = document.getElementById('va-live');
+    if (l) l.hidden = !VA_EXPORT_CSV_URL;
+    return;
+  }
+  if (e.target.closest && e.target.closest('#va-menu')) {
+    var act = e.target.closest('[data-va]');
+    if (!act) return;
+    var k = act.getAttribute('data-va');
+    if (k === 'cat' || k === 'all') downloadVa(k);
+    if (k === 'live' && VA_EXPORT_CSV_URL) {
+      var done = function(){ act.textContent = 'Link copied ✓'; setTimeout(function(){ act.textContent = 'Copy live link for Excel / Google Sheets'; }, 2000); };
+      if (navigator.clipboard) navigator.clipboard.writeText(VA_EXPORT_CSV_URL).then(done, function(){ window.prompt('Copy this link:', VA_EXPORT_CSV_URL); });
+      else window.prompt('Copy this link:', VA_EXPORT_CSV_URL);
+    }
+    return;
+  }
+  closeVaMenu();
+});
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeVaMenu(); });
+
 // ── Render market intelligence section ──────────────────────────────────────
 function renderNews() {
   var section = document.getElementById('intel-section');
@@ -2441,7 +2794,11 @@ function newsKey(s) {
   return (s || '').toString().trim().toLowerCase().replace(/[\s\-\/&]+/g, '_').replace(/_+/g, '_');
 }
 function decodeEntities(v) {
-  var t = document.createElement('textarea'); t.innerHTML = v || ''; return t.value;
+  return String(v || '')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'")
+    .replace(/&nbsp;/g, ' ').replace(/&#(\d+);/g, function(_, n){ return String.fromCharCode(+n); })
+    .replace(/&#x([0-9a-f]+);/gi, function(_, n){ return String.fromCharCode(parseInt(n, 16)); })
+    .replace(/&amp;/g, '&');
 }
 function escHtml(v) {
   return (v == null ? '' : String(v)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -2455,7 +2812,7 @@ function parseNewsDate(v) {
 }
 function fmtNewsDate(v) {
   var d = parseNewsDate(v);
-  return d ? d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) : v;
+  return d ? d.getDate() + ' ' + MONTHS_SHORT[d.getMonth()] + ' ' + d.getFullYear() : v;
 }
 // Map the sheet's risk column to the page's dot colours (r = red, a = amber, b = blue)
 function riskCode(s) {
@@ -2888,99 +3245,7 @@ function loadData() {
       .then(function(txt) {
         console.log('RASFF CSV length:', txt.length, 'chars');
         console.log('RASFF CSV preview:', txt.slice(0, 200));
-        var rows = parseCSV(txt);
-        console.log('RASFF parsed rows:', rows.length);
-        var EXCLUDED_HAZARDS = [
-          'biological contaminants',
-          'biotoxins',
-          'industrial contaminants',
-          'foreign bodies',
-          'mycotoxins',
-          'natural toxins',
-          'non pathogenic micro-organisms',
-          'parasitic infestation',
-          'pathogenic micro-organisms',
-          'pesticide residues'
-        ];
-        // Alerts whose title contains any of these (lower-case) phrases are hidden.
-        // Was referenced but never defined, which crashed the RASFF load. Add terms as needed.
-        var EXCLUDED_TITLE_TERMS = [];
-
-        // Normalise short commodity keys from old Apps Script to full RASFF labels
-        var SHEET_ALIASES = {
-          'honey':           'honey and royal jelly',
-          'cocoa':           'cocoa',
-          'poultry':         'poultry meat and poultry meat products',
-          'red_meat':        'meat and meat products (other than poultry)',
-          'fish_shellfish':  'fish and fish products',
-          'herbs_spices':    'herbs and spices',
-          'cereals':         'cereals and bakery products',
-          'fruit_veg':       'fruits and vegetables',
-          'dairy':           'milk and milk products',
-          'nuts':            'nuts, nut products and seeds',
-          'eggs':            'eggs and egg products',
-          'drinks':          'non-alcholic beverages'
-        };
-
-        // Vet residues first-node mapping
-        var VET_FIRST_NODE = {
-          'poultry meat and poultry meat products': 'Rearing Farm',
-          'poultry':                                'Rearing Farm',
-          'meat and meat products (other than poultry)': 'Farm/Ranch',
-          'fish and fish products':                 'Farm/Fishing Vessel',
-          'cephalopods and products thereof':       'Farm/Fishing Vessel',
-          'crustaceans and products thereof':       'Farm/Fishing Vessel',
-          'bivalve molluscs and products thereof':  'Farm/Fishing Vessel',
-          'honey and royal jelly':                  'Apiary/Hive',
-          'herbs and spices':                       'Growing Region',
-          'cereals and bakery products':            'Arable Farm',
-          'prepared dishes and snacks':             'Ingredient Supply',
-          'fruits and vegetables':                  'Farm/Orchard',
-          'milk and milk products':                 'Dairy Farm',
-          'nuts, nut products and seeds':           'Orchard',
-          'eggs and egg products':                  'Laying Farm',
-          'non-alcholic beverages':                 'Ingredient Supply'
-        };
-
-        rasffData = rows.map(function(r) {
-          var rawCommodity = (r[0]||'').trim();
-          var normCommodity = SHEET_ALIASES[rawCommodity.toLowerCase()] || rawCommodity;
-          return {
-            commodity: normCommodity,
-            title:     (r[1]||'').trim(),
-            date:      (r[2]||'').trim(),
-            country:   (r[3]||'').trim(),
-            severity:  (r[5]||'').trim(),
-            hazard:    (r[6]||'').trim(),
-            node:      (r[8]||r[7]||'').trim(),
-            ref:       '',
-            link:      (r[9]||'').trim()
-          };
-        });
-
-        // Apply vet residues first-node override where node is unknown or missing
-        rasffData.forEach(function(r) {
-          if ((r.hazard || '').toLowerCase().indexOf('vet residues') === -1) return;
-          if (r.node && r.node !== '' && r.node !== 'Unknown – needs review') return; // already mapped
-          var commLower = (r.commodity || '').toLowerCase();
-          var vetNode = VET_FIRST_NODE[commLower];
-          if (!vetNode) {
-            // Try partial match
-            Object.keys(VET_FIRST_NODE).forEach(function(k) {
-              if (!vetNode && commLower.indexOf(k) > -1) vetNode = VET_FIRST_NODE[k];
-            });
-          }
-          if (vetNode) r.node = vetNode;
-        });
-
-        rasffData = rasffData.filter(function(r) {
-          if (!r.commodity || r.commodity === '_none') return false;
-          var hazardLower = r.hazard.toLowerCase();
-          if (EXCLUDED_HAZARDS.some(function(ex) { return hazardLower === ex; })) return false;
-          var titleLower = r.title.toLowerCase();
-          if (EXCLUDED_TITLE_TERMS.some(function(t) { return titleLower.indexOf(t) > -1; })) return false;
-          return true;
-        });
+        rasffData = parseRasffCsv(txt);
         console.log('RASFF filtered rows:', rasffData.length);
         if (rasffData.length > 0) {
           // Show unique commodity values in sheet so we can debug matching
@@ -3005,77 +3270,9 @@ function loadData() {
     fetch(NEWS_CSV_URL)
       .then(function(r){ return r.text(); })
       .then(function(txt) {
-        // Read columns by HEADER NAME, so the sheet's column order doesn't matter.
-        // Falls back to the old fixed order: commodity, headline, detail, source, risk_level, updated
-        var all = parseCSV('x\n' + txt);
-        var hdr = (all[0] || []).map(function(h){ return (h||'').toLowerCase().trim(); });
-        var rows = all.slice(1);
-        var knownHeader = hdr.some(function(h){ return /headline|title|commodity|product|summary|lead|url|link/.test(h); });
-        function col(names, fallback) {
-          for (var n = 0; n < names.length; n++) {
-            for (var i = 0; i < hdr.length; i++) if (hdr[i] === names[n]) return i;
-          }
-          for (var n2 = 0; n2 < names.length; n2++) {
-            for (var j = 0; j < hdr.length; j++) if (hdr[j].indexOf(names[n2]) > -1) return j;
-          }
-          return knownHeader ? -1 : fallback; // only use fixed positions if the sheet has no recognisable header
-        }
-        var C = {
-          comm:   col(['commodity','product','category','key'], 0),
-          head:   col(['headline','title'], 1),
-          detail: col(['lead','lead paragraph','summary','description','snippet','excerpt','detail','body','text'], 2),
-          url:    col(['url','link','article url','href'], -1),
-          source: col(['source','publisher','outlet','site'], 3),
-          risk:   col(['risk_level','risk level','risk','level'], 4),
-          date:   col(['published','pub_date','date','updated'], 5),
-          theme:  col(['theme','topic'], -1),
-          tier:   col(['tier'], -1)
-        };
-        console.log('News header:', JSON.stringify(hdr), 'column map:', JSON.stringify(C));
-        function cell(r, i) { return i > -1 ? (r[i] || '').trim() : ''; }
-        function isUrl(v) { return /^https?:\/\//i.test(v); }
-        newsData = {};
-        newsUpdated = '';
-        rows.forEach(function(r) {
-          var comm = newsKey(cell(r, C.comm));
-          var head = decodeEntities(cell(r, C.head));
-          if (!comm || comm === '_none' || !head) return;
-          var detail = cell(r, C.detail), url = cell(r, C.url), src = cell(r, C.source);
-          var artDate = '';
-          // Google News RSS: source arrives as "Publisher · 8 Apr 2026" — split out the article date
-          var sm = src.match(/^(.*?)\s*[·|]\s*(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}|\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{4})\s*$/);
-          if (sm) { src = sm[1].trim(); artDate = sm[2]; }
-          // Google News RSS: detail is an (often HTML-escaped, truncated) link, not a paragraph
-          var dRaw = decodeEntities(detail);
-          if (/<a\s|<\/?[a-z][^>]*>/i.test(dRaw)) {
-            var hm = dRaw.match(/href="([^"]+)"/i);
-            if (hm && !url) url = hm[1];
-            detail = '';
-          }
-          // A link cut short by the sheet ("...") won't open — don't use it
-          if (url && /(\.\.\.|…)$/.test(url)) url = '';
-          if (url && !/^https?:\/\//i.test(url)) url = '';
-          // Headlines from Google News end with " - Publisher": drop the repeat
-          if (src) {
-            var tail = ' - ' + src;
-            if (head.slice(-tail.length).toLowerCase() === tail.toLowerCase()) head = head.slice(0, -tail.length);
-          }
-          head = head.replace(/\s+-\s+[^-]{2,60}$/, function(m){ return src && m.toLowerCase().indexOf(src.toLowerCase().split(' ')[0]) > -1 ? '' : m; });
-          // Never show a bare link as the paragraph or source text
-          if (isUrl(detail)) { if (!url) url = detail; detail = ''; }
-          if (isUrl(src))    { if (!url) url = src;    src = ''; }
-          if (!src && url) { try { src = new URL(url).hostname.replace(/^www\./, ''); } catch (e) {} }
-          // No working link: search for the headline instead
-          var findUrl = url ? '' : 'https://news.google.com/search?q=' + encodeURIComponent('"' + head + '"');
-          // Prefer the article's own date over the sheet's "updated" (fetch) date
-          var dateStr = artDate || cell(r, C.date), d = parseNewsDate(dateStr);
-          if (d && (!newsUpdated || d > parseNewsDate(newsUpdated))) newsUpdated = dateStr;
-          if (!newsData[comm]) newsData[comm] = [];
-          newsData[comm].push({ headline: head, detail: detail, source: src, url: url, findUrl: findUrl,
-                                date: dateStr, ts: d ? d.getTime() : 0, theme: cell(r, C.theme), tier: cell(r, C.tier).toLowerCase(), risk_level: riskCode(cell(r, C.risk)) });
-        });
-        // Newest first
-        Object.keys(newsData).forEach(function(k){ newsData[k].sort(function(x, y){ return y.ts - x.ts; }); });
+        var parsedNews = parseNewsCsv(txt);
+        newsData = parsedNews.data;
+        newsUpdated = parsedNews.updated;
         console.log('News rows loaded for:', JSON.stringify(Object.keys(newsData)), 'latest update:', newsUpdated);
         newsLoaded = true;
         renderNews();
@@ -3431,6 +3628,16 @@ document.getElementById('prod-select').addEventListener('change', function() {
   render();
 });
 
+// Open a category from the address, e.g. ...#honey (used by the export's page_link)
+(function() {
+  var h = (location.hash || '').replace('#', '');
+  if (h && COMM[h]) {
+    cur = h;
+    document.querySelectorAll('.pill').forEach(function(b){ b.classList.toggle('active', b.dataset.key === h); });
+    var prods = Object.keys(COMM[cur].products);
+    curProd = prods[0];
+  }
+})();
 rebuildProductDropdown();
 
 
