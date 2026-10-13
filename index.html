@@ -1935,12 +1935,9 @@ function renderSupplyChain() {
 
   // Attach mouse events for floating tooltip — shows Known Risks + Indicators
   var tip = document.getElementById('sc-float-tip');
-  function showTip(el, html) {
-    el.style.cursor = 'help';
-    el.addEventListener('mouseenter', function(e) { tip.innerHTML = html; tip.style.display = 'flex'; positionTip(e); });
-    el.addEventListener('mousemove', function(e) { positionTip(e); });
-    el.addEventListener('mouseleave', function() { tip.style.display = 'none'; });
-  }
+  // Black hover previews: a stage with known risks shows those; anywhere else in a zone shows the zone's
+  // alerts and concerns (click the zone for the full, scrollable list)
+  function showTip(el, html) { el._tipHtml = html; if (el.classList.contains('sc-node')) el.style.cursor = 'help'; }
   // Stages: known risks (fiin TSG)
   mapEl.querySelectorAll('.sc-node').forEach(function(el) {
     var risks = [];
@@ -1956,6 +1953,7 @@ function renderSupplyChain() {
   });
   // Zones: the RASFF alerts placed there
   mapEl.querySelectorAll('.sc-zone-foot').forEach(function(el) {
+    var zoneEl = el.closest('.sc-zone');
     var count = parseInt(el.getAttribute('data-count') || '0', 10), more = parseInt(el.getAttribute('data-more') || '0', 10);
     var fcount = parseInt(el.getAttribute('data-fcount') || '0', 10), fmore = parseInt(el.getAttribute('data-fmore') || '0', 10);
     if (!count && !fcount) return;
@@ -1967,7 +1965,7 @@ function renderSupplyChain() {
         return '<div class="sc-tip-item"><div class="sc-tip-meta">' + escHtml(a.d) + '</div>' + escHtml(a.t) + (a.t.length >= cut ? '&hellip;' : '') + '</div>';
       }).join('');
     };
-    showTip(el, '<div class="sc-tip-node-title">' + escHtml(el.getAttribute('data-zone')) + '</div>' +
+    showTip(zoneEl, '<div class="sc-tip-node-title">' + escHtml(el.getAttribute('data-zone')) + '</div>' +
       '<div class="sc-tip-section-head">RASFF alerts relating to potential fraud \u2014 ' + count + '</div>' +
       (count ? list(alerts, 90) : '<div class="sc-tip-empty">None placed here</div>') +
       (more > 0 ? '<div class="sc-tip-empty">+ ' + more + ' more in the alerts list</div>' : '') +
@@ -1977,6 +1975,17 @@ function renderSupplyChain() {
       (fmore > 0 ? '<div class="sc-tip-empty">+ ' + fmore + ' more in fiin member testing data</div>' : '') +
       '<div class="sc-tip-footer"><b>Click the zone to see them all, with links.</b> Placement is fiin\u2019s estimate, not where the issue was confirmed.</div>');
   });
+
+  var tipShown = null;
+  mapEl.onmousemove = function(e) {
+    var t = e.target.closest ? e.target : null;
+    var src = t && (t.closest('.sc-node') && t.closest('.sc-node')._tipHtml ? t.closest('.sc-node') : t.closest('.sc-zone'));
+    if (!src || !src._tipHtml) { tip.style.display = 'none'; tipShown = null; return; }
+    if (tipShown !== src) { tip.innerHTML = src._tipHtml; tipShown = src; }
+    tip.style.display = 'flex';
+    positionTip(e);
+  };
+  mapEl.onmouseleave = function() { tip.style.display = 'none'; tipShown = null; };
 
   function positionTip(e) {
     var x = e.clientX + 14;
