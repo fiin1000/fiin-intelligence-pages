@@ -180,6 +180,9 @@ body {
   @page { size: A4 portrait; margin: 12mm; }
   body { background: white !important; }
   .header, .print-btn, #pw-gate, .setup-notice, .intel-more, .rasff-more, .tsg-more, .risk-info, footer { display: none !important; }
+  body.printing-rasff .rasff-dialog { display: block !important; position: static; width: auto; max-height: none; box-shadow: none; margin-top: 14px; }
+  .rasff-open, .rasff-close, .rasff-link-row { display: none !important; }
+  .rasff-dialog-body { overflow: visible !important; }
   .print-head { display: block !important; border-bottom: 2px solid #1A3D1A; padding-bottom: 8px; margin-bottom: 10px; }
   .ph-title { font-size: 18px; font-weight: 700; color: #1A3D1A; }
   .ph-meta { font-size: 10.5px; color: #333; margin-top: 3px; line-height: 1.5; }
@@ -466,7 +469,17 @@ tr:hover td { background: var(--mist); }
 .rasff-status a { color: var(--blue); text-decoration: none; }
 .rasff-status a:hover { text-decoration: underline; }
 .rasff-link-row { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 12px 16px; background: white; border: 1px solid var(--border); border-radius: 10px; font-size: 12.5px; color: var(--ink); }
-.rasff-link-row a { font-weight: 600; color: var(--pine); text-decoration: none; }
+.rasff-link-row a { font-weight: 500; color: var(--pine); text-decoration: none; }
+.rasff-open { background: var(--pine); color: white; border: none; border-radius: 5px; padding: 6px 12px; font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+.rasff-open:hover { background: var(--forest); }
+.rasff-open[disabled] { background: var(--border); color: var(--muted); cursor: default; }
+.rasff-link-sep { color: var(--muted); }
+.rasff-dialog { position: fixed; inset: 0; margin: auto; height: fit-content; width: min(760px, 94vw); max-height: 84vh; padding: 0; border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 12px 40px rgba(0,0,0,.25); }
+.rasff-dialog[open] { display: flex; flex-direction: column; }
+.rasff-dialog::backdrop { background: rgba(14,28,14,.45); }
+.rasff-dialog-body { overflow-y: auto; flex: 1; }
+.rasff-close { margin-left: 8px; background: none; border: 1px solid var(--border); border-radius: 5px; width: 28px; height: 28px; font-size: 13px; color: var(--muted); cursor: pointer; }
+.rasff-close:hover { color: var(--ink); border-color: var(--muted); }
 .rasff-link-row a:hover { text-decoration: underline; }
 .rasff-list-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 13px 16px 10px; border-bottom: 1px solid var(--border); }
 .rasff-list-title { font-size: 13px; font-weight: 600; color: var(--ink); }
@@ -1017,12 +1030,23 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
       </div>
 
     </div>
-    <!-- RASFF: link only -->
+    <!-- RASFF: link to the alerts already collected for this category -->
     <div class="rasff-link-row" id="rasff-link-row">
-      <span>Full list of EU/UK RASFF alerts for <span id="rasff-com" style="text-transform:lowercase"></span>, searchable by product and country:</span>
-      <a id="rasff-portal-link" href="https://webgate.ec.europa.eu/rasff-window/screen/search" target="_blank" rel="noopener">Open RASFF Window →</a>
-      <span style="display:none"><span id="rasff-count"></span><span id="rasff-badge"></span><div id="rasff-body"></div></span>
+      <span>RASFF alerts for <span id="rasff-com" style="text-transform:lowercase"></span>:</span>
+      <button type="button" class="rasff-open" id="rasff-open">View alerts →</button>
+      <span class="rasff-link-sep">·</span>
+      <a id="rasff-portal-link" href="https://webgate.ec.europa.eu/rasff-window/screen/search" target="_blank" rel="noopener">Search RASFF Window</a>
+      <span style="display:none"><span id="rasff-badge"></span></span>
     </div>
+    <dialog class="rasff-dialog" id="rasff-dialog" aria-labelledby="rasff-dialog-title">
+      <div class="rasff-list-head">
+        <span class="rasff-list-title" id="rasff-dialog-title">RASFF alerts &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="rasff-dialog-com" style="color:var(--forest)"></span></span>
+        <span class="rasff-list-meta"><span id="rasff-count"></span></span>
+        <button type="button" class="rasff-close" id="rasff-close" aria-label="Close">✕</button>
+      </div>
+      <div class="rasff-dialog-body" id="rasff-body"></div>
+      <div class="rasff-list-foot">EU/UK enforcement notifications for the whole category from the last 6 months, newest first, as collected for this page. Excludes pathogens, pesticides, mycotoxins and other contamination-only alerts. Source: RASFF Window, © European Union.</div>
+    </dialog>
 
     <!-- EU Agri-Food Fraud Network monthly report: this category's entries -->
     <div class="card rasff-list-card" id="eu-card" style="margin-top:14px;padding:0;display:none">
@@ -2270,6 +2294,7 @@ document.addEventListener('click', function(e) {
 
 // ── Printable, dated snapshot of the current category ───────────────────────
 function printSnapshot() {
+  document.body.classList.add('printing-rasff');
   var today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   var period = document.getElementById('com-period').textContent;
   document.getElementById('print-head').innerHTML =
@@ -2281,7 +2306,7 @@ function printSnapshot() {
   var tsg = document.getElementById('tsg-content'); if (tsg) tsg.classList.remove('clamped');
   window.print();
 }
-window.addEventListener('afterprint', function() { renderTSG(); });
+window.addEventListener('afterprint', function() { document.body.classList.remove('printing-rasff'); renderTSG(); });
 
 // ── At-a-glance strip under the category name ───────────────────────────────
 function renderGlance() {
@@ -2725,6 +2750,9 @@ function renderFiinIndicators() {
 }
 
 function renderRasff() {
+  try { renderRasffList(); } finally { updateRasffButton(); }
+}
+function renderRasffList() {
   renderFiinIndicators();
   var body  = document.getElementById('rasff-body');
   var count = document.getElementById('rasff-count');
@@ -2804,8 +2832,7 @@ function renderRasff() {
   count.textContent = items.length + ' alert' + (items.length!==1?'s':'') +
     (items[0].date ? ' · latest ' + fmtNewsDate(items[0].date) : '');
 
-  if (rasffViewCat !== cur) { rasffViewCat = cur; rasffShowAll = false; }
-  var shown = rasffShowAll ? items : items.slice(0, RASFF_SHOWN);
+  var shown = items;
   body.innerHTML = shown.map(function(r) {
     var sc = sevClass(r.severity);
     return '<div class="rasff-item">' +
@@ -2821,14 +2848,26 @@ function renderRasff() {
       (r.link ? '<a class="rasff-link" href="' + escHtml(r.link) + '" target="_blank" rel="noopener">View on RASFF portal →</a>' : '') +
     '</div>';
   }).join('') +
-  (items.length > RASFF_SHOWN ? '<button type="button" class="rasff-more">' +
-     (rasffShowAll ? 'Show fewer \u25B4' : 'Show all ' + items.length + ' alerts \u25BE') + '</button>' : '');
+'';
 }
-var RASFF_SHOWN = 5, rasffShowAll = false, rasffViewCat = null;
+// Button under the map: "View N alerts" opens the collected alerts in a pop-up
+function updateRasffButton() {
+  var btn = document.getElementById('rasff-open'), c = document.getElementById('rasff-count');
+  var dc = document.getElementById('rasff-dialog-com');
+  if (dc) dc.textContent = COMM[cur] ? COMM[cur].label : '';
+  if (!btn) return;
+  var n = parseInt((c && c.textContent) || '', 10);
+  if (!RASFF_CSV_URL) { btn.disabled = true; btn.textContent = 'Not connected'; return; }
+  if (!rasffData.length && isNaN(n)) { btn.disabled = true; btn.textContent = 'Loading\u2026'; return; }
+  btn.disabled = !(n > 0);
+  btn.textContent = n > 0 ? 'View ' + n + ' alert' + (n === 1 ? '' : 's') + ' (last 6 months) \u2192' : 'No alerts in the last 6 months';
+}
 document.addEventListener('click', function(e) {
-  if (!(e.target.closest && e.target.closest('.rasff-more'))) return;
-  rasffShowAll = !rasffShowAll;
-  renderRasff();
+  var d = document.getElementById('rasff-dialog');
+  if (!d) return;
+  if (e.target.closest && e.target.closest('#rasff-open')) { if (d.showModal) d.showModal(); else d.setAttribute('open', ''); }
+  else if (e.target.closest && e.target.closest('#rasff-close')) d.close ? d.close() : d.removeAttribute('open');
+  else if (e.target === d) d.close();   // click on the dimmed background
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
