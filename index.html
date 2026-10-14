@@ -2064,7 +2064,13 @@ document.addEventListener('click', function(e) {
 
 var NEWS_PER_THEME = 2;   // headlines shown per theme before "Show all"
 var NEWS_WINDOW_DAYS = 90;   // news shown and downloaded: last 90 days (the script collects the same window)
-var NEWS_THEME_ORDER = ['Fraud & integrity', 'Supply & demand', 'Prices & markets', 'Weather & climate',
+// Older theme names in the news tab, shown under their current name
+function newsThemeName(t) {
+  if (t === 'Harvest & crop') return 'Harvest & production';
+  if (t === 'Fraud & integrity' || t === 'Food safety & recalls') return 'Food fraud & food safety';
+  return t;
+}
+var NEWS_THEME_ORDER = ['Food fraud & food safety', 'Supply & demand', 'Prices & markets', 'Weather & climate',
                         'Harvest & production', 'Sustainability & stocks', 'Disease & pests', 'Trade & geopolitics', 'Logistics',
                         'Inputs & energy', 'Policy & regulation', 'Market news'];
 var newsExpanded = {}, newsViewKey = null;
@@ -2513,11 +2519,11 @@ function renderGlance() {
     });
     parts.push(glanceItem(n ? 'a' : 'n', '<b>' + n + '</b> fraud-related RASFF alert' + (n === 1 ? '' : 's') + ' in 30 days'));
   }
-  // Fraud & integrity news in the last 30 days (all products in this category)
+  // Food fraud & food safety news in the last 90 days (all products in this category)
   if (newsLoaded) {
     var keys = [newsKey(cur)].concat(Object.keys(COMM[cur].products).map(newsKey)), heads = {};
     keys.forEach(function(k) {
-      (newsData[k] || []).forEach(function(it) { if (it.theme === 'Fraud & integrity') heads[(it.headline || '').toLowerCase().slice(0, 70)] = true; });
+      (newsData[k] || []).forEach(function(it) { if (it.theme === 'Food fraud & food safety') heads[(it.headline || '').toLowerCase().slice(0, 70)] = true; });
     });
     var f = Object.keys(heads).length;
     parts.push(glanceItem(f ? 'r' : 'n', '<b>' + f + '</b> fraud &amp; integrity stor' + (f === 1 ? 'y' : 'ies')));
@@ -2721,7 +2727,7 @@ function parseNewsCsv(txt) {
       if (d && (!newsUpdated || d > parseNewsDate(newsUpdated))) newsUpdated = dateStr;
       if (!newsData[comm]) newsData[comm] = [];
       newsData[comm].push({ headline: head, detail: detail, source: src, url: url, findUrl: findUrl,
-                            date: dateStr, ts: d ? d.getTime() : 0, theme: cell(r, C.theme) === 'Harvest & crop' ? 'Harvest & production' : cell(r, C.theme), tier: cell(r, C.tier).toLowerCase(), risk_level: riskCode(cell(r, C.risk)) });
+                            date: dateStr, ts: d ? d.getTime() : 0, theme: newsThemeName(cell(r, C.theme)), tier: cell(r, C.tier).toLowerCase(), risk_level: riskCode(cell(r, C.risk)) });
     });
     // Newest first
     Object.keys(newsData).forEach(function(k){ newsData[k].sort(function(x, y){ return y.ts - x.ts; }); });
@@ -2829,11 +2835,11 @@ function buildVaRows(catKeys, now) {
         });
       });
       items.sort(function(a, b){ return b.ts - a.ts; });
-      var fraud = items.filter(function(n){ return n.theme === 'Fraud & integrity'; });
+      var fraud = items.filter(function(n){ return n.theme === 'Food fraud & food safety'; });
       row.fraud_news_90d = fraud.length;
       row.fraud_news_detail = fraud.map(function(n){ return [n.date, vaStrip(n.headline), n.source, n.url].filter(Boolean).join(' · '); }).join(' | ');
       var themes = {};
-      items.forEach(function(n){ var th = n.theme || 'Other'; if (th !== 'Fraud & integrity') themes[th] = (themes[th] || 0) + 1; });
+      items.forEach(function(n){ var th = n.theme || 'Other'; if (th !== 'Food fraud & food safety') themes[th] = (themes[th] || 0) + 1; });
       row.supply_news_themes_90d = Object.keys(themes).sort(function(a, b){ return themes[b] - themes[a]; })
         .map(function(th){ return th + ': ' + themes[th]; }).join('; ');
 
@@ -4047,7 +4053,7 @@ setInterval(function() {
     <ul>
       <li><b>Price risk signals</b> — what UK importers paid per kg (HMRC customs data, about 2 months behind). Three checks: <i>price swing</i>, <i>origin shift</i> and <i>price gap</i> (an origin much cheaper than the UK average). Red and amber are prompts to check suppliers, specifications and testing — not proof of fraud. Origins show their corruption score (Transparency International CPI).</li>
       <li><b>About the prices</b> \u2014 lines are 3-month rolling averages of customs value \u00f7 weight across all grades and pack formats, so they are indicators to investigate, not market prices. Bear in mind: one customs code can mix grades and forms, so a cheap origin may simply ship a lower grade; prices are in pounds, so a weaker pound lifts every origin at once (one origin moving against the others is the more telling signal); and general food inflation nudges prices above their 2-year average. Source: HMRC Overseas Trade Statistics, \u00a9 Crown copyright, Open Government Licence v3.0. Corruption Perceptions Index \u00a9 Transparency International, CC BY-ND 4.0, shown as published: 0 = highly corrupt, 100 = very clean.</li>
-      <li><b>Supply chain news</b> — headlines from the last 90 days that name the product and a supply chain risk (prices, weather, harvest and production, disease, trade, fraud…). Only UK trade press, key sector sites such as FreshPlaza, and UK national press; trade press first.</li>
+      <li><b>Supply chain news</b> — headlines from the last 90 days that name the product and a supply chain risk (food fraud and food safety, prices, weather, harvest and production, sustainability, disease, trade…). Only UK trade press, key sector sites such as FreshPlaza, and UK national press; trade press first.</li>
     </ul>
     <h4>Taking it away</h4>
     <ul>
