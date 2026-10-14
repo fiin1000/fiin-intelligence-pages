@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TSG Horizon Scanning Alert</title>
+<title>MOCK – TSG Horizon Scanning Alert</title>
 <style>
   :root { --ink:#1A2B1A; --muted:#5B6B5B; --brand:#1A3D1A; --accent:#4E8A1F; --line:#DCE4D4; --bg:#EEF2EA; --paper:#FFFFFF; }
   * { box-sizing:border-box; }
@@ -14,15 +14,15 @@
   .meta { font-size:13px; color:var(--muted); border-bottom:2px solid var(--brand); padding-bottom:16px; margin-bottom:28px; }
   h2 { font-size:16px; color:var(--brand); margin:28px 0 8px; }
   .ph { height:12px; background:#EDF1EA; border-radius:3px; margin:8px 0; }
-  .mock { display:inline-block; margin-left:8px; padding:2px 8px; border-radius:4px; background:#B45309; color:#fff; letter-spacing:1px; }
+  .mock { display:inline-block; vertical-align:middle; margin:0 6px 4px 0; padding:3px 10px; border-radius:4px; background:#B45309; color:#fff; font-size:14px; font-weight:700; letter-spacing:1.5px; }
   .demo { margin-top:36px; font-size:13px; color:var(--muted); background:#FFF4E0; border:1px solid #E8C48A; border-radius:6px; padding:10px 14px; }
   @media (max-width:600px) { .page { padding:28px 20px 40px; } h1 { font-size:22px; } }
 </style>
 </head>
 <body>
 <div class="page">
-  <p class="eyebrow">fiin Technical Steering Group <span class="mock">Mock alert</span></p>
-  <h1 id="title">TSG Horizon Scanning Alert</h1>
+  <p class="eyebrow">fiin Technical Steering Group</p>
+  <h1><span class="mock">MOCK</span> <span id="title">TSG Horizon Scanning Alert</span></h1>
   <div class="meta" id="meta">Category: —</div>
   <h2>Summary</h2>
   <div class="ph" style="width:96%"></div><div class="ph" style="width:88%"></div><div class="ph" style="width:70%"></div>
@@ -37,7 +37,7 @@
   var product = q.get('product') || '', cat = q.get('category') || '';
   if (product) {
     document.getElementById('title').textContent = 'TSG Horizon Scanning Alert – ' + product;
-    document.title = 'TSG Horizon Scanning Alert – ' + product;
+    document.title = 'MOCK – TSG Horizon Scanning Alert – ' + product;
   }
   document.getElementById('meta').textContent = (cat ? 'Category: ' + cat + ' · ' : '') + 'Issued by the fiin TSG · Mock alert';
 </script>
