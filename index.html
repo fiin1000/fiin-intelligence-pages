@@ -3778,6 +3778,10 @@ var RES_ICONS = {
 };
 
 // Official references linked from every category's resources (opened on the publisher's site)
+// TSG Horizon Scanning Alert (demo document) linked for each category
+var TSG_ALERT_PRODUCT = { poultry:'Chicken', red_meat:'Lamb', fish_shellfish:'Tuna (yellowfin)', honey:'Honey',
+  herbs_spices:'Oregano', bakery_cereals:'Rice', fruit_veg:'Avocado', dairy:'Mozzarella', cocoa:'Cocoa butter',
+  nuts_snacks:'Pistachios', eggs:'Eggs (in shell)', drinks:'Orange juice' };
 var EXTERNAL_RESOURCES = [];
 function renderResources() {
   var titleEl       = document.getElementById('res-title');
@@ -3814,6 +3818,19 @@ function renderResources() {
     });
   } else {
     if (placeholderEl) placeholderEl.style.display = '';
+  }
+  // TSG Horizon Scanning Alert for this category (demo)
+  if (TSG_ALERT_PRODUCT[cur]) {
+    if (placeholderEl) placeholderEl.style.display = 'none';
+    var tp = TSG_ALERT_PRODUCT[cur], ta = document.createElement('a');
+    ta.href = 'tsg-alert.html?product=' + encodeURIComponent(tp) + '&category=' + encodeURIComponent(RES_LABELS[cur] || label);
+    ta.target = '_blank'; ta.rel = 'noopener';
+    ta.className = 'res-file';
+    ta.innerHTML =
+      '<div class="res-file-icon">' + RES_ICONS.report + '</div>' +
+      '<div class="res-file-name">TSG Horizon Scanning Alert \u2013 ' + tp + '</div>' +
+      '<span class="res-file-ext">DOC</span>';
+    bodyEl.insertBefore(ta, bodyEl.firstChild);
   }
   // External references shown for every category
   EXTERNAL_RESOURCES.forEach(function(f) {
