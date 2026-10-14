@@ -2541,6 +2541,48 @@ function glanceItem(dot, html) {
 }
 
 // Parse the published rasff tab into alert objects (shared with the Apps Script export)
+// fiin RASFF rules: is this alert about potential FRAUD (keep) or food safety only (remove)?
+// Returns { keep: true|false, reason: '…' }. Approved by fiin, 14 October 2026.
+// Order: (1) always-remove topics, (2) fraud signals keep, (3) safety-only topics remove, (4) anything else keep.
+function rasffFraudCheck(title) {
+  var t = String(title || '').toLowerCase();
+  // 1. Always removed, whatever else the title says
+  var ALWAYS_OUT = {
+    'Salmonella / Campylobacter': /salmonel|infantis|campylobacter/,
+    'THC / CBD / cannabis': /\bthc\b|tetrahydrocannabinol|\bcbd\b|cannabidiol|cannabis/,
+    'Feed / pet food': /pet ?food|petfood|dog food|cat food|for (dogs|cats)|karm(a|ie) dla|feed additive|compound feed|animal feed|\bfeed\b|piglets|chew sticks/
+  };
+  for (var a in ALWAYS_OUT) if (ALWAYS_OUT[a].test(t)) return { keep: false, reason: a };
+
+  // 2. Fraud signals: kept even if a safety topic is also mentioned
+  var FRAUD = /fraud|adulterat|falsif|counterfeit|mislabel|substitut|species|\bspecie\b|\bdna\b|fake|stolen|theft|incorrectly declared|illegal|unknown origin|without (an )?official control|not presented for (an )?official control|skipped (veterinary|border)|without the ne(c)?cessary veterinary|not passed veterinary|not submitted to inspection|border checks not carried|health certificate|official certificates?|certificate mismatch|sanitary certificate|identification code|without (mandatory )?documentation|incomplete documentation|incomplite documentation|traceability|establishment of origin not approved|without private attestation|\bchedd?\b|health mark|registration number|lack of health guarantees|irradiat|ionizing|carbon monoxide|nitrite|phosphate|sildenafil|tadalafil|sudan|soudan|unauthori[sz]ed (food )?additive|unauthorised colouring|unauthorise food additive|additives? no autorizad|aditivos no autorizados|not authorised|unauthori[sz]ed (substance|use|treatment)|maltitol|novel food|\bgmo\b|\bogm\b|terminator|harvesting|veterinar|antibiotic|inhibitor|withdrawal period|chloramphenicol|nitrofura|\baoz\b|florfenicol|floxacin|crystal violet|kanamycin|pharmacologically|diclofenac/;
+  if (FRAUD.test(t)) return { keep: true, reason: 'Fraud signal' };
+  // Claims that turn a safety finding into a false claim
+  var PESTICIDE = /pesticide|clothianidin|thiamet|tricyclazole|chlorpyrifos|chloropiryfos|deltamethrin|pirimiphos|flutriafol|acetamiprid|carbendazim|anthraquinone|ethylene oxide|óxido de etileno|glyphosate|imidacloprid|residue/;
+  if (/organic|\bbio\b|biologisch/.test(t) && PESTICIDE.test(t)) return { keep: true, reason: 'Pesticide in an organic product' };
+  var ALLERGEN = /allergen|alérgeno|alergen|allergic|gluten|milk|lactose|lactosa|soy|soja|mustard|sesame|peanut|nut\b|nuts\b|egg|casein|caseine|beta-lactoglobulin/;
+  if (/gluten.?free|free.?from|\bvegan\b|dairy.?free|lactose.?free|milk.?free|egg.?free|nut.?free|senza glutine|sin gluten/.test(t) && ALLERGEN.test(t)) return { keep: true, reason: 'Free-from claim not met' };
+
+  // 3. Food safety only: removed
+  var SAFETY = {
+    'Foreign body / spoilage': /foreign|corpo estraneo|ciała obcego|cuerpo extraño|plastic|metal|glass|wire|screw|stones|fish hook|insect|moth|pest infestation|infestation|mould|mold|muffe|pleśni|spoilage|organoleptic|sensory|bombage|swollen|state of preservation|deterioration|deterioro|bad smell|odour|off-flavour|chemical taste|sediment|rust\b|breakage|injury|vacuum|faeces|lesions|hygiene|improper production|insufficient cleaning/,
+    'Pathogen / microbiological': /listeria|monocytogenes|clostridium|botulinum|norovirus|hepatitis|vibrio|enterobacter|staphylococ|enterotox|enetrotox|cereulide|bacteria count|\bcbt\b|mesophilic|microbiological|e\. ?coli|escherichia|stec|sterilis|bacillus|biological contaminants|zanieczyszczeń biologicznych|ill presumably|illness/,
+    'Parasites': /anisakis|anisakid|parasit|cysticercosis|contracoecum|nematode/,
+    'Natural toxins / biotoxins': /histamine|istamina|\bdsps?\b|\basp\b|lipophilic|okadaic|biotoxin|bio toxins|dinophys|tropane|alcaloidi tropanici|ergot|opium|morphine|morfiny|hydrocyan|cyanide|erucic|coumarin|alternari|tenuazonic|tenzuánico|grayanotoxin|aflatoxin|ochratoxin|o[cht]+atoxin|\bota\b|mycotoxin|deoxynivalenol|fumonisin|zearalenone|apricot kernels/,
+    'Environmental / process contaminant': /mercury|mercurio|cadmium|cadmio|\blead\b|plomo|nickel|arsenic|dioxin|diossine|pfas|pfos|\bpah|polycyclic aromatic|benzo\(a\)pyrene|mosh|moah|mineral oil|3-mcpd|glycid|acrylam|akryloamid|ethyl carbamate|heavy metal|lignosulfonate|zinc|copper/,
+    'Pesticide residues': PESTICIDE,
+    'Allergen': ALLERGEN,
+    'Temperature / cold chain': /temperature|cold chain|cadena de frío|delivered frozen/,
+    'Date / label error': /use-by|use by|best.before|best-by|durability|\bdlc\b|expiration|\bubd\b|label on the packaging is incorrect|no english labelling|not mentioned on the label/
+  };
+  for (var s in SAFETY) if (SAFETY[s].test(t)) return { keep: false, reason: s };
+  // Residues above a legal limit (MRL): only illegal or prohibited residues are kept
+  if (/(exceed\w*|above|over|higher than|in excess of|>|≥)\s*(of\s+|for\s+)?(the\s+)?(eu\s+|permitted\s+|legal\s+|maximum\s+)*(mrls?\b|maximum residue (level|limit)s?)|\b(mrls?|maximum residue (level|limit)s?)\s*(\([^)]*\)\s*)?(is\s+|was\s+|were\s+|being\s+)?exceed/.test(t))
+    return { keep: false, reason: 'Residue above MRL' };
+  // 4. Anything else stays (the page lists it; fiin can mark it in node_override if it should go)
+  return { keep: true, reason: 'Not classified' };
+}
+
 function parseRasffCsv(txt) {
     var rows = parseCSV(txt);
     var EXCLUDED_HAZARDS = [
@@ -2555,13 +2597,8 @@ function parseRasffCsv(txt) {
       'pathogenic micro-organisms',
       'pesticide residues'
     ];
-    // fiin RASFF rules — only alerts relating to potential fraud are shown.
+    // fiin RASFF rules — only alerts relating to potential fraud are shown (see rasffFraudCheck above).
     // The Apps Script applies the same rules when it collects alerts; repeating them here keeps older rows in line.
-    // 1. Free-text exclusions: alerts whose title contains any of these (lower-case) phrases are hidden
-    var EXCLUDED_TITLE_TERMS = ['salmonel', 'infantis', 'campylobacter', 'pesticide',
-      'aflatoxin', 'mycotoxin', 'ochratoxin', 'deoxynivalenol', 'fumonisin', 'zearalenone'];
-    // 2. Residues reported above a maximum residue limit (MRL) are hidden: only illegal or prohibited residues are kept
-    var MRL_EXCEEDED = /(exceed\w*|above|over|higher than|in excess of|>|≥)\s*(of\s+|for\s+)?(the\s+)?(eu\s+|permitted\s+|legal\s+|maximum\s+)*(mrls?\b|maximum residue (level|limit)s?)|\b(mrls?|maximum residue (level|limit)s?)\s*(\([^)]*\)\s*)?(is\s+|was\s+|were\s+|being\s+)?exceed/i;
     // 3. Veterinary residues are placed at the first stage of the category's supply chain
     var VET_RESIDUE = /veterinar|antibiotic|antimicrobial|withdrawal period|hormone|chloramphenicol|thiamphenicol|florfenicol|nitrofura|semicarbazide|\b(sem|amoz|aoz|ahd)\b|floxacin|quinolone|cyclines?\b|doksycyklin|sulf[ao](dia|meth|thia|mer|quin|nil|dox|namid)|sulphonamid|sulfonamid|trimethoprim|metronidazole|dimetridazole|ronidazole|nitroimidazole|malachite|crystal violet|gentian violet|dapsone|ractopamine|clenbuterol|beta-agonist|stilben|coccidiostat|nicarbazin|lasalocid|monensin|salinomycin|narasin|diclazuril|toltrazuril|ivermectin|streptomycin|tylosin|lincomycin|fipronil|furazolidone|furaltadone|nifursol|dexamethasone|flumequine|oxolinic|amoxicillin|ampicillin|penicillin|colistin|neomycin|gentamicin|kanamycin|erythromycin|carbadox|olaquindox|phenylbutazone|levamisole|albendazole|fenbendazole|avermectin|emamectin|praziquantel|medicinal product|pharmacologically active|prohibited substance/i;
 
@@ -2615,10 +2652,7 @@ function parseRasffCsv(txt) {
       if (!r.commodity || r.commodity === '_none') return false;
       var hazardLower = r.hazard.toLowerCase();
       if (EXCLUDED_HAZARDS.some(function(ex) { return hazardLower === ex; })) return false;
-      var titleLower = r.title.toLowerCase();
-      if (EXCLUDED_TITLE_TERMS.some(function(t) { return titleLower.indexOf(t) > -1; })) return false;
-      if (MRL_EXCEEDED.test(r.title)) return false;
-      return true;
+      return rasffFraudCheck(r.title).keep;
     });
     return out;
 }
