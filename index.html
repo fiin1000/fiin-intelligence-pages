@@ -1343,9 +1343,8 @@ var COMM = {
     'Oregano': {unit:'$/kg',sources:'ITC'},
     'Black pepper': {unit:'$/kg',sources:'Spices Board India + HMRC'},
     'Cumin': {unit:'$/kg',sources:'Spices Board India + HMRC'},
-    'Paprika': {unit:'$/kg',sources:'HMRC (import price only)'},
+    'Paprika and chilli': {unit:'£/kg',sources:'HMRC'},
     'Turmeric': {unit:'$/kg',sources:'Spices Board India + HMRC'},
-    'Chilli': {unit:'$/kg',sources:'Spices Board India + HMRC'},
     'Coriander': {unit:'$/kg',sources:'Spices Board India + HMRC'},
     'Cinnamon': {unit:'$/kg',sources:'HMRC (import price only)'},
     'Basil': {unit:'$/kg',sources:'ITC + FAO'},
@@ -1438,8 +1437,7 @@ var COMM = {
     threshold:1.5, norm:1.0,
     rasffCategories:['eggs and egg products'],
     products:{
-    'Eggs (free range)': {unit:'£/dozen',sources:'AHDB + EU Agri-food API'},
-    'Eggs (barn/caged)': {unit:'£/dozen',sources:'AHDB + EU Agri-food API'},
+    'Eggs (in shell)': {unit:'£/kg',sources:'HMRC'},
     'Liquid whole egg': {unit:'£/kg',sources:'AHDB + FAO'},
     'Dried egg powder': {unit:'£/kg',sources:'FAO'},
     'Egg albumen (dried)': {unit:'£/kg',sources:'FAO'}
@@ -2065,6 +2063,7 @@ document.addEventListener('click', function(e) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 var NEWS_PER_THEME = 2;   // headlines shown per theme before "Show all"
+var NEWS_WINDOW_DAYS = 90;   // news shown and downloaded: last 90 days (the script collects the same window)
 var NEWS_THEME_ORDER = ['Fraud & integrity', 'Supply & demand', 'Prices & markets', 'Weather & climate',
                         'Harvest & production', 'Sustainability & stocks', 'Disease & pests', 'Trade & geopolitics', 'Logistics',
                         'Inputs & energy', 'Policy & regulation', 'Market news'];
@@ -2105,10 +2104,8 @@ var riskChart = null;
 // Products that share one HMRC dataset, because customs codes do not split them
 var TRADE_SHARED = {
   'Honey':          { from: 'Honey (all types)', note: 'All natural honey imports: customs data does not separate honey types.' },
-  'Paprika':        { from: 'Dried capsicum (paprika and chilli)', note: 'Customs data does not separate paprika from dried chilli: this shows both.' },
-  'Chilli':         { from: 'Dried capsicum (paprika and chilli)', note: 'Customs data does not separate dried chilli from paprika: this shows both.' },
-  'Eggs (free range)': { from: 'Eggs in shell', note: 'Customs data does not record the welfare system: this shows all hens’ eggs in shell.' },
-  'Eggs (barn/caged)': { from: 'Eggs in shell', note: 'Customs data does not record the welfare system: this shows all hens’ eggs in shell.' }
+  'Paprika and chilli': { from: 'Dried capsicum (paprika and chilli)', note: 'Dried paprika and chilli together: customs data does not separate them.' },
+  'Eggs (in shell)': { from: 'Eggs in shell', note: 'All hens’ eggs in shell: customs data does not record the farming system (free range, barn or cage).' }
 };
 // Products with no usable HMRC code, and why
 var TRADE_NOT_COVERED = {
@@ -2746,7 +2743,7 @@ var VA_COLUMNS = [
   'price_gap_level', 'price_gap_origin', 'price_gap_pct_below_uk_avg', 'price_gap_detail',
   'main_origins', 'lowest_cpi_main_origin', 'lowest_cpi_score', 'cpi_year',
   'rasff_alerts_6m', 'rasff_alert_notifications_6m', 'rasff_alerts_detail',
-  'fraud_news_30d', 'fraud_news_detail', 'supply_news_themes_30d',
+  'fraud_news_90d', 'fraud_news_detail', 'supply_news_themes_90d',
   'tsg_guidance', 'known_risks_by_stage', 'fiin_resources', 'page_link', 'sources_and_licences'
 ];
 var VA_SOURCES = 'HMRC Overseas Trade Statistics (Crown copyright, Open Government Licence v3.0); ' +
@@ -2762,7 +2759,7 @@ function vaNum(x, dp) { return x == null || isNaN(x) ? '' : Math.round(x * Math.
 // catKeys: category keys to include, in page order. now: a Date. Returns [VA_COLUMNS, row, row, ...]
 function buildVaRows(catKeys, now) {
   var out = [VA_COLUMNS.slice()];
-  var today = vaDate(now), sixMonthsAgo = new Date(now.getTime()), d30 = now.getTime() - 30 * 864e5;
+  var today = vaDate(now), sixMonthsAgo = new Date(now.getTime()), d30 = now.getTime() - NEWS_WINDOW_DAYS * 864e5;
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
   catKeys.forEach(function(cat) {
     var C = COMM[cat];
@@ -2821,7 +2818,7 @@ function buildVaRows(catKeys, now) {
         row.hmrc_coverage_note = TRADE_NOT_COVERED[p] || 'No HMRC import data available yet.';
       }
 
-      // News evidence (this product's own news, last 30 days)
+      // News evidence (this product's own news, last NEWS_WINDOW_DAYS days)
       var seen = {}, items = [];
       [newsData[newsKey(p)] || []].forEach(function(list) {
         list.forEach(function(n) {
@@ -2832,11 +2829,11 @@ function buildVaRows(catKeys, now) {
       });
       items.sort(function(a, b){ return b.ts - a.ts; });
       var fraud = items.filter(function(n){ return n.theme === 'Fraud & integrity'; });
-      row.fraud_news_30d = fraud.length;
+      row.fraud_news_90d = fraud.length;
       row.fraud_news_detail = fraud.map(function(n){ return [n.date, vaStrip(n.headline), n.source, n.url].filter(Boolean).join(' · '); }).join(' | ');
       var themes = {};
       items.forEach(function(n){ var th = n.theme || 'Other'; if (th !== 'Fraud & integrity') themes[th] = (themes[th] || 0) + 1; });
-      row.supply_news_themes_30d = Object.keys(themes).sort(function(a, b){ return themes[b] - themes[a]; })
+      row.supply_news_themes_90d = Object.keys(themes).sort(function(a, b){ return themes[b] - themes[a]; })
         .map(function(th){ return th + ': ' + themes[th]; }).join('; ');
 
       // Keep every cell inside Excel's limit (32,767 characters)
@@ -2861,7 +2858,7 @@ function vaToCsv(rows) {
 // price risk signals (HMRC) · supply chain news. Returns an array of rows (arrays of cells).
 function buildSnapshotCsvRows(cat, now) {
   var C = COMM[cat], rows = [], blank = function(){ rows.push([]); };
-  var today = vaDate(now), sixMonthsAgo = new Date(now.getTime()), d30 = now.getTime() - 30 * 864e5;
+  var today = vaDate(now), sixMonthsAgo = new Date(now.getTime()), d30 = now.getTime() - NEWS_WINDOW_DAYS * 864e5;
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
   var section = function(n, title, note) { blank(); rows.push([n + '. ' + title.toUpperCase()]); if (note) rows.push([note]); };
 
@@ -2929,7 +2926,7 @@ function buildSnapshotCsvRows(cat, now) {
   });
 
   // 5. News
-  section(5, 'Supply chain news (last 30 days)', 'Headlines found for each product; links go to the original articles.');
+  section(5, 'Supply chain news (last ' + NEWS_WINDOW_DAYS + ' days)', 'Headlines found for each product; links go to the original articles.');
   rows.push(['Product', 'Date', 'Theme', 'Headline', 'Source', 'Trade press', 'Link']);
   var any = false;
   Object.keys(C.products).forEach(function(p) {
@@ -2942,7 +2939,7 @@ function buildSnapshotCsvRows(cat, now) {
         rows.push([p, n.date || '', n.theme || '', vaStrip(n.headline), n.source || '', n.tier === 'trade' ? 'Yes' : '', n.url || '']);
       });
   });
-  if (!any) rows.push(['', '', '', 'No supply chain news for these products in the last 30 days.']);
+  if (!any) rows.push(['', '', '', 'No supply chain news for these products in the last ' + NEWS_WINDOW_DAYS + ' days.']);
 
   blank();
   rows.push(['Sources and licences', VA_SOURCES]);
@@ -2990,7 +2987,7 @@ function renderNews() {
 
   if (!commNews.length) {
     items.innerHTML = '<div class="intel-empty">' + (newsLoaded || !NEWS_CSV_URL
-      ? 'No supply chain news in the Sheet for ' + escHtml(prodKey) + ' in the last 30 days.'
+      ? 'No supply chain news in the Sheet for ' + escHtml(prodKey) + ' in the last ' + NEWS_WINDOW_DAYS + ' days.'
       : 'Loading market news&hellip;') + '</div>';
     try { renderGlance(); } catch (e) {}
     return;
@@ -3261,10 +3258,10 @@ var VERIFIED = {
   poultry:       ['Chicken', 'Turkey'],
   fish_shellfish:['Salmon', 'Cod', 'Haddock', 'Crab', 'Squid', 'Scallops', 'Mussels', 'Oysters', 'Mackerel', 'Tuna (skipjack)', 'Tuna (yellowfin)', 'Prawns (warm water)', 'Prawns (cold water)'],
   dairy:         ['Liquid milk', 'Cheddar', 'Butter', 'Cream', 'Skimmed milk powder', 'Whole milk powder'],
-  eggs:          ['Eggs (free range)', 'Eggs (barn/caged)'],
+  eggs:          ['Eggs (in shell)'],
   bakery_cereals:['Wheat', 'Maize', 'Rice', 'Oats', 'Barley', 'Rye'],
   nuts_snacks:   ['Pistachios', 'Almonds', 'Walnuts', 'Peanuts', 'Sunflower seeds', 'Hazelnuts', 'Cashews', 'Pumpkin seeds'],
-  herbs_spices:  ['Black pepper', 'Turmeric', 'Cumin', 'Paprika', 'Chilli', 'Coriander', 'Cinnamon', 'Saffron'],
+  herbs_spices:  ['Black pepper', 'Turmeric', 'Cumin', 'Paprika and chilli', 'Coriander', 'Cinnamon', 'Saffron'],
   cocoa:         ['Cocoa beans', 'Cocoa butter', 'Cocoa powder'],
   fruit_veg:     ['Tomatoes', 'Apples', 'Bananas', 'Oranges'],
   drinks:        ['Orange juice', 'Apple juice'],
@@ -4049,7 +4046,7 @@ setInterval(function() {
     <ul>
       <li><b>Price risk signals</b> — what UK importers paid per kg (HMRC customs data, about 2 months behind). Three checks: <i>price swing</i>, <i>origin shift</i> and <i>price gap</i> (an origin much cheaper than the UK average). Red and amber are prompts to check suppliers, specifications and testing — not proof of fraud. Origins show their corruption score (Transparency International CPI).</li>
       <li><b>About the prices</b> \u2014 lines are 3-month rolling averages of customs value \u00f7 weight across all grades and pack formats, so they are indicators to investigate, not market prices. Bear in mind: one customs code can mix grades and forms, so a cheap origin may simply ship a lower grade; prices are in pounds, so a weaker pound lifts every origin at once (one origin moving against the others is the more telling signal); and general food inflation nudges prices above their 2-year average. Source: HMRC Overseas Trade Statistics, \u00a9 Crown copyright, Open Government Licence v3.0. Corruption Perceptions Index \u00a9 Transparency International, CC BY-ND 4.0, shown as published: 0 = highly corrupt, 100 = very clean.</li>
-      <li><b>Supply chain news</b> — headlines from the last 30 days that name the product and a supply chain risk (prices, weather, harvest and production, disease, trade, fraud…). Only UK trade press, key sector sites such as FreshPlaza, and UK national press; trade press first.</li>
+      <li><b>Supply chain news</b> — headlines from the last 90 days that name the product and a supply chain risk (prices, weather, harvest and production, disease, trade, fraud…). Only UK trade press, key sector sites such as FreshPlaza, and UK national press; trade press first.</li>
     </ul>
     <h4>Taking it away</h4>
     <ul>
