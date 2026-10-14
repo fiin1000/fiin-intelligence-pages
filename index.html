@@ -190,7 +190,8 @@ body {
   .rasff-open, .rasff-close, .rasff-link-row { display: none !important; }
   .rasff-dialog-body { overflow: visible !important; }
   body.printing-rasff #unplaced-dialog:not(:has(.sc-unplaced-item)) { display: none !important; }
-  body.printing-rasff #zone-dialog { display: none !important; }
+  body.printing-rasff #zone-dialog, body.printing-rasff #help-dialog { display: none !important; }
+  .help-btn { display: none !important; }
   .print-head { display: block !important; border-bottom: 2px solid #1A3D1A; padding-bottom: 8px; margin-bottom: 10px; }
   .ph-title { font-size: 18px; font-weight: 700; color: #1A3D1A; }
   .ph-meta { font-size: 10.5px; color: #333; margin-top: 3px; line-height: 1.5; }
@@ -656,6 +657,15 @@ tr:hover td { background: var(--mist); }
 .zone-sev { border-radius: 3px; padding: 0 5px; margin-left: 4px; }
 .zone-sev-r { background: #F6E3E3; color: #8B2020; } .zone-sev-a { background: #FBEEDC; color: #7A4800; } .zone-sev-g { background: #E6F1E0; color: #2D6B2D; }
 .zone-empty { color: var(--muted); font-style: italic; padding: 4px 0 8px; }
+.help-btn { background: transparent; }
+.res-ext-note { font-size: 10.5px; color: var(--muted); font-weight: 400; margin-top: 1px; }
+.help-body { padding: 6px 20px 16px; font-size: 12.5px; line-height: 1.55; color: var(--ink); }
+.help-body h4 { font-family: 'DM Mono', monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--forest); margin: 16px 0 4px; }
+.help-body ul { margin: 0; padding-left: 18px; }
+.help-body li { margin-bottom: 6px; }
+.help-body p { margin: 10px 0 0; }
+.help-foot { color: var(--muted); font-size: 11px; }
+.feed-stale { color: #FFC56B !important; font-weight: 600; }
 .sc-zone-counts { display: flex; gap: 8px; margin-left: auto; }
 .sc-zone-count { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; color: var(--muted); }
 .sc-zone-zero { background: #E4E8E0; color: #8A948A !important; }
@@ -1032,7 +1042,8 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
       <div class="com-meta-label" id="com-period"></div>
       <button type="button" class="print-btn" id="csv-btn" onclick="downloadCsv()" title="This category’s TSG recommendations, RASFF alerts, fiin member data, price risk signals and news, in sections">Download CSV</button>
       <button type="button" class="print-btn" onclick="printSnapshot()">Print / save as PDF</button>
-      <div class="com-meta-value">RASFF: daily &nbsp;·&nbsp; News: daily &nbsp;·&nbsp; Prices: monthly (HMRC imports) &nbsp;·&nbsp; fiin data: quarterly</div>
+      <button type="button" class="print-btn help-btn" id="help-open">How to read this page</button>
+      <div class="com-meta-value" id="feed-status">RASFF: daily &nbsp;·&nbsp; News: daily &nbsp;·&nbsp; Prices: monthly (HMRC imports) &nbsp;·&nbsp; fiin data: quarterly</div>
     </div>
   </div>
 
@@ -1976,6 +1987,52 @@ function renderSupplyChain() {
   // Subtitle
   var subEl = document.getElementById('sc-sub');
   subEl.innerHTML = SC_SUB_TEXT;
+}
+
+document.addEventListener('click', function(e) {
+  var d = document.getElementById('help-dialog');
+  if (!d || !e.target.closest) return;
+  if (e.target.closest('#help-open')) { if (d.showModal) d.showModal(); else d.setAttribute('open', ''); }
+  else if (e.target.closest('#help-close') || e.target === d) d.close ? d.close() : d.removeAttribute('open');
+});
+
+// ── When each feed last updated (shown under the header buttons) ─────────────
+var feedChecked = { rasff: '', news: '' };
+// Latest value in a CSV column (dates as yyyy-mm-dd sort correctly as text)
+function latestInColumn(txt, name) {
+  var all = parseCSV('x\n' + txt), hdr = (all[0] || []).map(function(h){ return (h || '').toLowerCase().trim(); });
+  var i = hdr.indexOf(name), best = '';
+  if (i < 0) return '';
+  all.slice(1).forEach(function(r){ var v = (r[i] || '').trim(); if (/^\d{4}-\d{2}-\d{2}/.test(v) && v > best) best = v; });
+  return best.slice(0, 10);
+}
+function feedAge(ymd) {
+  if (!ymd) return null;
+  var d = new Date(ymd + 'T12:00:00'), now = new Date();
+  var days = Math.round((new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12) - d) / 864e5);
+  return { days: days, text: days <= 0 ? 'today' : days === 1 ? 'yesterday' : d.getDate() + ' ' + MONTHS_SHORT[d.getMonth()] };
+}
+function renderFeedStatus() {
+  var el = document.getElementById('feed-status');
+  if (!el) return;
+  var part = function(label, ymd, staleAfter, fallback) {
+    var a = feedAge(ymd);
+    if (!a) return label + ': ' + fallback;
+    var stale = a.days > staleAfter;
+    return '<span' + (stale ? ' class="feed-stale" title="This feed has not updated as expected"' : '') + '>' + label + ' updated ' + a.text + (stale ? ' \u26a0' : '') + '</span>';
+  };
+  var tradeChecked = '', tradeTo = '';
+  Object.keys(tradeData || {}).forEach(function(p) {
+    var t = tradeData[p];
+    if (t.updated && t.updated > tradeChecked) tradeChecked = String(t.updated).slice(0, 10);
+    var m = t.months[t.months.length - 1]; if (m && m > tradeTo) tradeTo = m;
+  });
+  el.innerHTML = [
+    part('RASFF', feedChecked.rasff, 2, 'daily'),
+    part('News', feedChecked.news, 2, 'daily'),
+    tradeTo ? 'HMRC prices to ' + fmtMonth(tradeTo) : 'Prices: monthly (HMRC imports)',
+    'fiin data: quarterly'
+  ].join(' &nbsp;\u00b7&nbsp; ');
 }
 
 // Zone pop-up: everything placed in one zone, scrollable, with links
@@ -3404,6 +3461,7 @@ function loadData() {
         console.log('RASFF CSV length:', txt.length, 'chars');
         console.log('RASFF CSV preview:', txt.slice(0, 200));
         rasffData = parseRasffCsv(txt);
+        feedChecked.rasff = latestInColumn(txt, 'updated'); renderFeedStatus();
         console.log('RASFF filtered rows:', rasffData.length);
         if (rasffData.length > 0) {
           // Show unique commodity values in sheet so we can debug matching
@@ -3433,6 +3491,7 @@ function loadData() {
         newsUpdated = parsedNews.updated;
         console.log('News rows loaded for:', JSON.stringify(Object.keys(newsData)), 'latest update:', newsUpdated);
         newsLoaded = true;
+        feedChecked.news = latestInColumn(txt, 'updated'); renderFeedStatus();
         renderNews();
       })
       .catch(function(e){ console.error('News fetch error:', e); newsLoaded = true; renderNews(); });
@@ -3448,7 +3507,7 @@ function loadData() {
   if (TRADE_CSV_URL) {
     fetch(TRADE_CSV_URL)
       .then(function(r){ return r.text(); })
-      .then(function(txt) { loadTradeCsv(txt); tradeLoaded = true; rebuildProductDropdown(); render(); })
+      .then(function(txt) { loadTradeCsv(txt); tradeLoaded = true; rebuildProductDropdown(); render(); renderFeedStatus(); })
       .catch(function(e){ console.error('Trade data fetch error:', e); tradeLoaded = true; renderTradeRisk(); });
   }
 
@@ -3670,6 +3729,12 @@ var RES_ICONS = {
   map:    '<span style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;background:#EAF3DE;flex-shrink:0"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#3B6D11" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3l5-1 4 1 5-1v11l-5 1-4-1-5 1V3z"/><line x1="6" y1="2" x2="6" y2="13"/><line x1="10" y1="3" x2="10" y2="14"/></svg></span>'
 };
 
+// Official references linked from every category's resources (opened on the publisher's site)
+var EXTERNAL_RESOURCES = [
+  { name: 'Food Crime Strategic Assessment 2024', ext: 'LINK', icon: 'report',
+    note: 'FSA National Food Crime Unit & Food Standards Scotland \u2014 UK food crime threats and trends',
+    url: 'https://www.gov.uk/government/publications/food-crime-strategic-assessment-2024-fcsa' }
+];
 function renderResources() {
   var titleEl       = document.getElementById('res-title');
   var bodyEl        = document.getElementById('res-body');
@@ -3706,6 +3771,18 @@ function renderResources() {
   } else {
     if (placeholderEl) placeholderEl.style.display = '';
   }
+  // External references shown for every category
+  EXTERNAL_RESOURCES.forEach(function(f) {
+    var a = document.createElement('a');
+    a.href = f.url; a.target = '_blank'; a.rel = 'noopener';
+    a.className = 'res-file res-ext';
+    a.title = f.note || '';
+    a.innerHTML =
+      '<div class="res-file-icon">' + (RES_ICONS[f.icon] || RES_ICONS.file) + '</div>' +
+      '<div class="res-file-name">' + f.name + '<div class="res-ext-note">' + f.note + '</div></div>' +
+      '<span class="res-file-ext">' + f.ext + '</span>';
+    bodyEl.appendChild(a);
+  });
 }
 
 
@@ -3748,6 +3825,7 @@ Object.keys(COMM).forEach(function(key) {
     document.querySelectorAll('.pill').forEach(function(b){ b.classList.remove('active'); });
     this.classList.add('active');
     cur = this.dataset.key;
+    try { localStorage.setItem('fiin-ci-category', cur); } catch (e) {}
     var ch = document.getElementById('com-header');
     if (ch && ch.getBoundingClientRect().top < 0) ch.scrollIntoView({ behavior: 'smooth', block: 'start' });
     var prods = Object.keys(COMM[cur].products);
@@ -3789,6 +3867,8 @@ document.getElementById('prod-select').addEventListener('change', function() {
 // Open a category from the address, e.g. ...#honey (used by the export's page_link)
 (function() {
   var h = (location.hash || '').replace('#', '');
+  // No category in the address: reopen the one this person last looked at
+  if (!COMM[h]) { try { h = localStorage.getItem('fiin-ci-category') || ''; } catch (e) { h = ''; } }
   if (h && COMM[h]) {
     cur = h;
     document.querySelectorAll('.pill').forEach(function(b){ b.classList.toggle('active', b.dataset.key === h); });
@@ -3907,6 +3987,33 @@ setInterval(function() {
   });
 })();
 </script>
+<dialog class="rasff-dialog" id="help-dialog" aria-labelledby="help-title">
+  <div class="rasff-list-head">
+    <span class="rasff-list-title" id="help-title">How to read this page</span>
+    <button type="button" class="rasff-close" id="help-close" aria-label="Close">✕</button>
+  </div>
+  <div class="rasff-dialog-body help-body">
+    <p><b>What it is.</b> Horizon-scanning evidence for food fraud vulnerability assessments, one page per commodity category. It points to where to look; it is not a vulnerability assessment in itself.</p>
+    <h4>Category intelligence</h4>
+    <ul>
+      <li><b>TSG recommendations</b> — quarterly guidance from the fiin Technical Steering Group.</li>
+      <li><b>Supply chain map</b> — RASFF alerts and fiin data that could indicate potential fraud, grouped into four zones (production; processing &amp; packing; import, storage &amp; distribution; retail &amp; consumer). The zone is fiin’s estimate of where each item most likely relates, not where the issue was confirmed. Hover a stage for the TSG’s known risks; click <i>View</i> on a zone for the detail.</li>
+      <li><b>RASFF alerts relating to potential fraud</b> — the last 6 months for the whole category. Contamination-only alerts (pathogens, pesticides, mycotoxins, residues above legal limits and similar) are filtered out.</li>
+      <li><b>fiin member testing data</b> — anonymised authenticity concerns from members: anomalous lab results or traceability findings thought likely to affect authenticity. <i>Example data until member data is live.</i></li>
+    </ul>
+    <h4>Product intelligence (choose a product)</h4>
+    <ul>
+      <li><b>Price risk signals</b> — what UK importers paid per kg (HMRC customs data, about 2 months behind). Three checks: <i>price swing</i>, <i>origin shift</i> and <i>price gap</i> (an origin much cheaper than the UK average). Red and amber are prompts to check suppliers, specifications and testing — not proof of fraud. Origins show their corruption score (Transparency International CPI).</li>
+      <li><b>Supply chain news</b> — headlines from the last 30 days that name the product and a supply chain risk (prices, weather, disease, trade, fraud…), trade press first.</li>
+    </ul>
+    <h4>Taking it away</h4>
+    <ul>
+      <li><b>Download CSV</b> — the category’s sections as a spreadsheet, to attach to your own assessment.</li>
+      <li><b>Print / save as PDF</b> — a dated snapshot.</li>
+    </ul>
+    <p class="help-foot">Updated automatically: RASFF and news daily, HMRC prices monthly, TSG guidance quarterly. The line under the buttons shows when each feed last updated.</p>
+  </div>
+</dialog>
 <div id="sc-float-tip"></div>
 </body>
 </html>
