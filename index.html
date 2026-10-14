@@ -2699,6 +2699,8 @@ function parseNewsCsv(txt) {
       var comm = newsKey(cell(r, C.comm));
       var head = decodeEntities(cell(r, C.head));
       if (!comm || comm === '_none' || !head) return;
+      // Sport and other off-topic stories that share a product's name (Anaheim Ducks, Oregon Ducks, Turkey's football team…)
+      if (/\b(ice hockey|hockey|nhl|nfl|nba|ncaa|anaheim|oregon ducks|quarterback|touchdown|playoffs?|goalie|goalkeeper|head coach|coach|stadium|premier league|league|world cup|season opener|roster|draft pick|win over|victory|beats?|defeats?|scored)\b/i.test(head)) return;
       var detail = cell(r, C.detail), url = cell(r, C.url), src = cell(r, C.source);
       var artDate = '';
       // Google News RSS: source arrives as "Publisher · 8 Apr 2026" — split out the article date
