@@ -1116,7 +1116,6 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
         <span class="sc-leg-item"><span class="sc-leg-dot" style="background:#D4820A"></span>Information</span>
         <span class="sc-leg-item"><span class="sc-leg-dot" style="background:#2D6B2D"></span>Border rejection</span>
         <span class="sc-leg-item"><span class="sc-leg-dot" style="background:#1A5FA5"></span>fiin authenticity concern (example data)</span>
-        <span style="margin-left:auto;font-size:10px;color:var(--muted)">RASFF badge colour = RASFF classification · placement is fiin’s estimate, not confirmed</span>
       </div>
 
     </div>
@@ -1223,13 +1222,6 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
           </div>
 
 
-          <div class="explainer">
-            <strong>How to read this:</strong> hover over or tap the <b>i</b> on each light for what it checks and
-            when it turns red or amber. <span style="color:#A02828;font-weight:600">Red</span> and
-            <span style="color:#7A4800;font-weight:600">amber</span> are prompts to check suppliers, specifications and testing,
-            not proof of fraud. Prices are averages across grades and arrive about two months after the month ends.
-            RASFF alerts on the supply chain map above are those relating to potential fraud, and cover the whole category, not just this product.
-          </div>
 
         </div>
 
@@ -2254,6 +2246,8 @@ function computeRiskSignals(prodName, t) {
     ' its 2-year average of ' + fmtGBP(ukAvg) + '/kg.' +
     (range >= RISK.rangeAmber ? ' It has swung by ' + fmtPct(range) + ' over the last 6 months.' : '') +
     (swing.level !== 'g' ? ' Sharp moves increase the incentive to cut corners.' : '');
+  swing.short = '<b>' + fmtGBP(ukNow) + '/kg</b>, ' + (Math.abs(chg) < 0.03 ? 'close to' : fmtPct(chg) + (chg > 0 ? ' above' : ' below')) +
+    ' its 2-year average' + (range >= RISK.rangeAmber ? '; swung ' + fmtPct(range) + ' in 6 months' : '') + '.';
 
   // ── 2. Origin shift: change in share of UK volume, and origins getting cheaper ──
   var totNow = tradeSum(t, null, last6), totBefore = tradeSum(t, null, prev12);
@@ -2284,14 +2278,18 @@ function computeRiskSignals(prodName, t) {
     shift.text = (isNew ? '<b>New major source:</b> ' : '') + '<b>' + escHtml(possessive(top.x.o)) + '</b> share of UK ' + escHtml(noun) +
       ' imports rose from ' + fmtPct(top.x.shareBefore) + ' to <b>' + fmtPct(top.x.shareNow) + '</b> (last 6 months vs the year before).' +
       ' Sudden switches, especially to countries that produce little, can point to re-routing or origin misdeclaration.';
+    shift.short = isNew ? '<b>New major source:</b> ' + escHtml(top.x.o) + ', now <b>' + fmtPct(top.x.shareNow) + '</b> of UK imports.'
+      : '<b>' + escHtml(top.x.o) + '</b> rose from ' + fmtPct(top.x.shareBefore) + ' to <b>' + fmtPct(top.x.shareNow) + '</b> of UK imports.';
   } else if (cheapLvl !== 'g') {
     shift.flag = cheaper.x.o;
     shift.text = '<b>' + escHtml(cheaper.x.o) + '</b> has become <b>' + fmtPct(cheaper.rel) + ' cheaper</b> relative to other origins over the last 6 months' +
       ' (' + fmtGBP(cheaper.x.before.p) + ' → ' + fmtGBP(cheaper.x.now.p) + '/kg). A newly cheap origin can draw buyers and blending.';
+    shift.short = '<b>' + escHtml(cheaper.x.o) + '</b> became <b>' + fmtPct(cheaper.rel) + ' cheaper</b> than other origins.';
   } else {
     var lead = origins.slice().sort(function(a, b){ return b.shareNow - a.shareNow; }).slice(0, 2);
     shift.text = 'No big change in where UK ' + escHtml(noun) + ' comes from. Main origins: ' +
       lead.map(function(x){ return escHtml(x.o) + ' ' + fmtPct(x.shareNow); }).join(', ') + ' of volume.';
+    shift.short = 'No big change in where imports come from.';
   }
 
   // ── 3. Price gap: origins far cheaper than the UK average ──
@@ -2310,6 +2308,9 @@ function computeRiskSignals(prodName, t) {
         ' Gaps this large can signal substitution, dilution or a lower grade sold as premium.'
       : 'No major origin is far below the UK average of ' + fmtGBP(totNow.p) + '/kg. Cheapest: ' +
         escHtml(g0.x.o) + ', ' + (g0.gap < 0 ? fmtPct(g0.gap) + ' below' : 'at or above average') + '.';
+  gap.short = !g0 ? 'Not enough volume to compare origins.'
+    : gap.level !== 'g' ? '<b>' + escHtml(g0.x.o) + '</b> at <b>' + fmtGBP(g0.x.now.p) + '/kg</b>, ' + fmtPct(g0.gap) + ' below the UK average.'
+    : 'No major origin far below the UK average.';
 
   // Origins to draw: top 3 by recent volume, plus any flagged origin
   var draw = origins.slice().sort(function(a, b){ return b.now.kg - a.now.kg; }).slice(0, 3).map(function(x){ return x.o; });
@@ -2359,7 +2360,7 @@ function renderTradeRisk() {
       '<div class="risk-light-head"><span class="risk-dot"></span><span class="risk-light-name">' + l.name + '</span>' +
       '<span class="risk-info" tabindex="0" role="button" aria-label="How ' + l.name + ' works">i<span class="risk-tip" role="tooltip">' + RISK_HELP[l.name] + '</span></span>' +
       '<span class="risk-light-status">' + l.status + '</span></div>' +
-      '<div class="risk-light-text">' + l.text + '</div></div>';
+      '<div class="risk-light-text">' + (l.short || l.text) + '</div></div>';
   }).join('');
 
   // Chart: UK average (thick) vs main origins (thin); flagged origins dashed red/amber
@@ -2423,11 +2424,8 @@ function renderTradeRisk() {
         '</tr>';
     }).join('') + '</tbody></table>' : '';
   document.getElementById('risk-foot').innerHTML =
-    'Lines are 3-month rolling averages of customs value ÷ weight. They average across grades and pack formats, so treat them as ' +
-    '<b>indicators to investigate, not market prices</b>. Source: HMRC Overseas Trade Statistics' +
-    (t.label ? ' — ' + escHtml(t.label) : '') + '. © Crown copyright, Open Government Licence v3.0.' +
-    (t.updated ? ' Updated ' + escHtml(t.updated) + '.' : '') +
-    (t.cpiYear ? ' Corruption Perceptions Index ' + escHtml(t.cpiYear) + ' © Transparency International, <a href="https://www.transparency.org/en/cpi" target="_blank" rel="noopener">transparency.org/cpi</a>, licensed under CC BY-ND 4.0: 0 = highly corrupt, 100 = very clean. Scores are shown as published.' : '');
+    'Source: HMRC trade data (OGL v3.0)' + (t.label ? ' \u2014 ' + escHtml(t.label) : '') +
+    (t.cpiYear ? ' \u00b7 CPI ' + escHtml(t.cpiYear) + ' \u00a9 <a href="https://www.transparency.org/en/cpi" target="_blank" rel="noopener">Transparency International</a> (CC BY-ND 4.0)' : '');
 }
 
 // ── EU Agri-Food Fraud Network monthly report (European Commission) ─────────
@@ -4011,6 +4009,7 @@ setInterval(function() {
     <h4>Product intelligence (choose a product)</h4>
     <ul>
       <li><b>Price risk signals</b> — what UK importers paid per kg (HMRC customs data, about 2 months behind). Three checks: <i>price swing</i>, <i>origin shift</i> and <i>price gap</i> (an origin much cheaper than the UK average). Red and amber are prompts to check suppliers, specifications and testing — not proof of fraud. Origins show their corruption score (Transparency International CPI).</li>
+      <li><b>About the prices</b> \u2014 lines are 3-month rolling averages of customs value \u00f7 weight across all grades and pack formats, so they are indicators to investigate, not market prices. Source: HMRC Overseas Trade Statistics, \u00a9 Crown copyright, Open Government Licence v3.0. Corruption Perceptions Index \u00a9 Transparency International, CC BY-ND 4.0, shown as published: 0 = highly corrupt, 100 = very clean.</li>
       <li><b>Supply chain news</b> — headlines from the last 30 days that name the product and a supply chain risk (prices, weather, disease, trade, fraud…), trade press first.</li>
     </ul>
     <h4>Taking it away</h4>
