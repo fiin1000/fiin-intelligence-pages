@@ -2104,8 +2104,7 @@ var riskChart = null;
 // Products that share one HMRC dataset, because customs codes do not split them
 var TRADE_SHARED = {
   'Honey':          { from: 'Honey (all types)', note: 'All natural honey imports: customs data does not separate honey types.' },
-  'Paprika and chilli': { from: 'Dried capsicum (paprika and chilli)', note: 'Dried paprika and chilli together: customs data does not separate them.' },
-  'Eggs (in shell)': { from: 'Eggs in shell', note: 'All hens’ eggs in shell: customs data does not record the farming system (free range, barn or cage).' }
+  'Paprika and chilli': { from: 'Dried capsicum (paprika and chilli)', note: 'Dried paprika and chilli together: customs data does not separate them.' }
 };
 // Products with no usable HMRC code, and why
 var TRADE_NOT_COVERED = {
@@ -2116,7 +2115,8 @@ var TRADE_NOT_COVERED = {
   'Rosemary':               'Customs codes group rosemary with other herbs.',
   'Pumpkin seeds':          'Customs codes group pumpkin seeds with other oil seeds.',
   'Energy drinks':          'Customs codes group energy drinks with other non-alcoholic drinks.',
-  'Coconut water':          'Customs codes group coconut water with other fruit juices.'
+  'Coconut water':          'Customs codes group coconut water with other fruit juices.',
+  'Eggs (in shell)':        'Customs data does not record the farming system (free range, barn or cage), which is where the main shell-egg fraud risk lies, and the UK produces most of its own shell eggs, so import prices say little about what UK shoppers buy. See the egg products for imported liquid and dried egg.'
 };
 var OTHER_ORIGINS = 'Other origins';
 // The HMRC dataset behind a page product, and any note about what it covers
@@ -2333,7 +2333,8 @@ function renderTradeRisk() {
       (!TRADE_CSV_URL ? 'Price risk signals are not connected yet.'
        : !tradeLoaded ? 'Loading price risk signals&hellip;'
        : TRADE_NOT_COVERED[prod] ? '<b>Not available for ' + escHtml(prod) + '.</b> ' + escHtml(TRADE_NOT_COVERED[prod]) +
-           ' HMRC import data can only be shown where a product has its own customs code. See the supply chain news and RASFF alerts for this category.'
+           (/^Customs codes group/.test(TRADE_NOT_COVERED[prod]) ? ' HMRC import data can only be shown where a product has its own customs code.' : '') +
+           ' See the supply chain news and RASFF alerts for this category.'
        : '<b>No HMRC import data yet for ' + escHtml(prod) + '.</b> It will appear after the next monthly update' +
            (covered ? ' (' + covered + ' products currently covered).' : '.')) +
       '</div>';
@@ -3258,7 +3259,7 @@ var VERIFIED = {
   poultry:       ['Chicken', 'Turkey'],
   fish_shellfish:['Salmon', 'Cod', 'Haddock', 'Crab', 'Squid', 'Scallops', 'Mussels', 'Oysters', 'Mackerel', 'Tuna (skipjack)', 'Tuna (yellowfin)', 'Prawns (warm water)', 'Prawns (cold water)'],
   dairy:         ['Liquid milk', 'Cheddar', 'Butter', 'Cream', 'Skimmed milk powder', 'Whole milk powder'],
-  eggs:          ['Eggs (in shell)'],
+  eggs:          [],
   bakery_cereals:['Wheat', 'Maize', 'Rice', 'Oats', 'Barley', 'Rye'],
   nuts_snacks:   ['Pistachios', 'Almonds', 'Walnuts', 'Peanuts', 'Sunflower seeds', 'Hazelnuts', 'Cashews', 'Pumpkin seeds'],
   herbs_spices:  ['Black pepper', 'Turmeric', 'Cumin', 'Paprika and chilli', 'Coriander', 'Cinnamon', 'Saffron'],
