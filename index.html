@@ -2220,10 +2220,11 @@ function buildRiskHelp() {
   var p = function(x){ return Math.round(x * 100) + '%'; };
   RISK_HELP['Price swing'] = 'Compares the UK import price over the last 3 months with its 2-year average, and how much it has swung in the last 6 months. ' +
     '<b>Red:</b> ' + p(RISK.swingRed) + '+ change or ' + p(RISK.rangeRed) + '+ swing. <b>Amber:</b> ' + p(RISK.swingAmber) + '+ or ' + p(RISK.rangeAmber) + '+. Sharp moves raise the incentive to cut corners.';
-  RISK_HELP['Origin shift'] = 'Flags a country suddenly supplying a bigger share of UK imports, or becoming much cheaper than other origins. ' +
-    '<b>Red:</b> share up ' + RISK.shiftRed + '+ points, a new major source, or ' + p(RISK.cheaperRed) + '+ relatively cheaper. <b>Amber:</b> ' + RISK.shiftAmber + '+ points or ' + p(RISK.cheaperAmber) + '+.';
-  RISK_HELP['Price gap'] = 'Flags an origin with at least ' + p(RISK.minShare) + ' of UK volume whose price is far below the UK average. ' +
-    '<b>Red:</b> ' + p(RISK.gapRed) + '+ below. <b>Amber:</b> ' + p(RISK.gapAmber) + '+ below. Large gaps can signal substitution, dilution or a lower grade sold as premium.';
+  RISK_HELP['Origin shift'] = 'Flags a country suddenly supplying a bigger share of UK imports (last 6 months vs the year before). ' +
+    '<b>Red:</b> share up ' + RISK.shiftRed + '+ percentage points, or a new major source. <b>Amber:</b> up ' + RISK.shiftAmber + '+ points.';
+  RISK_HELP['Price gap'] = 'Flags an origin with at least ' + p(RISK.minShare) + ' of UK volume whose price is far below the UK average, or getting cheaper fast relative to it. ' +
+    '<b>Red:</b> ' + p(RISK.gapRed) + '+ below, or ' + p(RISK.cheaperRed) + '+ cheaper than a year before (relative to the UK average). <b>Amber:</b> ' + p(RISK.gapAmber) + '+ below, or ' + p(RISK.cheaperAmber) + '+ cheaper. ' +
+    'Large gaps can signal substitution, dilution or a lower grade sold as premium.';
 }
 buildRiskHelp();
 
@@ -2265,26 +2266,19 @@ function computeRiskSignals(prodName, t) {
     return { x: x, rel: (x.now.p / totNow.p) / (x.before.p / totBefore.p) - 1 };
   }).sort(function(a, b){ return a.rel - b.rel; })[0];
 
+  // Origin shift is about WHERE imports come from: change in share of UK volume only
   var shift = { name: 'Origin shift' };
-  var shiftLvl = top && top.pp >= RISK.shiftRed ? 'r' : top && top.pp >= RISK.shiftAmber ? 'a' : 'g';
-  var cheapLvl = cheaper && -cheaper.rel >= RISK.cheaperRed ? 'r' : cheaper && -cheaper.rel >= RISK.cheaperAmber ? 'a' : 'g';
   var isNew = top && top.x.shareBefore < 0.02 && top.x.shareNow >= 0.08;
-  if (isNew) shiftLvl = 'r';
-  shift.level = ({ r: 2, a: 1, g: 0 }[shiftLvl] >= { r: 2, a: 1, g: 0 }[cheapLvl]) ? shiftLvl : cheapLvl;
+  shift.level = isNew || (top && top.pp >= RISK.shiftRed) ? 'r' : top && top.pp >= RISK.shiftAmber ? 'a' : 'g';
   shift.status = shift.level === 'r' ? 'Big shift' : shift.level === 'a' ? 'Shifting' : 'Steady';
   shift.flag = null;
-  if (shiftLvl !== 'g' && ({ r: 2, a: 1, g: 0 }[shiftLvl] >= { r: 2, a: 1, g: 0 }[cheapLvl])) {
+  if (shift.level !== 'g') {
     shift.flag = top.x.o;
     shift.text = (isNew ? '<b>New major source:</b> ' : '') + '<b>' + escHtml(possessive(top.x.o)) + '</b> share of UK ' + escHtml(noun) +
       ' imports rose from ' + fmtPct(top.x.shareBefore) + ' to <b>' + fmtPct(top.x.shareNow) + '</b> (last 6 months vs the year before).' +
       ' Sudden switches, especially to countries that produce little, can point to re-routing or origin misdeclaration.';
     shift.short = isNew ? '<b>New major source:</b> ' + escHtml(top.x.o) + ', now <b>' + fmtPct(top.x.shareNow) + '</b> of UK imports.'
       : '<b>' + escHtml(top.x.o) + '</b> rose from ' + fmtPct(top.x.shareBefore) + ' to <b>' + fmtPct(top.x.shareNow) + '</b> of UK imports.';
-  } else if (cheapLvl !== 'g') {
-    shift.flag = cheaper.x.o;
-    shift.text = '<b>' + escHtml(cheaper.x.o) + '</b> has become <b>' + fmtPct(cheaper.rel) + ' cheaper</b> relative to other origins over the last 6 months' +
-      ' (' + fmtGBP(cheaper.x.before.p) + ' → ' + fmtGBP(cheaper.x.now.p) + '/kg). A newly cheap origin can draw buyers and blending.';
-    shift.short = '<b>' + escHtml(cheaper.x.o) + '</b> became <b>' + fmtPct(cheaper.rel) + ' cheaper</b> than other origins.';
   } else {
     var lead = origins.slice().sort(function(a, b){ return b.shareNow - a.shareNow; }).slice(0, 2);
     shift.text = 'No big change in where UK ' + escHtml(noun) + ' comes from. Main origins: ' +
@@ -2297,20 +2291,31 @@ function computeRiskSignals(prodName, t) {
     .map(function(x){ return { x: x, gap: x.now.p / totNow.p - 1 }; })
     .sort(function(a, b){ return a.gap - b.gap; });
   var g0 = gaps[0];
+  // Price gap is about PRICE: an origin that is far below the UK average, or getting cheaper fast relative to it
   var gap = { name: 'Price gap' };
-  gap.level = g0 && -g0.gap >= RISK.gapRed ? 'r' : g0 && -g0.gap >= RISK.gapAmber ? 'a' : 'g';
-  gap.status = gap.level === 'r' ? 'Very cheap origin' : gap.level === 'a' ? 'Cheap origin' : 'No outlier';
-  gap.flag = gap.level !== 'g' ? g0.x.o : null;
-  gap.text = !g0 ? 'Not enough volume to compare origins.'
-    : gap.level !== 'g'
-      ? escHtml(nounPlural(noun.charAt(0).toUpperCase() + noun.slice(1))) + ' from <b>' + escHtml(g0.x.o) + '</b> averaged <b>' + fmtGBP(g0.x.now.p) + '/kg</b>, ' +
-        fmtPct(g0.gap) + ' below the UK average of ' + fmtGBP(totNow.p) + '/kg (last 6 months, ' + fmtPct(g0.x.shareNow) + ' of volume).' +
-        ' Gaps this large can signal substitution, dilution or a lower grade sold as premium.'
-      : 'No major origin is far below the UK average of ' + fmtGBP(totNow.p) + '/kg. Cheapest: ' +
-        escHtml(g0.x.o) + ', ' + (g0.gap < 0 ? fmtPct(g0.gap) + ' below' : 'at or above average') + '.';
-  gap.short = !g0 ? 'Not enough volume to compare origins.'
-    : gap.level !== 'g' ? '<b>' + escHtml(g0.x.o) + '</b> at <b>' + fmtGBP(g0.x.now.p) + '/kg</b>, ' + fmtPct(g0.gap) + ' below the UK average.'
-    : 'No major origin far below the UK average.';
+  var LV = { r: 2, a: 1, g: 0 };
+  var gapLvl = g0 && -g0.gap >= RISK.gapRed ? 'r' : g0 && -g0.gap >= RISK.gapAmber ? 'a' : 'g';
+  var cheapLvl = cheaper && -cheaper.rel >= RISK.cheaperRed ? 'r' : cheaper && -cheaper.rel >= RISK.cheaperAmber ? 'a' : 'g';
+  var byLevel = LV[gapLvl] >= LV[cheapLvl];
+  gap.level = byLevel ? gapLvl : cheapLvl;
+  gap.flag = gap.level === 'g' ? null : byLevel ? g0.x.o : cheaper.x.o;
+  gap.status = gap.level === 'g' ? 'No outlier' : byLevel ? (gap.level === 'r' ? 'Very cheap origin' : 'Cheap origin') : (gap.level === 'r' ? 'Getting much cheaper' : 'Getting cheaper');
+  if (!g0) {
+    gap.text = gap.short = 'Not enough volume to compare origins.';
+  } else if (gap.level !== 'g' && byLevel) {
+    gap.text = escHtml(nounPlural(noun.charAt(0).toUpperCase() + noun.slice(1))) + ' from <b>' + escHtml(g0.x.o) + '</b> averaged <b>' + fmtGBP(g0.x.now.p) + '/kg</b>, ' +
+      fmtPct(g0.gap) + ' below the UK average of ' + fmtGBP(totNow.p) + '/kg (last 6 months, ' + fmtPct(g0.x.shareNow) + ' of volume).' +
+      ' Gaps this large can signal substitution, dilution or a lower grade sold as premium.';
+    gap.short = '<b>' + escHtml(g0.x.o) + '</b> at <b>' + fmtGBP(g0.x.now.p) + '/kg</b>, ' + fmtPct(g0.gap) + ' below the UK average.';
+  } else if (gap.level !== 'g') {
+    gap.text = '<b>' + escHtml(cheaper.x.o) + '</b> has become <b>' + fmtPct(cheaper.rel) + ' cheaper</b> relative to the UK average over the last 6 months' +
+      ' (' + fmtGBP(cheaper.x.before.p) + ' \u2192 ' + fmtGBP(cheaper.x.now.p) + '/kg). An origin undercutting the market quickly can draw buyers and blending.';
+    gap.short = '<b>' + escHtml(cheaper.x.o) + '</b> became <b>' + fmtPct(cheaper.rel) + ' cheaper</b> relative to the UK average.';
+  } else {
+    gap.text = 'No major origin is far below the UK average of ' + fmtGBP(totNow.p) + '/kg or getting much cheaper. Cheapest: ' +
+      escHtml(g0.x.o) + ', ' + (g0.gap < 0 ? fmtPct(g0.gap) + ' below' : 'at or above average') + '.';
+    gap.short = 'No major origin far below, or falling fast against, the UK average.';
+  }
 
   // Origins to draw: top 3 by recent volume, plus any flagged origin
   var draw = origins.slice().sort(function(a, b){ return b.now.kg - a.now.kg; }).slice(0, 3).map(function(x){ return x.o; });
