@@ -658,7 +658,6 @@ tr:hover td { background: var(--mist); }
 .zone-sev-r { background: #F6E3E3; color: #8B2020; } .zone-sev-a { background: #FBEEDC; color: #7A4800; } .zone-sev-g { background: #E6F1E0; color: #2D6B2D; }
 .zone-empty { color: var(--muted); font-style: italic; padding: 4px 0 8px; }
 .help-btn { background: transparent; }
-.mirror-foot { font-size: 10.5px; color: var(--muted); line-height: 1.5; margin-top: 6px; }
 .res-ext-note { font-size: 10.5px; color: var(--muted); font-weight: 400; margin-top: 1px; }
 .help-body { padding: 6px 20px 16px; font-size: 12.5px; line-height: 1.55; color: var(--ink); }
 .help-body h4 { font-family: 'DM Mono', monospace; font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--forest); margin: 16px 0 4px; }
@@ -1214,7 +1213,6 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
             <div style="position:relative;height:210px"><canvas id="riskChart"></canvas></div>
             </div>
             <div id="risk-origins"></div>
-            <div id="risk-mirror"></div>
             <div class="risk-foot" id="risk-foot"></div>
           </div>
 
@@ -1275,8 +1273,6 @@ var FRAUD_CSV_URL = null;
 var EU_FRAUD_CSV_URL = null;
 // Live vulnerability-assessment export: publish the Sheet's "va_export" tab as CSV and paste the link here
 var VA_EXPORT_CSV_URL = null;
-// Mirror trade check (EU exporters' own figures): publish the Sheet's "mirror" tab as CSV and paste the link here
-var MIRROR_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR68kbziTvBGmuCrsqLB8m_MbCKs6JrSidcoLtiybXwZHkyvaGwCtslyJtPeiN5pJCyMAbE-LydRyO1/pub?gid=511553623&single=true&output=csv';
 var TRADE_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR68kbziTvBGmuCrsqLB8m_MbCKs6JrSidcoLtiybXwZHkyvaGwCtslyJtPeiN5pJCyMAbE-LydRyO1/pub?gid=56413450&single=true&output=csv';
 // var FRAUD_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/YOUR_PUBLISHED_ID/pub?gid=YOUR_GID&single=true&output=csv';
 
@@ -2320,60 +2316,6 @@ function computeRiskSignals(prodName, t) {
   return { lights: [swing, shift, gap], draw: draw, flags: [shift.flag, gap.flag], shiftFlag: shift.flag, gapFlag: gap.flag };
 }
 
-// ── Mirror trade check: what EU exporters report sending to GB vs what the UK recorded ──
-var mirrorData = {}, mirrorLoaded = false;
-var MIRROR_GAP = 0.5;          // flag a difference of 50% or more…
-var MIRROR_MIN_KG = 10000;     // …when either side is at least 10 tonnes over the period
-function loadMirrorCsv(txt) {
-  var all = parseCSV('x\n' + txt), hdr = (all[0] || []).map(function(h){ return (h || '').toLowerCase().trim(); });
-  var ix = function(n){ return hdr.indexOf(n); };
-  mirrorData = {};
-  all.slice(1).forEach(function(r) {
-    var p = (r[ix('product')] || '').trim(), o = (r[ix('origin')] || '').trim();
-    if (!p || !o) return;
-    (mirrorData[p] = mirrorData[p] || []).push({
-      o: o, from: r[ix('from_month')], to: r[ix('to_month')], months: +r[ix('months')] || 0,
-      ukKg: +r[ix('uk_kg')] || 0, ukGbp: +r[ix('uk_value_gbp')] || 0,
-      exKg: +r[ix('exporter_kg')] || 0, exGbp: +r[ix('exporter_value_gbp')] || 0
-    });
-  });
-}
-function mirrorFor(prod) {
-  var sh = TRADE_SHARED[prod], list = mirrorData[sh ? sh.from : prod] || [];
-  return list.map(function(m) {
-    var diff = m.exKg > 0 ? m.ukKg / m.exKg - 1 : null;
-    var big = Math.max(m.ukKg, m.exKg) >= MIRROR_MIN_KG && (diff === null || Math.abs(diff) >= MIRROR_GAP);
-    return Object.assign({}, m, { diff: diff, big: big,
-      ukP: m.ukKg ? m.ukGbp / m.ukKg : null, exP: m.exKg ? m.exGbp / m.exKg : null });
-  }).sort(function(a, b){ return b.ukKg - a.ukKg; });
-}
-function fmtTonnes(kg) { return kg >= 1e6 ? (Math.round(kg / 1e5) / 10).toLocaleString('en-GB') + 'k t' : Math.round(kg / 1000).toLocaleString('en-GB') + ' t'; }
-function mirrorDiffText(m) {
-  if (m.diff === null) return m.ukKg > 0 ? 'Exporter reports none' : '\u2014';
-  if (Math.abs(m.diff) < 0.05) return 'Close match';
-  return 'UK records ' + fmtPct(Math.abs(m.diff)) + (m.diff > 0 ? ' more' : ' less');
-}
-function renderMirror(prod) {
-  var el = document.getElementById('risk-mirror');
-  if (!el) return;
-  var rows = prod ? mirrorFor(prod) : [];
-  if (!rows.length) { el.innerHTML = ''; return; }
-  var r0 = rows[0];
-  el.innerHTML =
-    '<div class="risk-origins-title">Mirror check \u2014 what EU exporters report sending to Great Britain <span class="risk-info" tabindex="0" role="button" aria-label="How the mirror check works">i<span class="risk-tip" role="tooltip">The same trade, seen from both ends: what UK customs recorded importing from each EU country, and what that country\u2019s own statistics say it exported to Great Britain over the same months. <b>Large gap:</b> ' + Math.round(MIRROR_GAP * 100) + '%+ difference where either side is ' + MIRROR_MIN_KG / 1000 + '+ tonnes.</span></span></div>' +
-    '<table class="risk-origins"><thead><tr><th>EU origin</th><th class="num">UK records</th><th class="num">Exporter reports</th><th class="num">Difference</th>' +
-    '<th class="num">UK \u00a3/kg</th><th class="num">Exporter \u00a3/kg</th></tr></thead><tbody>' +
-    rows.map(function(m) {
-      return '<tr><td>' + escHtml(m.o) + (m.big ? '<span class="flag shift">large gap</span>' : '') + '</td>' +
-        '<td class="num">' + fmtTonnes(m.ukKg) + '</td><td class="num">' + fmtTonnes(m.exKg) + '</td>' +
-        '<td class="num' + (m.big ? ' below' : '') + '">' + mirrorDiffText(m) + '</td>' +
-        '<td class="num">' + (m.ukP ? fmtGBP(m.ukP) : '\u2014') + '</td><td class="num">' + (m.exP ? fmtGBP(m.exP) : '\u2014') + '</td></tr>';
-    }).join('') + '</tbody></table>' +
-    '<div class="mirror-foot">' + fmtMonth(r0.from) + ' to ' + fmtMonth(r0.to) + '. Some difference is normal: timing, goods passing through one EU country from another, ' +
-    'Northern Ireland, and exporters valuing goods before shipping costs. A <b>large, lasting gap</b> can point to transhipment or a misdeclared origin \u2014 a question to ask suppliers, not proof. ' +
-    'Exporter figures: Eurostat Comext, \u00a9 European Union, CC BY 4.0; converted from euros at Eurostat\u2019s monthly average rate.</div>';
-}
-
 function renderTradeRisk() {
   var card = document.getElementById('risk-card');
   if (!card) return;
@@ -2397,11 +2339,9 @@ function renderTradeRisk() {
       '</div>';
     document.getElementById('risk-foot').innerHTML = '';
     document.getElementById('risk-origins').innerHTML = '';
-    renderMirror(null);
     return;
   }
   chartBlock.style.display = '';
-  renderMirror(prod);
 
   var sig = computeRiskSignals(prod, t);
   var M = t.months;
@@ -2945,23 +2885,6 @@ function buildSnapshotCsvRows(cat, now) {
       }).join('; '),
       hit.note || '']);
   });
-
-  // Mirror check (EU origins), where available
-  var mirrorRows = [], seenSet = {};
-  Object.keys(C.products).forEach(function(p) {
-    var sh = TRADE_SHARED[p], key = sh ? sh.from : p;
-    if (seenSet[key]) return; seenSet[key] = true;
-    mirrorFor(p).forEach(function(m) {
-      mirrorRows.push([sh ? key : p, m.o, fmtMonth(m.from) + ' to ' + fmtMonth(m.to), Math.round(m.ukKg / 1000), Math.round(m.exKg / 1000),
-        mirrorDiffText(m), m.ukP ? vaNum(m.ukP, 2) : '', m.exP ? vaNum(m.exP, 2) : '', m.big ? 'Large gap' : '']);
-    });
-  });
-  if (mirrorRows.length) {
-    blank();
-    rows.push(['Mirror check \u2014 what EU exporters report sending to Great Britain (Eurostat Comext, \u00a9 European Union, CC BY 4.0) vs what the UK recorded (HMRC)']);
-    rows.push(['Product / HMRC data', 'EU origin', 'Period', 'UK records (tonnes)', 'Exporter reports (tonnes)', 'Difference', 'UK \u00a3/kg', 'Exporter \u00a3/kg', 'Flag']);
-    mirrorRows.forEach(function(r){ rows.push(r); });
-  }
 
   // 5. News
   section(5, 'Supply chain news (last 30 days)', 'Headlines found for each product; links go to the original articles.');
@@ -3582,10 +3505,6 @@ function loadData() {
   }
 
   if (TRADE_CSV_URL) {
-    if (MIRROR_CSV_URL) fetch(MIRROR_CSV_URL)
-      .then(function(r){ return r.text(); })
-      .then(function(txt) { loadMirrorCsv(txt); mirrorLoaded = true; renderTradeRisk(); })
-      .catch(function(e){ console.error('Mirror fetch error:', e); });
     fetch(TRADE_CSV_URL)
       .then(function(r){ return r.text(); })
       .then(function(txt) { loadTradeCsv(txt); tradeLoaded = true; rebuildProductDropdown(); render(); renderFeedStatus(); })
@@ -4084,7 +4003,7 @@ setInterval(function() {
     </ul>
     <h4>Product intelligence (choose a product)</h4>
     <ul>
-      <li><b>Price risk signals</b> — what UK importers paid per kg (HMRC customs data, about 2 months behind). Three checks: <i>price swing</i>, <i>origin shift</i> and <i>price gap</i> (an origin much cheaper than the UK average). Red and amber are prompts to check suppliers, specifications and testing — not proof of fraud. Origins show their corruption score (Transparency International CPI). For EU origins, a <i>mirror check</i> compares what the UK recorded with what the exporting country reports sending.</li>
+      <li><b>Price risk signals</b> — what UK importers paid per kg (HMRC customs data, about 2 months behind). Three checks: <i>price swing</i>, <i>origin shift</i> and <i>price gap</i> (an origin much cheaper than the UK average). Red and amber are prompts to check suppliers, specifications and testing — not proof of fraud. Origins show their corruption score (Transparency International CPI).</li>
       <li><b>Supply chain news</b> — headlines from the last 30 days that name the product and a supply chain risk (prices, weather, disease, trade, fraud…), trade press first.</li>
     </ul>
     <h4>Taking it away</h4>
