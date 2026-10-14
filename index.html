@@ -814,6 +814,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
 .intel-detail   { font-size: 11px; color: var(--sub); line-height: 1.5; }
 .intel-src      { font-size: 10px; color: var(--muted); margin-top: 1px; font-style: italic; }
 .intel-trade    { font-style: normal; font-size: 10px; font-weight: 600; color: var(--pine); text-transform: uppercase; letter-spacing: .04em; }
+.intel-uk { color: #1A5FA5; }
 .intel-more     { background: none; border: none; padding: 2px 0 0 14px; font: inherit; font-size: 10.5px; font-weight: 500; color: var(--pine); cursor: pointer; }
 .intel-more:hover { text-decoration: underline; }
 .intel-fraud {
@@ -2070,7 +2071,7 @@ document.addEventListener('click', function(e) {
 
 var NEWS_PER_THEME = 2;   // headlines shown per theme before "Show all"
 var NEWS_THEME_ORDER = ['Fraud & integrity', 'Supply & demand', 'Prices & markets', 'Weather & climate',
-                        'Harvest & crop', 'Disease & pests', 'Trade & geopolitics', 'Logistics',
+                        'Harvest & production', 'Disease & pests', 'Trade & geopolitics', 'Logistics',
                         'Inputs & energy', 'Policy & regulation'];
 var newsExpanded = {}, newsViewKey = null;
 
@@ -2084,7 +2085,7 @@ function newsItemHtml(n) {
       (href ? '<a class="intel-headline" href="' + escHtml(href) + '" target="_blank" rel="noopener">' + escHtml(n.headline) + '</a>'
             : '<div class="intel-headline">' + escHtml(n.headline) + '</div>') +
       (n.detail ? '<div class="intel-detail">' + escHtml(n.detail) + '</div>' : '') +
-      '<div class="intel-src">' + (n.tier === 'trade' ? '<span class="intel-trade">Trade press</span> ' : '') + escHtml(meta) + '</div>' +
+      '<div class="intel-src">' + (n.tier === 'trade' ? '<span class="intel-trade">Trade press</span> ' : n.tier === 'uk' ? '<span class="intel-trade intel-uk">UK press</span> ' : '') + escHtml(meta) + '</div>' +
     '</div>' +
   '</div>';
 }
@@ -2690,7 +2691,7 @@ function parseNewsCsv(txt) {
       if (d && (!newsUpdated || d > parseNewsDate(newsUpdated))) newsUpdated = dateStr;
       if (!newsData[comm]) newsData[comm] = [];
       newsData[comm].push({ headline: head, detail: detail, source: src, url: url, findUrl: findUrl,
-                            date: dateStr, ts: d ? d.getTime() : 0, theme: cell(r, C.theme), tier: cell(r, C.tier).toLowerCase(), risk_level: riskCode(cell(r, C.risk)) });
+                            date: dateStr, ts: d ? d.getTime() : 0, theme: cell(r, C.theme) === 'Harvest & crop' ? 'Harvest & production' : cell(r, C.theme), tier: cell(r, C.tier).toLowerCase(), risk_level: riskCode(cell(r, C.risk)) });
     });
     // Newest first
     Object.keys(newsData).forEach(function(k){ newsData[k].sort(function(x, y){ return y.ts - x.ts; }); });
@@ -2976,7 +2977,8 @@ function renderNews() {
   items.innerHTML = order.map(function(theme) {
     // Trade press first, then newest
     var list = groups[theme].slice().sort(function(x, y) {
-      return (y.tier === 'trade') - (x.tier === 'trade') || y.ts - x.ts;
+      var rank = function(n){ return n.tier === 'trade' ? 2 : n.tier === 'uk' ? 1 : 0; };
+      return rank(y) - rank(x) || y.ts - x.ts;
     });
     var worst = list.reduce(function(w, n){ return RANK[n.risk_level] < RANK[w] ? n.risk_level : w; }, 'b');
     var open  = !!newsExpanded[theme];
@@ -4015,7 +4017,7 @@ setInterval(function() {
     <ul>
       <li><b>Price risk signals</b> — what UK importers paid per kg (HMRC customs data, about 2 months behind). Three checks: <i>price swing</i>, <i>origin shift</i> and <i>price gap</i> (an origin much cheaper than the UK average). Red and amber are prompts to check suppliers, specifications and testing — not proof of fraud. Origins show their corruption score (Transparency International CPI).</li>
       <li><b>About the prices</b> \u2014 lines are 3-month rolling averages of customs value \u00f7 weight across all grades and pack formats, so they are indicators to investigate, not market prices. Bear in mind: one customs code can mix grades and forms, so a cheap origin may simply ship a lower grade; prices are in pounds, so a weaker pound lifts every origin at once (one origin moving against the others is the more telling signal); and general food inflation nudges prices above their 2-year average. Source: HMRC Overseas Trade Statistics, \u00a9 Crown copyright, Open Government Licence v3.0. Corruption Perceptions Index \u00a9 Transparency International, CC BY-ND 4.0, shown as published: 0 = highly corrupt, 100 = very clean.</li>
-      <li><b>Supply chain news</b> — headlines from the last 30 days that name the product and a supply chain risk (prices, weather, disease, trade, fraud…), trade press first.</li>
+      <li><b>Supply chain news</b> — headlines from the last 30 days that name the product and a supply chain risk (prices, weather, harvest and production, disease, trade, fraud…). Only UK trade press, key sector sites such as FreshPlaza, and UK national press; trade press first.</li>
     </ul>
     <h4>Taking it away</h4>
     <ul>
