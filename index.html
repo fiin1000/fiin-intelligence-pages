@@ -2543,7 +2543,8 @@ function glanceItem(dot, html) {
 // Parse the published rasff tab into alert objects (shared with the Apps Script export)
 // fiin RASFF rules: is this alert about potential FRAUD (keep) or food safety only (remove)?
 // Returns { keep: true|false, reason: '…' }. Approved by fiin, 14 October 2026.
-// Order: (1) always-remove topics, (2) fraud signals keep, (3) safety-only topics remove, (4) anything else keep.
+// Order: (1) always-remove topics, (2) fraud signals, missing information and date/label errors keep,
+// (3) safety-only topics remove, (4) anything else keep.
 function rasffFraudCheck(title) {
   var t = String(title || '').toLowerCase();
   // 1. Always removed, whatever else the title says
@@ -2557,6 +2558,12 @@ function rasffFraudCheck(title) {
   // 2. Fraud signals: kept even if a safety topic is also mentioned
   var FRAUD = /fraud|adulterat|falsif|counterfeit|mislabel|substitut|species|\bspecie\b|\bdna\b|fake|stolen|theft|incorrectly declared|illegal|unknown origin|without (an )?official control|not presented for (an )?official control|skipped (veterinary|border)|without the ne(c)?cessary veterinary|not passed veterinary|not submitted to inspection|border checks not carried|health certificate|official certificates?|certificate mismatch|sanitary certificate|identification code|without (mandatory )?documentation|incomplete documentation|incomplite documentation|traceability|establishment of origin not approved|without private attestation|\bchedd?\b|health mark|registration number|lack of health guarantees|irradiat|ionizing|carbon monoxide|nitrite|phosphate|sildenafil|tadalafil|sudan|soudan|unauthori[sz]ed (food )?additive|unauthorised colouring|unauthorise food additive|additives? no autorizad|aditivos no autorizados|not authorised|unauthori[sz]ed (substance|use|treatment)|maltitol|novel food|\bgmo\b|\bogm\b|terminator|harvesting|veterinar|antibiotic|inhibitor|withdrawal period|chloramphenicol|nitrofura|\baoz\b|florfenicol|floxacin|crystal violet|kanamycin|pharmacologically|diclofenac/;
   if (FRAUD.test(t)) return { keep: true, reason: 'Fraud signal' };
+  // Missing or incomplete information (labels, certificates, health marks, guarantees): kept
+  if (/absence|absent\b|missing|\black of\b|without label|no label|unlabel+ed|not labell?ed|without labell?ing|incomplete label|incomplete information|unclear information|no information|no date|no (health|identification) mark|no registration/.test(t))
+    return { keep: true, reason: 'Missing or incomplete information' };
+  // Date and label errors: kept (wrong or missing use-by / best-before dates, labels that don't match the product)
+  if (/use-by|use by|best.before|best-by|durability|\bdlc\b|expiration|\bubd\b|label on the packaging is incorrect|no english labelling|incorrect label|labell?ing error|labeling issues|errata etichettatura/.test(t))
+    return { keep: true, reason: 'Date or label error' };
   // Claims that turn a safety finding into a false claim
   var PESTICIDE = /pesticide|clothianidin|thiamet|tricyclazole|chlorpyrifos|chloropiryfos|deltamethrin|pirimiphos|flutriafol|acetamiprid|carbendazim|anthraquinone|ethylene oxide|óxido de etileno|glyphosate|imidacloprid|residue/;
   if (/organic|\bbio\b|biologisch/.test(t) && PESTICIDE.test(t)) return { keep: true, reason: 'Pesticide in an organic product' };
@@ -2572,8 +2579,7 @@ function rasffFraudCheck(title) {
     'Environmental / process contaminant': /mercury|mercurio|cadmium|cadmio|\blead\b|plomo|nickel|arsenic|dioxin|diossine|pfas|pfos|\bpah|polycyclic aromatic|benzo\(a\)pyrene|mosh|moah|mineral oil|3-mcpd|glycid|acrylam|akryloamid|ethyl carbamate|heavy metal|lignosulfonate|zinc|copper/,
     'Pesticide residues': PESTICIDE,
     'Allergen': ALLERGEN,
-    'Temperature / cold chain': /temperature|cold chain|cadena de frío|delivered frozen/,
-    'Date / label error': /use-by|use by|best.before|best-by|durability|\bdlc\b|expiration|\bubd\b|label on the packaging is incorrect|no english labelling|not mentioned on the label/
+    'Temperature / cold chain': /temperature|cold chain|cadena de frío|delivered frozen/
   };
   for (var s in SAFETY) if (SAFETY[s].test(t)) return { keep: false, reason: s };
   // Residues above a legal limit (MRL): only illegal or prohibited residues are kept
