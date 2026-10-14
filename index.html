@@ -477,12 +477,17 @@ tr:hover td { background: var(--mist); }
 .rasff-status { padding: 28px 18px; text-align: center; font-size: 11px; color: var(--muted); line-height: 1.7; }
 .rasff-status a { color: var(--blue); text-decoration: none; }
 .rasff-status a:hover { text-decoration: underline; }
-.rasff-link-row { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 12px 16px; background: white; border: 1px solid var(--border); border-radius: 10px; font-size: 12.5px; color: var(--ink); }
+.rasff-link-row { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: stretch; gap: 12px; color: var(--ink); }
 .rasff-scope-tag { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .05em; text-transform: uppercase; background: #FFF4E0; color: #7A4800; border: 1px solid #E8C48A; border-radius: 4px; padding: 2px 7px; }
 .rasff-link-row a { font-weight: 500; color: var(--pine); text-decoration: none; }
-.rasff-open { background: var(--pine); color: white; border: none; border-radius: 5px; padding: 6px 12px; font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+.rasff-box { flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: 12px 16px; border-radius: 8px; font: inherit; cursor: pointer; text-decoration: none; }
+.rasff-open { background: var(--pine); color: white; border: 1px solid var(--pine); }
 .rasff-open:hover { background: var(--forest); }
-.rasff-open[disabled] { background: var(--border); color: var(--muted); cursor: default; }
+.rasff-open[disabled] { background: var(--mist); color: var(--muted); border-color: var(--border); cursor: default; }
+.rasff-box-ext { background: white; color: var(--pine) !important; border: 1px solid var(--border); }
+.rasff-box-ext:hover { border-color: var(--pine); text-decoration: none !important; }
+.rasff-box-title { font-size: 13.5px; font-weight: 600; }
+.rasff-box-sub { font-size: 11.5px; opacity: .85; font-weight: 400; }
 .rasff-link-sep { color: var(--muted); }
 .rasff-dialog { position: fixed; inset: 0; margin: auto; height: fit-content; width: min(760px, 94vw); max-height: 84vh; padding: 0; border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 12px 40px rgba(0,0,0,.25); }
 .rasff-dialog[open] { display: flex; flex-direction: column; }
@@ -1035,7 +1040,6 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
   <div class="com-header" id="com-header" style="margin-top:6px">
     <div>
       <div class="com-name" id="com-name"></div>
-      <div class="com-glance" id="com-glance"></div>
 
     </div>
     <div class="com-meta">
@@ -1050,7 +1054,6 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
   <div class="com-body">
     <div class="section-header" style="margin-top:4px;margin-bottom:6px">
       <div class="section-header-label">Category intelligence</div>
-      <div class="section-header-sub" id="cat-section-sub">TSG Quarterly Recommendations &amp; Information &nbsp;·&nbsp; Supply chain map &nbsp;·&nbsp; RASFF alerts relating to potential fraud</div>
       <div class="section-header-line"></div>
     </div>
     <div class="tsg-resources-row">
@@ -1119,10 +1122,13 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
     </div>
     <!-- RASFF: link to the alerts already collected for this category -->
     <div class="rasff-link-row" id="rasff-link-row">
-      <span class="rasff-scope-tag">Fraud-related only</span><span>RASFF alerts relating to potential fraud — <span id="rasff-com" style="text-transform:lowercase"></span>:</span>
-      <button type="button" class="rasff-open" id="rasff-open">View alerts →</button>
-      <span class="rasff-link-sep">·</span>
-      <a id="rasff-portal-link" href="https://webgate.ec.europa.eu/rasff-window/screen/search" target="_blank" rel="noopener">Search RASFF Window</a>
+      <span id="rasff-com" style="display:none"></span>
+      <button type="button" class="rasff-box rasff-open" id="rasff-open" title="Alerts for this category from the last 6 months, filtered to those relating to potential fraud">
+        <span class="rasff-box-title">RASFF alerts relating to fraud</span><span class="rasff-box-sub" id="rasff-open-sub">Loading…</span>
+      </button>
+      <a class="rasff-box rasff-box-ext" id="rasff-portal-link" href="https://webgate.ec.europa.eu/rasff-window/screen/search" target="_blank" rel="noopener" title="Every RASFF notification, on the European Commission’s site">
+        <span class="rasff-box-title">Whole RASFF Window ↗</span><span class="rasff-box-sub">All alerts, unfiltered</span>
+      </a>
       <span style="display:none"><span id="rasff-badge"></span></span>
     </div>
     <dialog class="rasff-dialog" id="rasff-dialog" aria-labelledby="rasff-dialog-title">
@@ -3423,12 +3429,13 @@ function updateRasffButton() {
   var btn = document.getElementById('rasff-open'), c = document.getElementById('rasff-count');
   var dc = document.getElementById('rasff-dialog-com');
   if (dc) dc.textContent = COMM[cur] ? COMM[cur].label : '';
-  if (!btn) return;
+  var sub = document.getElementById('rasff-open-sub');
+  if (!btn || !sub) return;
   var n = parseInt((c && c.textContent) || '', 10);
-  if (!RASFF_CSV_URL) { btn.disabled = true; btn.textContent = 'Not connected'; return; }
-  if (!rasffData.length && isNaN(n)) { btn.disabled = true; btn.textContent = 'Loading\u2026'; return; }
+  if (!RASFF_CSV_URL) { btn.disabled = true; sub.textContent = 'Not connected'; return; }
+  if (!rasffData.length && isNaN(n)) { btn.disabled = true; sub.textContent = 'Loading\u2026'; return; }
   btn.disabled = !(n > 0);
-  btn.textContent = n > 0 ? 'View ' + n + ' alert' + (n === 1 ? '' : 's') + ' (last 6 months) \u2192' : 'No alerts in the last 6 months';
+  sub.textContent = n > 0 ? 'View ' + n + ' from the last 6 months \u2192' : 'None in the last 6 months';
 }
 document.addEventListener('click', function(e) {
   var d = document.getElementById('rasff-dialog');
