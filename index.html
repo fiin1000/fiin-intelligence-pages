@@ -1331,12 +1331,7 @@ var COMM = {
     threshold:2.5, norm:1.8,
     rasffCategories:['honey and royal jelly'],
     products:{
-    'Blossom honey': {unit:'£/kg',sources:'USDA National Honey Report + HMRC'},
-    'Manuka honey': {unit:'£/kg',sources:'FAO'},
-    'Acacia honey': {unit:'£/kg',sources:'FAO'},
-    'Heather honey': {unit:'£/kg',sources:'BBKA'},
-    'Clover honey': {unit:'£/kg',sources:'FAO'},
-    'Blended honey': {unit:'£/kg',sources:'FAO'}
+    'Honey': {unit:'£/kg',sources:'HMRC'}
   }
   },
   herbs_spices: {
@@ -2109,12 +2104,7 @@ var tradeLoaded = false;
 var riskChart = null;
 // Products that share one HMRC dataset, because customs codes do not split them
 var TRADE_SHARED = {
-  'Blossom honey':  { from: 'Honey (all types)', note: 'Customs data does not separate honey by type: this shows all natural honey imports.' },
-  'Manuka honey':   { from: 'Honey (all types)', note: 'Customs data does not separate honey by type: this shows all natural honey imports.' },
-  'Acacia honey':   { from: 'Honey (all types)', note: 'Customs data does not separate honey by type: this shows all natural honey imports.' },
-  'Heather honey':  { from: 'Honey (all types)', note: 'Customs data does not separate honey by type: this shows all natural honey imports.' },
-  'Clover honey':   { from: 'Honey (all types)', note: 'Customs data does not separate honey by type: this shows all natural honey imports.' },
-  'Blended honey':  { from: 'Honey (all types)', note: 'Customs data does not separate honey by type: this shows all natural honey imports.' },
+  'Honey':          { from: 'Honey (all types)', note: 'All natural honey imports: customs data does not separate honey types.' },
   'Paprika':        { from: 'Dried capsicum (paprika and chilli)', note: 'Customs data does not separate paprika from dried chilli: this shows both.' },
   'Chilli':         { from: 'Dried capsicum (paprika and chilli)', note: 'Customs data does not separate dried chilli from paprika: this shows both.' },
   'Eggs (free range)': { from: 'Eggs in shell', note: 'Customs data does not record the welfare system: this shows all hens’ eggs in shell.' },
@@ -3278,7 +3268,7 @@ var VERIFIED = {
   cocoa:         ['Cocoa beans', 'Cocoa butter', 'Cocoa powder'],
   fruit_veg:     ['Tomatoes', 'Apples', 'Bananas', 'Oranges'],
   drinks:        ['Orange juice', 'Apple juice'],
-  honey:         ['Blossom honey']
+  honey:         ['Honey']
 };
 
 function getTier(catKey, prodName) {
