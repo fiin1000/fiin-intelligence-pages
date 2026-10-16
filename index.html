@@ -4120,13 +4120,44 @@ setInterval(function() {
     <ul>
       <li><b>TSG recommendations</b> — quarterly guidance from the fiin Technical Steering Group.</li>
       <li><b>Supply chain map</b> — RASFF alerts and fiin data that could indicate potential fraud, grouped into four zones (production; processing &amp; packing; import, storage &amp; distribution; retail &amp; consumer). The zone is fiin’s estimate of where each item most likely relates, not where the issue was confirmed. Hover a stage for the TSG’s known risks; click <i>View</i> on a zone for the detail.</li>
-      <li><b>RASFF alerts relating to potential fraud</b> — the last 6 months for the whole category. Contamination-only alerts (pathogens, pesticides, mycotoxins, residues above legal limits and similar) are filtered out.</li>
+      <li><b>RASFF alerts relating to potential fraud</b> — the last 6 months for the whole category, from the EU’s Rapid Alert System for Food and Feed. Contamination-only alerts (pathogens, pesticides, mycotoxins, residues above legal limits and similar) are filtered out.</li>
+      <li><b>About the RASFF alerts</b> — bear in mind:
+        <ul>
+          <li>RASFF covers what EU and EEA countries report. Great Britain left RASFF after Brexit (Northern Ireland still takes part), so it does not include issues found only in GB.</li>
+          <li>Alerts show where countries looked, not how common a problem is: more border checks on a product or origin mean more alerts.</li>
+          <li>fiin’s fraud filter reads the alert title only. Some titles are vague or not in English, so a few fraud-relevant alerts may be filtered out and a few safety-only ones kept.</li>
+          <li>RASFF’s product categories are broad (for example, fats and oils includes animal fats), so some alerts relate to products other than the one you are looking at.</li>
+          <li>The supply chain stage is fiin’s estimate from the title, not where the issue was confirmed.</li>
+        </ul>
+      </li>
       <li><b>fiin member testing data</b> — anonymised authenticity concerns from members: anomalous lab results or traceability findings thought likely to affect authenticity. <i>Example data until member data is live.</i></li>
     </ul>
     <h4>Product intelligence (choose a product)</h4>
     <ul>
-      <li><b>Price risk signals</b> — what UK importers paid per kg (HMRC customs data, about 2 months behind). Three checks: <i>price swing</i>, <i>origin shift</i> and <i>price gap</i> (an origin much cheaper than the UK average). Red and amber are prompts to check suppliers, specifications and testing — not proof of fraud. Origins show their corruption score (Transparency International CPI).</li>
-      <li><b>About the prices</b> \u2014 lines are 3-month rolling averages of customs value \u00f7 weight across all grades and pack formats, so they are indicators to investigate, not market prices. Bear in mind: one customs code can mix grades and forms, so a cheap origin may simply ship a lower grade; prices are in pounds, so a weaker pound lifts every origin at once (one origin moving against the others is the more telling signal); and general food inflation nudges prices above their 2-year average. Source: HMRC Overseas Trade Statistics, \u00a9 Crown copyright, Open Government Licence v3.0. Corruption Perceptions Index \u00a9 Transparency International, CC BY-ND 4.0, shown as published: 0 = highly corrupt, 100 = very clean.</li>
+      <li><b>Price risk signals</b> — what UK importers paid per kg for the product, by country of origin, from HMRC customs data (about 2 months behind). Three checks, each shown as a green, amber or red light. Red and amber are prompts to check suppliers, specifications and testing — not proof of fraud.</li>
+      <li><b>How the prices are worked out</b>
+        <ul>
+          <li><b>Price per kg</b> = customs value (£) ÷ net weight (kg), for each month and country of origin.</li>
+          <li><b>UK average</b> = the value of all UK imports of the product ÷ their total weight, so origins that ship more count for more.</li>
+          <li><b>The chart</b> shows 3-month rolling averages, to smooth out lumpy monthly shipments. The 10 largest origins by volume are named; the rest are grouped as “Other origins”.</li>
+        </ul>
+      </li>
+      <li><b>The three checks</b>
+        <ul>
+          <li><b>Price swing</b> — the UK average for the last 3 months compared with its 2-year average, plus how far the price has swung (highest to lowest) over the last 6 months. Red: 25%+ change or 30%+ swing. Amber: 12%+ or 15%+.</li>
+          <li><b>Origin shift</b> — each country’s share of UK import volume (kg) in the last 6 months compared with the 12 months before. Red: share up 15+ percentage points, or a new major source (under 2% before, 8%+ now). Amber: up 7+ points.</li>
+          <li><b>Price gap</b> — each country’s price over the last 6 months compared with the UK average for the same months; or a country getting cheaper relative to the UK average than it was the year before. Only countries with at least 3% of UK volume are checked. Red: 40%+ below the average, or 25%+ cheaper than before. Amber: 25%+ or 15%+.</li>
+        </ul>
+      </li>
+      <li><b>Bear in mind</b>
+        <ul>
+          <li>These are indicators to investigate, not market prices: one customs code can cover several grades and forms (fresh and frozen, bulk and retail packs), so a cheap origin may simply ship a lower grade.</li>
+          <li>Prices are in pounds, so a weaker pound pushes every origin up at once. One origin moving against the others is the more telling signal.</li>
+          <li>General food inflation nudges prices above their 2-year average.</li>
+        </ul>
+      </li>
+      <li><b>Corruption score</b> — each origin’s Corruption Perceptions Index score, shown as published: 0 = highly corrupt, 100 = very clean.</li>
+      <li><b>Sources</b> — HMRC Overseas Trade Statistics, © Crown copyright, Open Government Licence v3.0. Corruption Perceptions Index © Transparency International, CC BY-ND 4.0.</li>
       <li><b>Supply chain news</b> — headlines from the last 90 days that name the product and a supply chain risk (food fraud and food safety, prices, weather, harvest and production, sustainability, disease, trade…). Only UK trade press, key sector sites such as FreshPlaza, and UK national press; trade press first.</li>
     </ul>
     <h4>Taking it away</h4>
