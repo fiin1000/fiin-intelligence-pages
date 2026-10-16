@@ -2531,7 +2531,7 @@ function printSnapshot() {
     '<div class="ph-title">fiin Commodity Intelligence \u2014 ' + escHtml(COMM[cur].label) + ' snapshot</div>' +
     '<div class="ph-meta">Printed ' + today + ' \u00b7 Product shown: ' + escHtml(curProd || '') +
     (period ? ' \u00b7 ' + escHtml(period) : '') + ' \u00b7 RASFF and news as loaded on ' + today +
-    ' \u00b7 For fiin member use only. Evidence of horizon scanning, not a vulnerability assessment in itself.</div>';
+    ' \u00b7 For fiin member use only. Evidence of horizon scanning.</div>';
   // Open everything that is folded on screen
   var tsg = document.getElementById('tsg-content'); if (tsg) tsg.classList.remove('clamped');
   window.print();
@@ -2924,7 +2924,7 @@ function buildSnapshotCsvRows(cat, now) {
   rows.push(['fiin Commodity Intelligence — ' + C.label]);
   rows.push(['Downloaded', today]);
   rows.push(['Page', VA_PAGE_URL + '#' + cat]);
-  rows.push(['For fiin member use only. Evidence of horizon scanning, not a vulnerability assessment in itself.']);
+  rows.push(['For fiin member use only. Evidence of horizon scanning.']);
 
   // 1. TSG recommendations
   section(1, 'TSG quarterly recommendations');
@@ -4116,7 +4116,6 @@ setInterval(function() {
     <button type="button" class="rasff-close" id="help-close" aria-label="Close">✕</button>
   </div>
   <div class="rasff-dialog-body help-body">
-    <p><b>What it is.</b> Horizon-scanning evidence for food fraud vulnerability assessments, one page per commodity category. It points to where to look; it is not a vulnerability assessment in itself.</p>
     <h4>Category intelligence</h4>
     <ul>
       <li><b>TSG recommendations</b> — quarterly guidance from the fiin Technical Steering Group.</li>
