@@ -996,7 +996,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
   }
   function attempt() {
     var val = document.getElementById('pw-input').value;
-    if (val === 'fiinboard') {
+    if (val === 'fiinboard' || val === 'TSG_Review') {
       try { sessionStorage.setItem('fiin_auth','ok'); } catch(e){}
       document.getElementById('pw-overlay').style.display = 'none';
     } else {
