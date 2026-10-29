@@ -684,6 +684,9 @@ tr:hover td { background: var(--mist); }
 #sc-map { align-items: stretch; }
 .sc-zone .sc-box { width: 76px; }
 .sc-zone .sc-arrow { width: 13px; }
+/* Maps with more than four zones (honey): let single-stage zones narrow so the chain stays on one row */
+.sc-map-many .sc-zone { min-width: 0; }
+.sc-map-many .sc-zone-counts { margin-left: 0; }
 .sc-unplaced-link { margin-top: 8px; }
 .sc-unplaced-link button { background: none; border: none; padding: 0; font: inherit; font-size: 11px; font-weight: 500; color: var(--pine); cursor: pointer; }
 .sc-unplaced-link button:hover { text-decoration: underline; }
@@ -1513,14 +1516,14 @@ var KNOWN_RISKS = {
     'Import/Border':            [{t:'Catch certificate falsification',l:'high'},{t:'IUU product entry',l:'high'}],
     'Retail/Food Service':      [{t:'Species substitution in fish & chips/sushi',l:'high'},{t:'Thawed sold as fresh',l:'med'}]
   },
+  // Honey: TSG Honey guide supply chain (Figure 1, testing steps left out) and its risk themes. Not rated high/medium.
   honey: {
-    'Apiary/Hive':              [{t:'Antibiotic residues',l:'high'},{t:'False geographical origin claims',l:'med'}],
-    'Extraction & Filtering':   [{t:'Pollen removal to conceal origin',l:'high'},{t:'Ultra-filtration fraud',l:'med'}],
-    'Blending':                 [{t:'Sugar syrup adulteration',l:'high'},{t:'Dilution with cheap honey',l:'high'}],
-    'Heat Treatment':           [{t:'Overheating to mask adulteration',l:'med'}],
-    'Packaging & Labelling':    [{t:'False botanical/geographical origin',l:'high'},{t:'Manuka strength fraud',l:'high'},{t:'Blend composition fraud',l:'med'}],
-    'Import/Border':            [{t:'Chinese honey re-routed via third countries',l:'high'},{t:'False certificates of origin',l:'high'}],
-    'Retail':                   [{t:'Premium variety fraud (e.g. fake Manuka)',l:'high'}]
+    'Beekeeper / Apiary':       [{t:'Production method: false organic or raw claims, undeclared filtration, artificial moisture reduction, undisclosed heating'}],
+    'Collection & Transport':   [{t:'Botanical origin: mislabelled monofloral honey, exaggerated floral content, cheaper multifloral blending'}],
+    'Bulk Processor':           [{t:'Identity and purity: added sugar syrups, undeclared blending, foreign enzymes, removal of markers through ultrafiltration'},{t:'Production method: false organic or raw claims, undeclared filtration, artificial moisture reduction, undisclosed heating'}],
+    'Exporter':                 [{t:'Identity and purity: added sugar syrups, undeclared blending, foreign enzymes, removal of markers through ultrafiltration'},{t:'Geographical origin: false country declarations, trans-shipping, relabelling, mixing origins'}],
+    'Shipping & Border':        [{t:'Geographical origin: false country declarations, trans-shipping, relabelling, mixing origins'}],
+    'Blender / Packer':         [{t:'Identity and purity: added sugar syrups, undeclared blending, foreign enzymes, removal of markers through ultrafiltration'},{t:'Botanical origin: mislabelled monofloral honey, exaggerated floral content, cheaper multifloral blending'},{t:'Production method: false organic or raw claims, undeclared filtration, artificial moisture reduction, undisclosed heating'},{t:'Premium variety: counterfeit product, false grading claims, dilution or substitution'}]
   },
   herbs_spices: {
     'Growing Region':           [{t:'Misidentification of species at source',l:'med'},{t:'Pesticide overuse',l:'med'}],
@@ -1843,7 +1846,7 @@ var SUPPLY_CHAIN = {
   poultry:       ['Rearing Farm','Slaughter & Evisceration','Cutting & Processing','Further Processing','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
   red_meat:      ['Farm/Ranch','Slaughter & Dressing','Cutting & Deboning','Processing & Manufacture','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
   fish_shellfish:['Farm/Fishing Vessel','Landing & Grading','Slaughter & Gutting','Filleting & Processing','Smoking/Further Processing','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
-  honey:         ['Apiary/Hive','Extraction & Filtering','Blending','Heat Treatment','Packaging & Labelling','Import/Border','Warehouse','Distribution','Retail','Consumer'],
+  honey:         ['Beekeeper / Apiary','Collection & Transport','Bulk Processor','Exporter','Shipping & Border','Blender / Packer','Distribution','Customer'],
   herbs_spices:  ['Growing Region','Harvest & Drying','Milling & Blending','Packaging & Labelling','Import/Border','Warehouse','Distribution','Retail','Consumer'],
   cereals:       ['Arable Farm','Harvest & Storage','Grain Store','Milling & Processing','Packaging & Labelling','Import/Border','Distribution','Retail','Consumer'],
   fruit_veg:     ['Farm/Orchard','Harvest','Packing & Processing','Cold Storage','Import/Border','Distribution','Retail','Consumer'],
@@ -1859,13 +1862,15 @@ var SUPPLY_CHAIN = {
 // 0 = first zone, 1 = second… Labels below; a category can have its own labels.
 var SUPPLY_ZONE_LABELS = {
   _default: ['Production', 'Processing & packing', 'Import, storage & distribution', 'Retail & consumer'],
-  cocoa:    ['Production & import', 'Processing & packing', 'Storage & distribution', 'Retail & consumer']
+  cocoa:    ['Production & import', 'Processing & packing', 'Storage & distribution', 'Retail & consumer'],
+  // Honey is processed in bulk before export and blended/packed after import, so two zones appear twice
+  honey:    ['Production', 'Processing & packing', 'Import, storage & distribution', 'Processing & packing', 'Import, storage & distribution', 'Retail & consumer']
 };
 var SUPPLY_ZONES = {
   poultry:        [0,1,1,1,1,2,2,2,3,3],
   red_meat:       [0,1,1,1,1,2,2,2,3,3],
   fish_shellfish: [0,0,1,1,1,1,2,2,2,3,3],
-  honey:          [0,1,1,1,1,2,2,2,3,3],
+  honey:          [0,0,1,2,2,3,4,5],
   herbs_spices:   [0,0,1,1,2,2,2,3,3],
   cereals:        [0,0,0,1,1,2,2,3,3],
   fruit_veg:      [0,0,1,2,2,2,3,3],
@@ -1938,6 +1943,7 @@ function renderSupplyChain() {
   var ZONE_BG = { r: 'background:#FDF0EF;border-color:#E7B4B4;', a: 'background:#FDF6EC;border-color:#EBCB98;', g: 'background:#EEF6E8;border-color:#B5D3A8;' };
 
   mapEl._zones = zones;
+  mapEl.classList.toggle('sc-map-many', zones.filter(function(z){ return z.nodes.length; }).length > 4);
   try {
     mapEl.innerHTML = zones.filter(function(z){ return z.nodes.length; }).map(function(z, zi, all) {
       var n = z.alerts.length, w = worst(z.alerts), nf = z.fiin.length;
@@ -2670,9 +2676,18 @@ function parseRasffCsv(txt) {
       'oils':            'fats and oils'
     };
 
+    // Honey stages were renamed to the TSG Honey guide flow: alerts still tagged with the old names are moved to the new stage
+    var HONEY_OLD_STAGES = {
+      'Apiary/Hive': 'Beekeeper / Apiary', 'Extraction & Filtering': 'Bulk Processor', 'Heat Treatment': 'Bulk Processor',
+      'Blending': 'Blender / Packer', 'Packaging & Labelling': 'Blender / Packer', 'Import/Border': 'Shipping & Border',
+      'Warehouse': 'Distribution', 'Retail': 'Customer', 'Consumer': 'Customer'
+    };
+
     var out = rows.map(function(r) {
       var rawCommodity = (r[0]||'').trim();
       var normCommodity = SHEET_ALIASES[rawCommodity.toLowerCase()] || rawCommodity;
+      var node = (r[8]||r[7]||'').trim();
+      if (normCommodity.toLowerCase() === 'honey and royal jelly' && HONEY_OLD_STAGES[node]) node = HONEY_OLD_STAGES[node];
       return {
         commodity: normCommodity,
         title:     (r[1]||'').trim(),
@@ -2680,7 +2695,7 @@ function parseRasffCsv(txt) {
         country:   (r[3]||'').trim(),
         severity:  (r[5]||'').trim(),
         hazard:    (r[6]||'').trim(),
-        node:      (r[8]||r[7]||'').trim(),
+        node:      node,
         override:  !!(r[8]||'').trim(),
         ref:       '',
         link:      (r[9]||'').trim()
