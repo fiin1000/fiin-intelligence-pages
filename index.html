@@ -1486,37 +1486,36 @@ var COMM = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Known risks per node per category ──────────────────────────────────────────
-// Format: { nodeLabel: [ {text, level:'high'|'med'|''} ] }
-// level: high = red tag, med = amber tag, '' = neutral grey
+// Format: { nodeLabel: [ {t: text} ] }. Known risks are not rated.
 var KNOWN_RISKS = {
   poultry: {
-    'Rearing Farm':             [{t:'Campylobacter prevalence in flocks',l:'high'},{t:'Antibiotic use/AMR',l:'med'},{t:'Welfare status fraud',l:'med'}],
-    'Slaughter & Evisceration': [{t:'Cross-contamination at slaughter',l:'high'},{t:'Inspection bypass',l:'med'}],
-    'Cutting & Processing':     [{t:'Species substitution (turkey/chicken)',l:'med'},{t:'Water injection/added water',l:'med'}],
-    'Further Processing':       [{t:'Undeclared additives',l:'med'},{t:'Mechanically separated meat mislabelling',l:'high'}],
-    'Packaging & Labelling':    [{t:'Welfare status mislabelling (free range/organic)',l:'high'},{t:'Origin fraud',l:'high'},{t:'Date manipulation',l:'med'}],
-    'Import/Border':            [{t:'Veterinary certificate fraud',l:'high'},{t:'Prohibited origin',l:'med'}],
-    'Retail/Food Service':      [{t:'Species substitution in kebab/processed',l:'high'},{t:'Use-by date manipulation',l:'med'}]
+    'Rearing Farm':             [{t:'Campylobacter prevalence in flocks'},{t:'Antibiotic use/AMR'},{t:'Welfare status fraud'}],
+    'Slaughter & Evisceration': [{t:'Cross-contamination at slaughter'},{t:'Inspection bypass'}],
+    'Cutting & Processing':     [{t:'Species substitution (turkey/chicken)'},{t:'Water injection/added water'}],
+    'Further Processing':       [{t:'Undeclared additives'},{t:'Mechanically separated meat mislabelling'}],
+    'Packaging & Labelling':    [{t:'Welfare status mislabelling (free range/organic)'},{t:'Origin fraud'},{t:'Date manipulation'}],
+    'Import/Border':            [{t:'Veterinary certificate fraud'},{t:'Prohibited origin'}],
+    'Retail/Food Service':      [{t:'Species substitution in kebab/processed'},{t:'Use-by date manipulation'}]
   },
   red_meat: {
-    'Farm/Ranch':               [{t:'Prohibited growth hormones',l:'high'},{t:'Antibiotic residues',l:'med'},{t:'Clenbuterol use',l:'high'}],
-    'Slaughter & Dressing':     [{t:'Inspection certificate fraud',l:'high'},{t:'Carcase weight falsification',l:'med'}],
-    'Cutting & Deboning':       [{t:'Species substitution (horse/donkey)',l:'high'},{t:'Fat injection',l:'med'}],
-    'Processing & Manufacture': [{t:'Species fraud in burgers/mince',l:'high'},{t:'Undeclared offal',l:'high'},{t:'Added water/brine',l:'med'}],
-    'Packaging & Labelling':    [{t:'Origin fraud (e.g. non-EU labelled as EU)',l:'high'},{t:'Breed/quality fraud',l:'med'},{t:'Date manipulation',l:'med'}],
-    'Import/Border':            [{t:'False veterinary certificates',l:'high'},{t:'Sanction evasion',l:'med'}],
-    'Retail/Food Service':      [{t:'Species substitution in processed products',l:'high'},{t:'Cheap cuts sold as premium',l:'med'}]
+    'Farm/Ranch':               [{t:'Prohibited growth hormones'},{t:'Antibiotic residues'},{t:'Clenbuterol use'}],
+    'Slaughter & Dressing':     [{t:'Inspection certificate fraud'},{t:'Carcase weight falsification'}],
+    'Cutting & Deboning':       [{t:'Species substitution (horse/donkey)'},{t:'Fat injection'}],
+    'Processing & Manufacture': [{t:'Species fraud in burgers/mince'},{t:'Undeclared offal'},{t:'Added water/brine'}],
+    'Packaging & Labelling':    [{t:'Origin fraud (e.g. non-EU labelled as EU)'},{t:'Breed/quality fraud'},{t:'Date manipulation'}],
+    'Import/Border':            [{t:'False veterinary certificates'},{t:'Sanction evasion'}],
+    'Retail/Food Service':      [{t:'Species substitution in processed products'},{t:'Cheap cuts sold as premium'}]
   },
   fish_shellfish: {
-    'Farm/Fishing Vessel':      [{t:'IUU (illegal, unreported, unregulated) fishing',l:'high'},{t:'Antibiotic use in aquaculture',l:'med'}],
-    'Landing & Grading':        [{t:'Catch certificate fraud',l:'high'},{t:'Species misidentification at landing',l:'med'}],
-    'Filleting & Processing':   [{t:'Species substitution (cod → pollock/pangasius)',l:'high'},{t:'Glazing/water injection',l:'med'}],
-    'Smoking/Further Processing':[{t:'Origin mislabelling (Norwegian → Scottish)',l:'high'},{t:'Undeclared additives/colorants',l:'med'}],
-    'Packaging & Labelling':    [{t:'Species fraud (e.g. sold as premium species)',l:'high'},{t:'Wild vs farmed mislabelling',l:'high'},{t:'Catch method fraud',l:'med'}],
-    'Import/Border':            [{t:'Catch certificate falsification',l:'high'},{t:'IUU product entry',l:'high'}],
-    'Retail/Food Service':      [{t:'Species substitution in fish & chips/sushi',l:'high'},{t:'Thawed sold as fresh',l:'med'}]
+    'Farm/Fishing Vessel':      [{t:'IUU (illegal, unreported, unregulated) fishing'},{t:'Antibiotic use in aquaculture'}],
+    'Landing & Grading':        [{t:'Catch certificate fraud'},{t:'Species misidentification at landing'}],
+    'Filleting & Processing':   [{t:'Species substitution (cod → pollock/pangasius)'},{t:'Glazing/water injection'}],
+    'Smoking/Further Processing':[{t:'Origin mislabelling (Norwegian → Scottish)'},{t:'Undeclared additives/colorants'}],
+    'Packaging & Labelling':    [{t:'Species fraud (e.g. sold as premium species)'},{t:'Wild vs farmed mislabelling'},{t:'Catch method fraud'}],
+    'Import/Border':            [{t:'Catch certificate falsification'},{t:'IUU product entry'}],
+    'Retail/Food Service':      [{t:'Species substitution in fish & chips/sushi'},{t:'Thawed sold as fresh'}]
   },
-  // Honey: TSG Honey guide supply chain (Figure 1, testing steps left out) and its risk themes. Not rated high/medium.
+  // Honey: TSG Honey guide supply chain (Figure 1, testing steps left out) and its risk themes.
   honey: {
     'Beekeeper / Apiary':       [{t:'Production method: false organic or raw claims, undeclared filtration, artificial moisture reduction, undisclosed heating'}],
     'Collection & Transport':   [{t:'Botanical origin: mislabelled monofloral honey, exaggerated floral content, cheaper multifloral blending'}],
@@ -1526,61 +1525,61 @@ var KNOWN_RISKS = {
     'Blender / Packer':         [{t:'Identity and purity: added sugar syrups, undeclared blending, foreign enzymes, removal of markers through ultrafiltration'},{t:'Botanical origin: mislabelled monofloral honey, exaggerated floral content, cheaper multifloral blending'},{t:'Production method: false organic or raw claims, undeclared filtration, artificial moisture reduction, undisclosed heating'},{t:'Premium variety: counterfeit product, false grading claims, dilution or substitution'}]
   },
   herbs_spices: {
-    'Growing Region':           [{t:'Misidentification of species at source',l:'med'},{t:'Pesticide overuse',l:'med'}],
-    'Harvest & Drying':         [{t:'Mixing of species during drying',l:'med'}],
-    'Milling & Blending':       [{t:'Addition of artificial dyes (Sudan red, rhodamine)',l:'high'},{t:'Addition of chalk/starch/sawdust',l:'high'},{t:'Spent material mixed in',l:'high'},{t:'Species substitution',l:'high'}],
-    'Packaging & Labelling':    [{t:'Origin fraud',l:'high'},{t:'False botanical name',l:'med'},{t:'Weight fraud',l:'med'}],
-    'Import/Border':            [{t:'MRL violations',l:'med'},{t:'Smuggling to avoid controls',l:'med'}],
-    'Warehouse':                [{t:'Cross-contamination with allergens',l:'med'}],
-    'Retail':                   [{t:'Adulterated product reaching consumer',l:'high'}]
+    'Growing Region':           [{t:'Misidentification of species at source'},{t:'Pesticide overuse'}],
+    'Harvest & Drying':         [{t:'Mixing of species during drying'}],
+    'Milling & Blending':       [{t:'Addition of artificial dyes (Sudan red, rhodamine)'},{t:'Addition of chalk/starch/sawdust'},{t:'Spent material mixed in'},{t:'Species substitution'}],
+    'Packaging & Labelling':    [{t:'Origin fraud'},{t:'False botanical name'},{t:'Weight fraud'}],
+    'Import/Border':            [{t:'MRL violations'},{t:'Smuggling to avoid controls'}],
+    'Warehouse':                [{t:'Cross-contamination with allergens'}],
+    'Retail':                   [{t:'Adulterated product reaching consumer'}]
   },
   dairy: {
-    'Dairy Farm':               [{t:'Antibiotic residue in milk',l:'high'},{t:'Hormone use',l:'med'}],
-    'Pasteurisation/UHT':       [{t:'Process bypass/under-treatment',l:'med'}],
-    'Separation & Processing':  [{t:'Addition of non-milk proteins (whey, soy)',l:'high'},{t:'Fat substitution',l:'med'},{t:'Water addition',l:'med'}],
-    'Packaging & Labelling':    [{t:'PDO/PGI fraud (e.g. fake Parmigiano)',l:'high'},{t:'Organic certification fraud',l:'high'},{t:'Origin fraud',l:'med'}],
-    'Import/Border':            [{t:'Non-compliant imports',l:'med'}],
-    'Retail':                   [{t:'Fake premium cheese products',l:'high'},{t:'Date manipulation',l:'med'}]
+    'Dairy Farm':               [{t:'Antibiotic residue in milk'},{t:'Hormone use'}],
+    'Pasteurisation/UHT':       [{t:'Process bypass/under-treatment'}],
+    'Separation & Processing':  [{t:'Addition of non-milk proteins (whey, soy)'},{t:'Fat substitution'},{t:'Water addition'}],
+    'Packaging & Labelling':    [{t:'PDO/PGI fraud (e.g. fake Parmigiano)'},{t:'Organic certification fraud'},{t:'Origin fraud'}],
+    'Import/Border':            [{t:'Non-compliant imports'}],
+    'Retail':                   [{t:'Fake premium cheese products'},{t:'Date manipulation'}]
   },
   nuts: {
-    'Orchard':                  [{t:'Aflatoxin contamination',l:'high'},{t:'Pesticide residues',l:'med'}],
-    'Harvest & Hulling':        [{t:'Moisture during storage enabling mould',l:'high'}],
-    'Processing & Sorting':     [{t:'Species substitution (e.g. cheap nuts sold as pistachios)',l:'high'},{t:'Artificial colouring',l:'med'}],
-    'Packaging & Labelling':    [{t:'Origin fraud (e.g. US pistachios labelled as Iranian)',l:'high'},{t:'Allergen mislabelling',l:'high'}],
-    'Import/Border':            [{t:'Aflatoxin above legal limits',l:'high'},{t:'False certificates',l:'med'}],
-    'Warehouse':                [{t:'Storage conditions enabling aflatoxin growth',l:'high'}]
+    'Orchard':                  [{t:'Aflatoxin contamination'},{t:'Pesticide residues'}],
+    'Harvest & Hulling':        [{t:'Moisture during storage enabling mould'}],
+    'Processing & Sorting':     [{t:'Species substitution (e.g. cheap nuts sold as pistachios)'},{t:'Artificial colouring'}],
+    'Packaging & Labelling':    [{t:'Origin fraud (e.g. US pistachios labelled as Iranian)'},{t:'Allergen mislabelling'}],
+    'Import/Border':            [{t:'Aflatoxin above legal limits'},{t:'False certificates'}],
+    'Warehouse':                [{t:'Storage conditions enabling aflatoxin growth'}]
   },
   eggs: {
-    'Laying Farm':              [{t:'Welfare status fraud (barn/free range/organic)',l:'high'},{t:'Salmonella in flock',l:'med'}],
-    'Grading & Washing':        [{t:'Class downgrading concealment',l:'med'}],
-    'Packing':                  [{t:'Incorrect date coding',l:'med'},{t:'Re-packing of out-of-date eggs',l:'high'}],
-    'Import/Border':            [{t:'Non-EU welfare standards',l:'med'}],
-    'Retail/Food Service':      [{t:'Welfare status mislabelling',l:'high'},{t:'Date fraud',l:'med'}]
+    'Laying Farm':              [{t:'Welfare status fraud (barn/free range/organic)'},{t:'Salmonella in flock'}],
+    'Grading & Washing':        [{t:'Class downgrading concealment'}],
+    'Packing':                  [{t:'Incorrect date coding'},{t:'Re-packing of out-of-date eggs'}],
+    'Import/Border':            [{t:'Non-EU welfare standards'}],
+    'Retail/Food Service':      [{t:'Welfare status mislabelling'},{t:'Date fraud'}]
   },
   fruit_veg: {
-    'Farm/Orchard':             [{t:'Pesticide/MRL violations',l:'high'},{t:'Prohibited pesticide use',l:'high'}],
-    'Packing & Processing':     [{t:'Country of origin fraud',l:'high'},{t:'Waxing/treatment to extend shelf life',l:'med'}],
-    'Cold Storage':             [{t:'Temperature abuse',l:'med'},{t:'Date manipulation',l:'med'}],
-    'Import/Border':            [{t:'MRL violations',l:'high'},{t:'Phytosanitary fraud',l:'med'}],
-    'Retail':                   [{t:'Organic certification fraud',l:'high'},{t:'Country of origin mislabelling',l:'med'}]
+    'Farm/Orchard':             [{t:'Pesticide/MRL violations'},{t:'Prohibited pesticide use'}],
+    'Packing & Processing':     [{t:'Country of origin fraud'},{t:'Waxing/treatment to extend shelf life'}],
+    'Cold Storage':             [{t:'Temperature abuse'},{t:'Date manipulation'}],
+    'Import/Border':            [{t:'MRL violations'},{t:'Phytosanitary fraud'}],
+    'Retail':                   [{t:'Organic certification fraud'},{t:'Country of origin mislabelling'}]
   },
   cereals: {
-    'Arable Farm':              [{t:'Pesticide/MRL violations',l:'med'},{t:'Mycotoxin contamination',l:'high'}],
-    'Grain Store':              [{t:'Mycotoxin development in storage',l:'high'},{t:'Species mixing',l:'med'}],
-    'Milling & Processing':     [{t:'Species substitution (e.g. wheat in gluten-free)',l:'high'},{t:'Starch adulteration',l:'med'}],
-    'Packaging & Labelling':    [{t:'Gluten-free fraud',l:'high'},{t:'Origin fraud',l:'med'},{t:'Variety/provenance fraud (e.g. basmati)',l:'high'}],
-    'Import/Border':            [{t:'Mycotoxin above legal limits',l:'high'},{t:'Sanction evasion (Russian grain)',l:'high'}]
+    'Arable Farm':              [{t:'Pesticide/MRL violations'},{t:'Mycotoxin contamination'}],
+    'Grain Store':              [{t:'Mycotoxin development in storage'},{t:'Species mixing'}],
+    'Milling & Processing':     [{t:'Species substitution (e.g. wheat in gluten-free)'},{t:'Starch adulteration'}],
+    'Packaging & Labelling':    [{t:'Gluten-free fraud'},{t:'Origin fraud'},{t:'Variety/provenance fraud (e.g. basmati)'}],
+    'Import/Border':            [{t:'Mycotoxin above legal limits'},{t:'Sanction evasion (Russian grain)'}]
   },
   oils: {
-    'Farm/Plantation':          [{t:'Premium attached to PDO, origin and variety claims',l:'high'},{t:'Organic and sustainability (e.g. RSPO) certification fraud',l:'med'}],
-    'Harvesting':               [{t:'Harvest method (hand or machine) and timing affect grade and value',l:'med'},{t:'Illegal or exploited labour',l:'med'}],
-    'Milling & Pressing':       [{t:'Grade of oil depends on cold or standard milling: grade claims open to misrepresentation',l:'high'}],
-    'Refining & Grading':       [{t:'Refined or lampante oil passed off as extra virgin (e.g. deodorised oil)',l:'high'},{t:'Grade or type of oil misdeclared',l:'high'}],
-    'Blending':                 [{t:'Adulteration or substitution with lower grade or cheaper oils (e.g. sunflower, hazelnut, pomace)',l:'high'},{t:'Colouring or flavouring added to mask lower grade oil',l:'med'}],
-    'Bottling & Labelling':     [{t:'Origin and PDO mislabelling',l:'high'},{t:'Grade or blend not declared on the label',l:'med'}],
-    'Bulk Storage':             [{t:'Storage conditions degrading grade (oxidation)',l:'med'},{t:'Blending or topping up of bulk tanks',l:'med'}],
-    'Import & Trade':           [{t:'Documentation fraud, including AI-generated documents',l:'high'},{t:'Country of origin fraud and trade sanctions evasion',l:'high'},{t:'Long, opaque bulk trading chains (traders, agents) reduce visibility',l:'med'}],
-    'Retail/Food Service':      [{t:'Lower grade or blended oil sold as extra virgin',l:'high'}]
+    'Farm/Plantation':          [{t:'Premium attached to PDO, origin and variety claims'},{t:'Organic and sustainability (e.g. RSPO) certification fraud'}],
+    'Harvesting':               [{t:'Harvest method (hand or machine) and timing affect grade and value'},{t:'Illegal or exploited labour'}],
+    'Milling & Pressing':       [{t:'Grade of oil depends on cold or standard milling: grade claims open to misrepresentation'}],
+    'Refining & Grading':       [{t:'Refined or lampante oil passed off as extra virgin (e.g. deodorised oil)'},{t:'Grade or type of oil misdeclared'}],
+    'Blending':                 [{t:'Adulteration or substitution with lower grade or cheaper oils (e.g. sunflower, hazelnut, pomace)'},{t:'Colouring or flavouring added to mask lower grade oil'}],
+    'Bottling & Labelling':     [{t:'Origin and PDO mislabelling'},{t:'Grade or blend not declared on the label'}],
+    'Bulk Storage':             [{t:'Storage conditions degrading grade (oxidation)'},{t:'Blending or topping up of bulk tanks'}],
+    'Import & Trade':           [{t:'Documentation fraud, including AI-generated documents'},{t:'Country of origin fraud and trade sanctions evasion'},{t:'Long, opaque bulk trading chains (traders, agents) reduce visibility'}],
+    'Retail/Food Service':      [{t:'Lower grade or blended oil sold as extra virgin'}]
   },
 };
 
