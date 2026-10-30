@@ -1514,14 +1514,16 @@ var KNOWN_RISKS = {
     'Packaging & Labelling':    [{t:'Country of origin misrepresentation'},{t:'Species misdescription'}],
     'Distribution':             [{t:'Transport security (driver, vehicle, open packs)'}]
   },
-  // Honey: TSG Honey guide supply chain (Figure 1, testing steps left out) and its risk themes.
+  // Honey: TSG Honey guide, "Stages, records and vulnerability points" table (principal authenticity vulnerabilities per stage).
   honey: {
-    'Beekeeper / Apiary':       [{t:'Production method: false organic or raw claims, undeclared filtration, artificial moisture reduction, undisclosed heating'}],
-    'Collection & Transport':   [{t:'Botanical origin: mislabelled monofloral honey, exaggerated floral content, cheaper multifloral blending'}],
-    'Bulk Processor':           [{t:'Identity and purity: added sugar syrups, undeclared blending, foreign enzymes, removal of markers through ultrafiltration'},{t:'Production method: false organic or raw claims, undeclared filtration, artificial moisture reduction, undisclosed heating'}],
-    'Exporter':                 [{t:'Identity and purity: added sugar syrups, undeclared blending, foreign enzymes, removal of markers through ultrafiltration'},{t:'Geographical origin: false country declarations, trans-shipping, relabelling, mixing origins'}],
-    'Shipping & Border':        [{t:'Geographical origin: false country declarations, trans-shipping, relabelling, mixing origins'}],
-    'Blender / Packer':         [{t:'Identity and purity: added sugar syrups, undeclared blending, foreign enzymes, removal of markers through ultrafiltration'},{t:'Botanical origin: mislabelled monofloral honey, exaggerated floral content, cheaper multifloral blending'},{t:'Production method: false organic or raw claims, undeclared filtration, artificial moisture reduction, undisclosed heating'},{t:'Premium variety: counterfeit product, false grading claims, dilution or substitution'}]
+    'Beekeeper / Apiary':       [{t:'Premature harvest'},{t:'Unsupported floral, organic, raw, local or origin claims'},{t:'Feed-related questions'}],
+    'Collection & Transport':   [{t:'Loss of beekeeper linkage'},{t:'Mixing'},{t:'Incorrect origin or floral declarations'}],
+    'Bulk Processor':           [{t:'Undeclared processing'},{t:'Mixing'},{t:'Excessive heat'},{t:'Artificial moisture reduction questions'},{t:'Marker removal'}],
+    'Exporter':                 [{t:'Relabelling'},{t:'Trans-shipping'},{t:'Document fraud'},{t:'Undisclosed intermediaries'}],
+    'Shipping & Border':        [{t:'Sample mismatch'},{t:'Incomplete origin evidence'},{t:'Breaks in chain of custody'}],
+    'Blender / Packer':         [{t:'Syrup addition'},{t:'Undeclared origin mixing'},{t:'Claim misrepresentation'},{t:'Marker removal'},{t:'Packaging errors'}],
+    'Distribution':             [{t:'Batch mix-ups'},{t:'Deterioration'}],
+    'Customer':                 [{t:'Incomplete downstream traceability'}]
   },
   herbs_spices: {
     'Growing Region':           [{t:'Crop failure, water scarcity and extreme weather'},{t:'Sanctions'},{t:'Seed shortages and growing demand'}],
