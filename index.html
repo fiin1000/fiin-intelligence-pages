@@ -293,6 +293,8 @@ input[type=range] { flex: 1; max-width: 140px; accent-color: var(--forest); curs
 .uk-tile-status.flag { color: #9A5B00; }
 .uk-tile-big { font-size: 18px; font-weight: 600; color: #4A3D73; font-family: 'DM Mono', monospace; }
 .uk-tile-text { font-size: 11px; color: var(--muted); line-height: 1.45; margin-top: 2px; }
+.uk-tile-src { font-size: 10px; color: #4A3D73; margin-top: 6px; padding-top: 5px; border-top: 1px solid #EEEAF6; font-family: 'DM Mono', monospace; }
+.uk-tile:last-child .risk-tip { left: auto; right: -10px; }
 .uk-foot { font-size: 10.5px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
 .uk-proto { display: inline-block; font-size: 9.5px; font-weight: 700; padding: 1px 6px; border-radius: 3px; background: #FDF0D5; color: #8A5A00; margin-right: 6px; letter-spacing: .04em; }
 .risk-card .card-title { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
@@ -1222,35 +1224,34 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
       <div class="two-col" style="margin-top:14px">
         <div class="left">
 
+          <!-- UK market price movement (Defra producer price index) - PROTOTYPE -->
+          <div class="card uk-card" id="uk-card" style="margin-bottom:14px;display:none">
+            <div class="card-title">
+              <span>UK market price movement &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="uk-prod" style="color:#4A3D73"></span></span>
+              <span class="uk-badge">UK PRODUCER PRICES · DEFRA</span>
+            </div>
+            <div class="uk-note" id="uk-note"></div>
+            <div class="uk-tiles" id="uk-tiles"></div>
+            <div class="uk-foot" id="uk-foot"></div>
+          </div>
+
           <!-- Price risk signals from HMRC UK import data (prototype) -->
           <div class="card risk-card" id="risk-card" style="margin-bottom:14px;">
             <div class="card-title">
-              <span>Price risk signals &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="risk-prod" style="color:var(--forest)"></span></span>
+              <span>Import price signals &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="risk-prod" style="color:var(--forest)"></span></span>
               <span class="risk-badge">UK IMPORTS · HMRC</span>
             </div>
             <div class="card-sub" id="risk-sub"></div>
             <div class="risk-lights" id="risk-lights"></div>
             <div id="risk-chart-block">
             <div class="risk-chart-head">
-              <span class="risk-chart-title">Import price per kg: UK average vs main origins</span>
+              <span class="risk-chart-title">Import price per kg: average import price vs main origins</span>
               <span class="legend" id="risk-legend"></span>
             </div>
             <div style="position:relative;height:210px"><canvas id="riskChart"></canvas></div>
             </div>
             <div id="risk-origins"></div>
             <div class="risk-foot" id="risk-foot"></div>
-          </div>
-          <!-- UK market price movement (Defra producer price index) - PROTOTYPE -->
-          <div class="card uk-card" id="uk-card" style="margin-bottom:14px;display:none">
-            <div class="card-title">
-              <span>UK market price movement &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="uk-prod" style="color:#4A3D73"></span></span>
-              <span class="uk-badge">UK FARMGATE · DEFRA INDEX</span>
-            </div>
-            <div class="uk-note" id="uk-note"></div>
-            <div class="uk-tiles" id="uk-tiles"></div>
-            <div class="risk-chart-head"><span class="risk-chart-title" id="uk-chart-title"></span></div>
-            <div style="position:relative;height:170px"><canvas id="ukChart"></canvas></div>
-            <div class="uk-foot" id="uk-foot"></div>
           </div>
 
 
@@ -2210,8 +2211,8 @@ var RISK = {
   swingRed: 0.25, swingAmber: 0.12,     // latest 3-month price vs 2-year average
   rangeRed: 0.30, rangeAmber: 0.15,     // high-to-low spread of the last 6 months
   shiftRed: 15,   shiftAmber: 7,        // gain in an origin's share of UK volume, percentage points
-  cheaperRed: 0.25, cheaperAmber: 0.15, // an origin falling in price relative to the UK average
-  gapRed: 0.40,   gapAmber: 0.25,       // an origin's price below the UK average
+  cheaperRed: 0.25, cheaperAmber: 0.15, // an origin falling in price relative to the average import price
+  gapRed: 0.40,   gapAmber: 0.25,       // an origin's price below the average import price
   minShare: 0.03                        // origins below 3% of volume are ignored for gap/cheaper
 };
 
@@ -2275,12 +2276,12 @@ function fmtMonth(m) {
 var RISK_HELP = {};
 function buildRiskHelp() {
   var p = function(x){ return Math.round(x * 100) + '%'; };
-  RISK_HELP['Price swing'] = 'Compares the UK import price over the last 3 months with its 2-year average, and how much it has swung in the last 6 months. ' +
+  RISK_HELP['Price swing'] = 'Compares the average import price over the last 3 months with its 2-year average, and how much it has swung in the last 6 months. ' +
     '<b>Red:</b> ' + p(RISK.swingRed) + '+ change or ' + p(RISK.rangeRed) + '+ swing. <b>Amber:</b> ' + p(RISK.swingAmber) + '+ or ' + p(RISK.rangeAmber) + '+. Sharp moves raise the incentive to cut corners.';
   RISK_HELP['Origin shift'] = 'Flags a country suddenly supplying a bigger share of UK imports (last 6 months vs the year before). ' +
     '<b>Red:</b> share up ' + RISK.shiftRed + '+ percentage points, or a new major source. <b>Amber:</b> up ' + RISK.shiftAmber + '+ points.';
-  RISK_HELP['Price gap'] = 'Flags an origin with at least ' + p(RISK.minShare) + ' of UK volume whose price is far below the UK average, or getting cheaper fast relative to it. ' +
-    '<b>Red:</b> ' + p(RISK.gapRed) + '+ below, or ' + p(RISK.cheaperRed) + '+ cheaper than a year before (relative to the UK average). <b>Amber:</b> ' + p(RISK.gapAmber) + '+ below, or ' + p(RISK.cheaperAmber) + '+ cheaper. ' +
+  RISK_HELP['Price gap'] = 'Flags an origin with at least ' + p(RISK.minShare) + ' of UK volume whose price is far below the average import price, or getting cheaper fast relative to it. ' +
+    '<b>Red:</b> ' + p(RISK.gapRed) + '+ below, or ' + p(RISK.cheaperRed) + '+ cheaper than a year before (relative to the average import price). <b>Amber:</b> ' + p(RISK.gapAmber) + '+ below, or ' + p(RISK.cheaperAmber) + '+ cheaper. ' +
     'Large gaps can signal substitution, dilution or a lower grade sold as premium.';
 }
 buildRiskHelp();
@@ -2299,7 +2300,7 @@ function computeRiskSignals(prodName, t) {
   swing.level = (Math.abs(chg) >= RISK.swingRed || range >= RISK.rangeRed) ? 'r'
               : (Math.abs(chg) >= RISK.swingAmber || range >= RISK.rangeAmber) ? 'a' : 'g';
   swing.status = swing.level === 'r' ? 'Big move' : swing.level === 'a' ? 'Moving' : 'Stable';
-  swing.text = 'UK import price is <b>' + fmtGBP(ukNow) + '/kg</b> (3 months to ' + fmtMonth(M[n - 1]) + '), ' +
+  swing.text = 'Average import price is <b>' + fmtGBP(ukNow) + '/kg</b> (3 months to ' + fmtMonth(M[n - 1]) + '), ' +
     (Math.abs(chg) < 0.03 ? 'close to' : fmtPct(chg) + (chg > 0 ? ' above' : ' below')) +
     ' its 2-year average of ' + fmtGBP(ukAvg) + '/kg.' +
     (range >= RISK.rangeAmber ? ' It has swung by ' + fmtPct(range) + ' over the last 6 months.' : '') +
@@ -2343,12 +2344,12 @@ function computeRiskSignals(prodName, t) {
     shift.short = 'No big change in where imports come from.';
   }
 
-  // ── 3. Price gap: origins far cheaper than the UK average ──
+  // ── 3. Price gap: origins far cheaper than the average import price ──
   var gaps = origins.filter(function(x){ return x.shareNow >= RISK.minShare && x.now.p && totNow.p; })
     .map(function(x){ return { x: x, gap: x.now.p / totNow.p - 1 }; })
     .sort(function(a, b){ return a.gap - b.gap; });
   var g0 = gaps[0];
-  // Price gap is about PRICE: an origin that is far below the UK average, or getting cheaper fast relative to it
+  // Price gap is about PRICE: an origin that is far below the average import price, or getting cheaper fast relative to it
   var gap = { name: 'Price gap' };
   var LV = { r: 2, a: 1, g: 0 };
   var gapLvl = g0 && -g0.gap >= RISK.gapRed ? 'r' : g0 && -g0.gap >= RISK.gapAmber ? 'a' : 'g';
@@ -2361,17 +2362,17 @@ function computeRiskSignals(prodName, t) {
     gap.text = gap.short = 'Not enough volume to compare origins.';
   } else if (gap.level !== 'g' && byLevel) {
     gap.text = escHtml(nounPlural(noun.charAt(0).toUpperCase() + noun.slice(1))) + ' from <b>' + escHtml(g0.x.o) + '</b> averaged <b>' + fmtGBP(g0.x.now.p) + '/kg</b>, ' +
-      fmtPct(g0.gap) + ' below the UK average of ' + fmtGBP(totNow.p) + '/kg (last 6 months, ' + fmtPct(g0.x.shareNow) + ' of volume).' +
+      fmtPct(g0.gap) + ' below the average import price of ' + fmtGBP(totNow.p) + '/kg (last 6 months, ' + fmtPct(g0.x.shareNow) + ' of volume).' +
       ' Gaps this large can signal substitution, dilution or a lower grade sold as premium.';
-    gap.short = '<b>' + escHtml(g0.x.o) + '</b> at <b>' + fmtGBP(g0.x.now.p) + '/kg</b>, ' + fmtPct(g0.gap) + ' below the UK average.';
+    gap.short = '<b>' + escHtml(g0.x.o) + '</b> at <b>' + fmtGBP(g0.x.now.p) + '/kg</b>, ' + fmtPct(g0.gap) + ' below the average import price.';
   } else if (gap.level !== 'g') {
-    gap.text = '<b>' + escHtml(cheaper.x.o) + '</b> has become <b>' + fmtPct(cheaper.rel) + ' cheaper</b> relative to the UK average over the last 6 months' +
+    gap.text = '<b>' + escHtml(cheaper.x.o) + '</b> has become <b>' + fmtPct(cheaper.rel) + ' cheaper</b> relative to the average import price over the last 6 months' +
       ' (' + fmtGBP(cheaper.x.before.p) + ' \u2192 ' + fmtGBP(cheaper.x.now.p) + '/kg). An origin undercutting the market quickly can draw buyers and blending.';
-    gap.short = '<b>' + escHtml(cheaper.x.o) + '</b> became <b>' + fmtPct(cheaper.rel) + ' cheaper</b> relative to the UK average.';
+    gap.short = '<b>' + escHtml(cheaper.x.o) + '</b> became <b>' + fmtPct(cheaper.rel) + ' cheaper</b> relative to the average import price.';
   } else {
-    gap.text = 'No major origin is far below the UK average of ' + fmtGBP(totNow.p) + '/kg or getting much cheaper. Cheapest: ' +
+    gap.text = 'No major origin is far below the average import price of ' + fmtGBP(totNow.p) + '/kg or getting much cheaper. Cheapest: ' +
       escHtml(g0.x.o) + ', ' + (g0.gap < 0 ? fmtPct(g0.gap) + ' below' : 'at or above average') + '.';
-    gap.short = 'No major origin far below, or falling fast against, the UK average.';
+    gap.short = 'No major origin far below, or falling fast against, the average import price.';
   }
 
   // Origins to draw: top 3 by recent volume, plus any flagged origin
@@ -2399,26 +2400,28 @@ var UK_PRICES = {
   },
   products: { 'Beef': 'cattle_and_calves', 'Veal': 'cattle_and_calves', 'Lamb': 'sheep_and_lambs', 'Pork': 'pigs' }
 };
-var ukChart = null;
 function ukPct(x) { return (x > 0 ? '+' : x < 0 ? '−' : '') + Math.abs(Math.round(x * 10) / 10) + '%'; }
+var UK_GAP_HELP = 'Compares <b>which way</b> UK and import prices are moving, never the prices themselves. ' +
+  '<b>UK:</b> Defra’s 12-month change in the UK producer price index for the latest month. ' +
+  '<b>Imports:</b> HMRC average import price (all origins: total £ ÷ total kg) for the last 3 months, compared with the same 3 months a year earlier. ' +
+  '<b>Gap</b> = UK change minus import change. 10 points or more: <b>gap widening</b> (UK prices rising faster than imports, so more incentive to pass imports off as UK). ' +
+  'Minus 10 points or more: <b>gap narrowing</b>. Otherwise <b>in step</b>.';
 function renderUkPrices() {
   var card = document.getElementById('uk-card');
   if (!card) return;
   var prod = typeof curProd !== 'undefined' ? curProd : null;
   var key = prod ? UK_PRICES.products[prod] : null, s = key ? UK_PRICES.series[key] : null;
-  if (!s) { card.style.display = 'none'; if (ukChart) { ukChart.destroy(); ukChart = null; } return; }
+  if (!s) { card.style.display = 'none'; return; }
   card.style.display = '';
-  var M = UK_PRICES.months, v = s.values, last = M[M.length - 1];
+  var M = UK_PRICES.months, v = s.values, last = M[M.length - 1], yearAgoM = (+last.slice(0, 4) - 1) + last.slice(4);
+  var src = 'Defra UK producer price index, ' + s.label;
   document.getElementById('uk-prod').textContent = prod;
-  document.getElementById('uk-note').innerHTML = '<span class="uk-proto">PROTOTYPE</span>An index of UK producer (farmgate) prices for ' + s.label +
-    ', 2020 = 100. It shows which way UK prices are moving and how much they swing. <b>It is not a price</b>, and is not comparable with the import £/kg above.';
-  // 1. On a year ago (Defra's own 12-month rate)
+  document.getElementById('uk-note').innerHTML = '<span class="uk-proto">PROTOTYPE</span>How UK producer (farmgate) prices for ' + s.label +
+    ' are moving, from Defra’s monthly price index (2020 = 100). <b>These are % changes, not prices</b>, and are not comparable with the import £/kg below.';
   var yo = s.yoy, yoStatus = Math.abs(yo) < 5 ? 'Steady' : yo > 0 ? 'Rising' : 'Falling';
-  // 2. Swing: highest vs lowest index over the months shown
   var hi = Math.max.apply(null, v), lo = Math.min.apply(null, v), sw = (hi / lo - 1) * 100;
   var swStatus = sw < 10 ? 'Stable' : sw < 25 ? 'Moving' : 'Volatile';
-  // 3. UK vs imports: compares the two directions of travel (both % changes), never the prices
-  var gapHtml = '<div class="uk-tile-text">No HMRC import data for this product.</div>', gapStatus = '', gapFlag = false;
+  var gapHtml = '<div class="uk-tile-text">No HMRC import data for this product.</div>', gapStatus = '—', gapFlag = false;
   var hit = typeof tradeFor === 'function' ? tradeFor(prod) : null;
   if (hit && hit.t.months.length >= 15) {
     var TM = hit.t.months, n = TM.length;
@@ -2427,33 +2430,24 @@ function renderUkPrices() {
       var imp = (nowP / agoP - 1) * 100, gap = yo - imp;
       gapStatus = gap >= 10 ? 'Gap widening' : gap <= -10 ? 'Gap narrowing' : 'In step';
       gapFlag = gap >= 10;
-      gapHtml = '<div class="uk-tile-text">UK ' + ukPct(yo) + ' on a year ago; import prices ' + ukPct(imp) + ' (3 months to ' + fmtMonth(TM[n - 1]) + ').' +
+      gapHtml = '<div class="uk-tile-text"><b>UK</b> ' + ukPct(yo) + ' on a year ago (Defra). <b>Imports</b> ' + ukPct(imp) +
+        ' (HMRC average import price, 3 months to ' + fmtMonth(TM[n - 1]) + ' vs a year earlier). Gap ' + (gap > 0 ? '+' : gap < 0 ? '−' : '') + Math.abs(Math.round(gap)) + ' points.' +
         (gapFlag ? ' UK prices are rising faster than imports, which increases the incentive to pass imports off as UK.' : '') + '</div>';
     }
   }
-  var tile = function(name, status, big, text, flag) {
-    return '<div class="uk-tile"><div class="uk-tile-head"><span class="uk-tile-name">' + name + '</span><span class="uk-tile-status' + (flag ? ' flag' : '') + '">' + status + '</span></div>' +
-      (big ? '<div class="uk-tile-big">' + big + '</div>' : '') + text + '</div>';
+  var info = function(html) { return '<span class="risk-info" tabindex="0" role="button" aria-label="How this is worked out">i<span class="risk-tip" role="tooltip">' + html + '</span></span>'; };
+  var tile = function(name, status, big, text, source, flag, help) {
+    return '<div class="uk-tile"><div class="uk-tile-head"><span class="uk-tile-name">' + name + '</span>' + (help ? info(help) : '') +
+      '<span class="uk-tile-status' + (flag ? ' flag' : '') + '">' + status + '</span></div>' +
+      (big ? '<div class="uk-tile-big">' + big + '</div>' : '') + text + '<div class="uk-tile-src">Source: ' + source + '</div></div>';
   };
   document.getElementById('uk-tiles').innerHTML =
-    tile('On a year ago', yoStatus, ukPct(yo), '<div class="uk-tile-text">' + fmtMonth(last) + ' compared with ' + fmtMonth((+last.slice(0, 4) - 1) + last.slice(4)) + '.</div>', false) +
+    tile('On a year ago', yoStatus, ukPct(yo), '<div class="uk-tile-text">' + fmtMonth(last) + ' compared with ' + fmtMonth(yearAgoM) + '.</div>',
+      src + ' (Defra’s 12-month rate)', false) +
     tile('Swing', swStatus, Math.round(sw) + '%', '<div class="uk-tile-text">Between the highest and lowest month, ' + fmtMonth(M[0]) + ' – ' + fmtMonth(last) + '.' +
-      (s.seasonal ? ' Prices for ' + s.label + ' are seasonal, so some swing is normal.' : '') + '</div>', swStatus === 'Volatile') +
-    tile('UK vs imports', gapStatus || '—', '', gapHtml, gapFlag);
-  document.getElementById('uk-chart-title').textContent = 'UK producer price index, ' + s.label + ' (2020 = 100)';
-  var labels = M.map(function(m){ return fmtMonth(m).replace(/ (\d{2})(\d{2})$/, " '$2"); });
-  if (ukChart) ukChart.destroy();
-  ukChart = new Chart(document.getElementById('ukChart'), {
-    type: 'line',
-    data: { labels: labels, datasets: [{ label: 'Index', data: v, borderColor: '#6B5B95', backgroundColor: 'rgba(107,91,149,.08)', fill: true, borderWidth: 2, pointRadius: 2.5, tension: 0.3 }] },
-    options: { responsive: true, maintainAspectRatio: false, animation: false,
-      plugins: { legend: { display: false }, datalabels: { display: false },
-        tooltip: { callbacks: { label: function(c){ return 'Index ' + c.raw.toFixed(1) + ' (2020 = 100)'; } } } },
-      scales: { x: { grid: { color: 'rgba(0,0,0,.04)' }, ticks: { color: 'rgba(0,0,0,.4)', font: { size: 10 } } },
-                y: { grid: { color: 'rgba(0,0,0,.04)' }, ticks: { color: 'rgba(0,0,0,.4)', font: { size: 10 } }, title: { display: true, text: 'Index', color: 'rgba(0,0,0,.4)', font: { size: 10 } } } } }
-  });
-  document.getElementById('uk-foot').innerHTML = 'Source: Defra, Agricultural price indices – United Kingdom (monthly), © Crown copyright, Open Government Licence v3.0. Latest month ' + fmtMonth(last) +
-    '. The prototype shows the ' + M.length + ' months currently loaded; the live version would show two years and update monthly.';
+      (s.seasonal ? ' Prices for ' + s.label + ' are seasonal, so some swing is normal.' : '') + '</div>', src + ', monthly', swStatus === 'Volatile') +
+    tile('UK vs imports', gapStatus, '', gapHtml, 'Defra (UK) and HMRC (imports)', gapFlag, UK_GAP_HELP);
+  document.getElementById('uk-foot').innerHTML = 'Source: Defra, Agricultural price indices – United Kingdom (monthly), © Crown copyright, Open Government Licence v3.0. Latest month ' + fmtMonth(last) + '.';
 }
 
 function renderTradeRisk() {
@@ -2501,9 +2495,9 @@ function renderTradeRisk() {
   var PAL = ['#2a78d6', '#1baf7a', '#8e6fd8', '#e87ba4', '#5a7a8c'];
   // First two months have no 3-month average yet, so start the chart at month 3
   var labels = M.slice(2).map(function(m){ return fmtMonth(m).replace(/ (\d{2})(\d{2})$/, " '$2"); });
-  var sets = [{ label: 'UK average (all origins)', data: tradeRolling(t, null).slice(2), borderColor: '#1A3D1A',
+  var sets = [{ label: 'Average import price (all origins)', data: tradeRolling(t, null).slice(2), borderColor: '#1A3D1A',
                 borderWidth: 3, pointRadius: 0, tension: 0.3, spanGaps: true, order: 0 }];
-  var legend = '<span class="risk-chip"><i class="uk" style="border-color:#1A3D1A"></i>UK average</span>';
+  var legend = '<span class="risk-chip"><i class="uk" style="border-color:#1A3D1A"></i>Average import price</span>';
   sig.draw.forEach(function(o, i) {
     var flagged = sig.flags.indexOf(o) > -1;
     var col = o === sig.gapFlag ? '#C0392B' : o === sig.shiftFlag ? '#D4820A' : PAL[i % PAL.length];
@@ -2545,7 +2539,7 @@ function renderTradeRisk() {
   var hasCpi = orows.some(function(r){ return t.cpi && t.cpi[r.o] != null; });
   document.getElementById('risk-origins').innerHTML = orows.length ?
     '<div class="risk-origins-title">Main origins, last 6 months</div>' +
-    '<table class="risk-origins"><thead><tr><th>Origin</th><th class="num">Share of UK volume</th><th class="num">\u00a3/kg</th><th class="num">vs UK average</th>' +
+    '<table class="risk-origins"><thead><tr><th>Origin</th><th class="num">Share of UK import volume</th><th class="num">\u00a3/kg</th><th class="num">vs average import price</th>' +
     (hasCpi ? '<th class="num">Corruption Perceptions Index</th>' : '') + '</tr></thead><tbody>' +
     orows.map(function(r) {
       var d = tot6.p ? r.p / tot6.p - 1 : 0;
@@ -3056,7 +3050,7 @@ function buildSnapshotCsvRows(cat, now) {
   // 4. Price risk signals (HMRC)
   section(4, 'Price risk signals — UK imports (HMRC)',
     'Red and amber are prompts to check suppliers, specifications and testing, not proof of fraud. Prices are volume-weighted averages; HMRC publishes about 2 months after the month ends.');
-  rows.push(['Product', 'HMRC data used', 'Latest month', 'UK import price £/kg (last 3 months)', '2-year average £/kg',
+  rows.push(['Product', 'HMRC data used', 'Latest month', 'Average import price £/kg (last 3 months)', '2-year average £/kg',
              'Price swing', 'Price swing detail', 'Origin shift', 'Origin shift detail', 'Price gap', 'Price gap detail',
              'Main origins (share of kg, £/kg, CPI score) — last 6 months', 'Note']);
   Object.keys(C.products).forEach(function(p) {
@@ -4211,15 +4205,15 @@ setInterval(function() {
       <li><b>How the prices are worked out</b>
         <ul>
           <li><b>Price per kg</b> = customs value (£) ÷ net weight (kg), for each month and country of origin.</li>
-          <li><b>UK average</b> = the value of all UK imports of the product ÷ their total weight, so origins that ship more count for more.</li>
+          <li><b>Average import price</b> = the value of all UK imports of the product ÷ their total weight, so origins that ship more count for more.</li>
           <li><b>The chart</b> shows 3-month rolling averages, to smooth out lumpy monthly shipments. The 10 largest origins by volume are named; the rest are grouped as “Other origins”.</li>
         </ul>
       </li>
       <li><b>The three checks</b>
         <ul>
-          <li><b>Price swing</b> — the UK average for the last 3 months compared with its 2-year average, plus how far the price has swung (highest to lowest) over the last 6 months. Red: 25%+ change or 30%+ swing. Amber: 12%+ or 15%+.</li>
+          <li><b>Price swing</b> — the average import price for the last 3 months compared with its 2-year average, plus how far the price has swung (highest to lowest) over the last 6 months. Red: 25%+ change or 30%+ swing. Amber: 12%+ or 15%+.</li>
           <li><b>Origin shift</b> — each country’s share of UK import volume (kg) in the last 6 months compared with the 12 months before. Red: share up 15+ percentage points, or a new major source (under 2% before, 8%+ now). Amber: up 7+ points.</li>
-          <li><b>Price gap</b> — each country’s price over the last 6 months compared with the UK average for the same months; or a country getting cheaper relative to the UK average than it was the year before. Only countries with at least 3% of UK volume are checked. Red: 40%+ below the average, or 25%+ cheaper than before. Amber: 25%+ or 15%+.</li>
+          <li><b>Price gap</b> — each country’s price over the last 6 months compared with the average import price for the same months; or a country getting cheaper relative to the average import price than it was the year before. Only countries with at least 3% of UK volume are checked. Red: 40%+ below the average, or 25%+ cheaper than before. Amber: 25%+ or 15%+.</li>
         </ul>
       </li>
       <li><b>Things to note</b>
