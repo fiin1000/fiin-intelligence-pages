@@ -279,6 +279,22 @@ input[type=range] { flex: 1; max-width: 140px; accent-color: var(--forest); curs
 }
 .card-title { font-size: 12px; font-weight: 600; margin-bottom: 2px; }
 /* ── Price risk card (HMRC import signals) ── */
+/* UK market price movement (Defra index) - deliberately styled apart from the HMRC import card */
+.uk-card { border-top: 3px solid #6B5B95; }
+.uk-card .card-title { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.uk-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: #EEEAF6; color: #4A3D73; font-family: 'DM Mono', monospace; letter-spacing: .03em; }
+.uk-note { font-size: 11px; color: #4A3D73; background: #F5F3FA; border: 1px solid #E0DAEE; border-radius: 6px; padding: 7px 10px; margin: 4px 0 10px; line-height: 1.5; }
+.uk-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0 0 12px; }
+@media (max-width: 700px) { .uk-tiles { grid-template-columns: 1fr; } }
+.uk-tile { border: 1px solid var(--border); border-radius: 6px; padding: 9px 10px 10px; background: white; }
+.uk-tile-head { display: flex; align-items: baseline; gap: 6px; margin-bottom: 3px; }
+.uk-tile-name { font-size: 11px; font-weight: 600; color: var(--ink); }
+.uk-tile-status { margin-left: auto; font-size: 10px; font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .05em; color: #4A3D73; }
+.uk-tile-status.flag { color: #9A5B00; }
+.uk-tile-big { font-size: 18px; font-weight: 600; color: #4A3D73; font-family: 'DM Mono', monospace; }
+.uk-tile-text { font-size: 11px; color: var(--muted); line-height: 1.45; margin-top: 2px; }
+.uk-foot { font-size: 10.5px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+.uk-proto { display: inline-block; font-size: 9.5px; font-weight: 700; padding: 1px 6px; border-radius: 3px; background: #FDF0D5; color: #8A5A00; margin-right: 6px; letter-spacing: .04em; }
 .risk-card .card-title { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .risk-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: #E6F1FB; color: #0C447C; font-family: 'DM Mono', monospace; letter-spacing: .03em; }
 .risk-lights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 4px 0 14px; }
@@ -1223,6 +1239,18 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
             </div>
             <div id="risk-origins"></div>
             <div class="risk-foot" id="risk-foot"></div>
+          </div>
+          <!-- UK market price movement (Defra producer price index) - PROTOTYPE -->
+          <div class="card uk-card" id="uk-card" style="margin-bottom:14px;display:none">
+            <div class="card-title">
+              <span>UK market price movement &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="uk-prod" style="color:#4A3D73"></span></span>
+              <span class="uk-badge">UK FARMGATE · DEFRA INDEX</span>
+            </div>
+            <div class="uk-note" id="uk-note"></div>
+            <div class="uk-tiles" id="uk-tiles"></div>
+            <div class="risk-chart-head"><span class="risk-chart-title" id="uk-chart-title"></span></div>
+            <div style="position:relative;height:170px"><canvas id="ukChart"></canvas></div>
+            <div class="uk-foot" id="uk-foot"></div>
           </div>
 
 
@@ -2357,6 +2385,77 @@ function computeRiskSignals(prodName, t) {
   return { lights: [swing, shift, gap], draw: draw, flags: [shift.flag, gap.flag], shiftFlag: shift.flag, gapFlag: gap.flag };
 }
 
+// ── UK market price movement (PROTOTYPE) ────────────────────────────────────────
+// Defra agricultural price indices, UK producer prices, 2020 = 100 (Open Government Licence).
+// Prototype data typed in from the 29 Oct 2026 release; the live version would be read from a 'uk_prices'
+// tab filled monthly by the Apps Script. Shown as an index and % change only, never as £, so it cannot be
+// read against the HMRC import £/kg.
+var UK_PRICES = {
+  months: ['2025-11','2025-12','2026-01','2026-02','2026-03','2026-04','2026-05','2026-06','2026-07','2026-08'],
+  series: {
+    cattle_and_calves: { label: 'cattle and calves', values: [201.4,197.4,197.1,197.8,197.1,190.9,183.6,182.5,186.2,182.4], yearAgo: 196.4, yoy: -7.1 },
+    sheep_and_lambs:   { label: 'sheep and lambs',   values: [147.5,151.0,151.5,154.2,175.0,182.3,191.5,193.8,172.5,152.4], yearAgo: 154.7, yoy: -1.5, seasonal: true },
+    pigs:              { label: 'pigs',              values: [124.0,122.2,118.5,115.4,113.3,111.8,110.3,109.4,109.8,110.0], yearAgo: 128.9, yoy: -14.7 }
+  },
+  products: { 'Beef': 'cattle_and_calves', 'Veal': 'cattle_and_calves', 'Lamb': 'sheep_and_lambs', 'Pork': 'pigs' }
+};
+var ukChart = null;
+function ukPct(x) { return (x > 0 ? '+' : x < 0 ? '−' : '') + Math.abs(Math.round(x * 10) / 10) + '%'; }
+function renderUkPrices() {
+  var card = document.getElementById('uk-card');
+  if (!card) return;
+  var prod = typeof curProd !== 'undefined' ? curProd : null;
+  var key = prod ? UK_PRICES.products[prod] : null, s = key ? UK_PRICES.series[key] : null;
+  if (!s) { card.style.display = 'none'; if (ukChart) { ukChart.destroy(); ukChart = null; } return; }
+  card.style.display = '';
+  var M = UK_PRICES.months, v = s.values, last = M[M.length - 1];
+  document.getElementById('uk-prod').textContent = prod;
+  document.getElementById('uk-note').innerHTML = '<span class="uk-proto">PROTOTYPE</span>An index of UK producer (farmgate) prices for ' + s.label +
+    ', 2020 = 100. It shows which way UK prices are moving and how much they swing. <b>It is not a price</b>, and is not comparable with the import £/kg above.';
+  // 1. On a year ago (Defra's own 12-month rate)
+  var yo = s.yoy, yoStatus = Math.abs(yo) < 5 ? 'Steady' : yo > 0 ? 'Rising' : 'Falling';
+  // 2. Swing: highest vs lowest index over the months shown
+  var hi = Math.max.apply(null, v), lo = Math.min.apply(null, v), sw = (hi / lo - 1) * 100;
+  var swStatus = sw < 10 ? 'Stable' : sw < 25 ? 'Moving' : 'Volatile';
+  // 3. UK vs imports: compares the two directions of travel (both % changes), never the prices
+  var gapHtml = '<div class="uk-tile-text">No HMRC import data for this product.</div>', gapStatus = '', gapFlag = false;
+  var hit = typeof tradeFor === 'function' ? tradeFor(prod) : null;
+  if (hit && hit.t.months.length >= 15) {
+    var TM = hit.t.months, n = TM.length;
+    var nowP = tradeSum(hit.t, null, TM.slice(-3)).p, agoP = tradeSum(hit.t, null, TM.slice(n - 15, n - 12)).p;
+    if (nowP && agoP) {
+      var imp = (nowP / agoP - 1) * 100, gap = yo - imp;
+      gapStatus = gap >= 10 ? 'Gap widening' : gap <= -10 ? 'Gap narrowing' : 'In step';
+      gapFlag = gap >= 10;
+      gapHtml = '<div class="uk-tile-text">UK ' + ukPct(yo) + ' on a year ago; import prices ' + ukPct(imp) + ' (3 months to ' + fmtMonth(TM[n - 1]) + ').' +
+        (gapFlag ? ' UK prices are rising faster than imports, which increases the incentive to pass imports off as UK.' : '') + '</div>';
+    }
+  }
+  var tile = function(name, status, big, text, flag) {
+    return '<div class="uk-tile"><div class="uk-tile-head"><span class="uk-tile-name">' + name + '</span><span class="uk-tile-status' + (flag ? ' flag' : '') + '">' + status + '</span></div>' +
+      (big ? '<div class="uk-tile-big">' + big + '</div>' : '') + text + '</div>';
+  };
+  document.getElementById('uk-tiles').innerHTML =
+    tile('On a year ago', yoStatus, ukPct(yo), '<div class="uk-tile-text">' + fmtMonth(last) + ' compared with ' + fmtMonth((+last.slice(0, 4) - 1) + last.slice(4)) + '.</div>', false) +
+    tile('Swing', swStatus, Math.round(sw) + '%', '<div class="uk-tile-text">Between the highest and lowest month, ' + fmtMonth(M[0]) + ' – ' + fmtMonth(last) + '.' +
+      (s.seasonal ? ' Prices for ' + s.label + ' are seasonal, so some swing is normal.' : '') + '</div>', swStatus === 'Volatile') +
+    tile('UK vs imports', gapStatus || '—', '', gapHtml, gapFlag);
+  document.getElementById('uk-chart-title').textContent = 'UK producer price index, ' + s.label + ' (2020 = 100)';
+  var labels = M.map(function(m){ return fmtMonth(m).replace(/ (\d{2})(\d{2})$/, " '$2"); });
+  if (ukChart) ukChart.destroy();
+  ukChart = new Chart(document.getElementById('ukChart'), {
+    type: 'line',
+    data: { labels: labels, datasets: [{ label: 'Index', data: v, borderColor: '#6B5B95', backgroundColor: 'rgba(107,91,149,.08)', fill: true, borderWidth: 2, pointRadius: 2.5, tension: 0.3 }] },
+    options: { responsive: true, maintainAspectRatio: false, animation: false,
+      plugins: { legend: { display: false }, datalabels: { display: false },
+        tooltip: { callbacks: { label: function(c){ return 'Index ' + c.raw.toFixed(1) + ' (2020 = 100)'; } } } },
+      scales: { x: { grid: { color: 'rgba(0,0,0,.04)' }, ticks: { color: 'rgba(0,0,0,.4)', font: { size: 10 } } },
+                y: { grid: { color: 'rgba(0,0,0,.04)' }, ticks: { color: 'rgba(0,0,0,.4)', font: { size: 10 } }, title: { display: true, text: 'Index', color: 'rgba(0,0,0,.4)', font: { size: 10 } } } } }
+  });
+  document.getElementById('uk-foot').innerHTML = 'Source: Defra, Agricultural price indices – United Kingdom (monthly), © Crown copyright, Open Government Licence v3.0. Latest month ' + fmtMonth(last) +
+    '. The prototype shows the ' + M.length + ' months currently loaded; the live version would show two years and update monthly.';
+}
+
 function renderTradeRisk() {
   var card = document.getElementById('risk-card');
   if (!card) return;
@@ -3371,6 +3470,7 @@ function render() {
 
   // Price risk signals (HMRC)
   try { renderTradeRisk(); } catch (e) { console.error('Price risk card error:', e); }
+  try { renderUkPrices(); } catch (e) { console.error('UK price card error:', e); }
 
   // EU fraud suspicions
   try { renderEuFraud(); } catch (e) { console.error('EU fraud error:', e); }
