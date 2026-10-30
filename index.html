@@ -2401,11 +2401,7 @@ var UK_PRICES = {
   products: { 'Beef': 'cattle_and_calves', 'Veal': 'cattle_and_calves', 'Lamb': 'sheep_and_lambs', 'Pork': 'pigs' }
 };
 function ukPct(x) { return (x > 0 ? '+' : x < 0 ? '−' : '') + Math.abs(Math.round(x * 10) / 10) + '%'; }
-var UK_GAP_HELP = 'Compares <b>which way</b> UK and import prices are moving, never the prices themselves. ' +
-  '<b>UK:</b> Defra’s 12-month change in the UK producer price index for the latest month. ' +
-  '<b>Imports:</b> HMRC average import price (all origins: total £ ÷ total kg) for the last 3 months, compared with the same 3 months a year earlier. ' +
-  '<b>Gap</b> = UK change minus import change. 10 points or more: <b>gap widening</b> (UK prices rising faster than imports, so more incentive to pass imports off as UK). ' +
-  'Minus 10 points or more: <b>gap narrowing</b>. Otherwise <b>in step</b>.';
+var ukChart = null;
 function renderUkPrices() {
   var card = document.getElementById('uk-card');
   if (!card) return;
@@ -2421,20 +2417,6 @@ function renderUkPrices() {
   var yo = s.yoy, yoStatus = Math.abs(yo) < 5 ? 'Steady' : yo > 0 ? 'Rising' : 'Falling';
   var hi = Math.max.apply(null, v), lo = Math.min.apply(null, v), sw = (hi / lo - 1) * 100;
   var swStatus = sw < 10 ? 'Stable' : sw < 25 ? 'Moving' : 'Volatile';
-  var gapHtml = '<div class="uk-tile-text">No HMRC import data for this product.</div>', gapStatus = '—', gapFlag = false;
-  var hit = typeof tradeFor === 'function' ? tradeFor(prod) : null;
-  if (hit && hit.t.months.length >= 15) {
-    var TM = hit.t.months, n = TM.length;
-    var nowP = tradeSum(hit.t, null, TM.slice(-3)).p, agoP = tradeSum(hit.t, null, TM.slice(n - 15, n - 12)).p;
-    if (nowP && agoP) {
-      var imp = (nowP / agoP - 1) * 100, gap = yo - imp;
-      gapStatus = gap >= 10 ? 'Gap widening' : gap <= -10 ? 'Gap narrowing' : 'In step';
-      gapFlag = gap >= 10;
-      gapHtml = '<div class="uk-tile-text"><b>UK</b> ' + ukPct(yo) + ' on a year ago (Defra). <b>Imports</b> ' + ukPct(imp) +
-        ' (HMRC average import price, 3 months to ' + fmtMonth(TM[n - 1]) + ' vs a year earlier). Gap ' + (gap > 0 ? '+' : gap < 0 ? '−' : '') + Math.abs(Math.round(gap)) + ' points.' +
-        (gapFlag ? ' UK prices are rising faster than imports, which increases the incentive to pass imports off as UK.' : '') + '</div>';
-    }
-  }
   var info = function(html) { return '<span class="risk-info" tabindex="0" role="button" aria-label="How this is worked out">i<span class="risk-tip" role="tooltip">' + html + '</span></span>'; };
   var tile = function(name, status, big, text, source, flag, help) {
     return '<div class="uk-tile"><div class="uk-tile-head"><span class="uk-tile-name">' + name + '</span>' + (help ? info(help) : '') +
@@ -2446,7 +2428,14 @@ function renderUkPrices() {
       src + ' (Defra’s 12-month rate)', false) +
     tile('Swing', swStatus, Math.round(sw) + '%', '<div class="uk-tile-text">Between the highest and lowest month, ' + fmtMonth(M[0]) + ' – ' + fmtMonth(last) + '.' +
       (s.seasonal ? ' Prices for ' + s.label + ' are seasonal, so some swing is normal.' : '') + '</div>', src + ', monthly', swStatus === 'Volatile') +
-    tile('UK vs imports', gapStatus, '', gapHtml, 'Defra (UK) and HMRC (imports)', gapFlag, UK_GAP_HELP);
+    tile('Index, monthly', '2020 = 100', '', '<div style="position:relative;height:74px;margin-top:4px"><canvas id="ukChart"></canvas></div>' +
+      '<div class="uk-tile-text">' + fmtMonth(M[0]) + ' – ' + fmtMonth(last) + '</div>', src + ', monthly', false);
+  if (ukChart) ukChart.destroy();
+  ukChart = new Chart(document.getElementById('ukChart'), { type: 'line',
+    data: { labels: M.map(function(m){ return fmtMonth(m); }), datasets: [{ data: v, borderColor: '#6B5B95', backgroundColor: 'rgba(107,91,149,.10)', fill: true, borderWidth: 2, pointRadius: 0, tension: 0.3 }] },
+    options: { responsive: true, maintainAspectRatio: false, animation: false, layout: { padding: { top: 4, bottom: 2 } },
+      plugins: { legend: { display: false }, datalabels: { display: false }, tooltip: { callbacks: { label: function(c){ return 'Index ' + c.raw.toFixed(1); } } } },
+      scales: { x: { display: false }, y: { display: true, grid: { display: false }, border: { display: false }, ticks: { maxTicksLimit: 3, color: 'rgba(0,0,0,.35)', font: { size: 9 } } } } } });
   document.getElementById('uk-foot').innerHTML = 'Source: Defra, Agricultural price indices – United Kingdom (monthly), © Crown copyright, Open Government Licence v3.0. Latest month ' + fmtMonth(last) + '.';
 }
 
