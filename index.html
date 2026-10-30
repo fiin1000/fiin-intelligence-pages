@@ -1446,20 +1446,6 @@ var COMM = {
     'Egg albumen (dried)': {unit:'£/kg',sources:'FAO'}
   }
   },
-  drinks: {
-    label:'Drinks', sources:'BSDA + FAO',
-    context:'False juice content claims, origin fraud, adulteration with cheaper ingredients',
-    threshold:0.5, norm:0.3,
-    rasffCategories:['non-alcholic beverages'],
-    products:{
-    'Orange juice': {unit:'£/litre',sources:'HMRC (import price only)'},
-    'Apple juice': {unit:'£/litre',sources:'HMRC (import price only)'},
-    'Mineral water': {unit:'£/litre',sources:'BSDA'},
-    'Energy drinks': {unit:'£/litre',sources:'BSDA'},
-    'Soft drinks': {unit:'£/litre',sources:'BSDA'},
-    'Coconut water': {unit:'£/litre',sources:'FAO'}
-  }
-  },
   oils: {
     label:'Vegetable Oils', sources:'HMRC',
     context:'Grade fraud (lower grade or refined oil sold as extra virgin), dilution with cheaper oils, origin and PDO fraud, sustainability certification fraud',
@@ -3670,7 +3656,7 @@ function loadData() {
 // Each string in the array becomes one bullet point.
 // ─────────────────────────────────────────────────────────────────────────────
 var TSG_GUIDANCE = {
-  // TSG recommendations, updated 30 Oct 2026 from the TSG round-up. Drinks: none in this update.
+  // TSG recommendations, updated 30 Oct 2026 from the TSG round-up.
   poultry: [
     "Changes in the Brazilian meat and poultry market, including implications of the EU import ban, possible stockpiling and redirection of supply, are increasing pressure on smaller operators and warrant continued monitoring.",
     "Organic livestock and feed availability were identified as a future watch-out, particularly where drought or feed substitution pressure could increase fraud vulnerability.",
@@ -3693,11 +3679,9 @@ var TSG_GUIDANCE = {
     "Whitefish sourcing warrants continued monitoring: the EU's proposed ban on Russian cod and Alaskan pollock imports was dropped from its July 2026 sanctions package following objections from some European countries. However, the prospect of a ban may have prompted supply chain adjustments that will not necessarily reverse and tariffs remain in place. Availability, pricing, and supplier relationships in this category should continue to be tracked particularly where Russian-caught fish is processed via third countries such as China before entering European supply chains."
   ],
   honey: [
-    'The Honey Working Group has reconvened with new members, led by Steve Brown from Barfoots, to establish a shared understanding of honey authenticity challenges. A subgroup, led by Claire Yates from Co-op, is developing best practice honey supply chain assurance guidance for members.',
-    "Adulteration with sugar syrup, or lower cost honeys"
+    'The Honey Working Group has reconvened with new members, led by Steve Brown from Barfoots, to establish a shared understanding of honey authenticity challenges. A subgroup, led by Claire Yates from Co-op, is developing best practice honey supply chain assurance guidance for members.'
   ],
   herbs_spices: [
-    "Bulking herbs with cheaper, morphologically similar plants, or with parts of the same plant not used in production, e.g. stem",
     "Approximately 90% of global saffron supply originates from Iran, due to ongoing conflict supply disruption is anticipated and fraud risk elevated. Known fraud types for saffron include: PDO origin fraud (Iranian sold as Spanish), grade fraud (grade 2 sold as grade 1), quality fraud (older stock at premium price), substitution, and country-of-origin misrepresentation. The most probable near-term risk is bulking out (with safflower or other materials) rather than origin fraud, especially in ground saffron",
     "Additional scrutiny is advised for spices originating from India, reflecting ongoing pressures in complex supply chains and the continued need to verify origin, quality, and authenticity claims",
     "Approximately 90% of global saffron supply originates from Iran, creating a highly concentrated supply base. This supply chain may face increased disruption risk in the coming months due to conflict, which could heighten vulnerability to substitution or misrepresentation",
