@@ -1530,7 +1530,7 @@ var WHOLE_CHAIN = {
   },
   fruit_veg: {
     vulnerabilities: ['Climate change', 'El Niño', 'Geopolitics', 'Customer demand', 'Demand / supply trends (long-term shock vs short-term trends)', 'Excess volume', 'Illicit volume', 'Change of ownership / pricing', 'Provenance premium, e.g. Spanish', 'Inflation / cost pressures', 'Insecticides', 'Methods of testing and interpretation of results'],
-    risks: ['Adulteration / dilution / substitution', 'Mislabelling / counterfeit', 'Misrepresentation of origin, organic or sustainability claims', 'Malicious contamination / tampering', 'Using AI to fake test certificates']
+    risks: ['Document fraud', 'Adulteration / dilution / substitution', 'Mislabelling / counterfeit', 'Misrepresentation of origin, organic or sustainability claims', 'Malicious contamination / tampering', 'Using AI to fake test certificates']
   },
   dairy: {
     vulnerabilities: ['Cross-border activity', 'Chemical content', 'Labour shortages', 'Fuel shortages', 'Maturation of product'],
@@ -1596,7 +1596,8 @@ var KNOWN_VULNERABILITIES = {
     'Laying Farm':              ['Avian influenza affecting supply and demand', 'Lack of vet inspection of chicks', 'Farm certification and economic viability of farms', 'Animal welfare standards', 'Price volatility (feed, energy)', 'Climate change and environmental legislation']
   },
   fruit_veg: {
-    'Farm/Orchard':             ['Weather, seasonality and disease', 'Input supply and pesticide rules (fertilisers, pesticides, including new pesticides)', 'Seed availability, quality and long lead times', 'Propagation, seed viability, cross-contamination and crop rotation', 'Differences in legislation between countries and limited auditor availability', 'Historic sourcing issues in some regions (e.g. Xinjiang)', 'Labour shortages'],
+    'Farm/Orchard':             ['Input supply and pesticide rules (fertilisers, pesticides, including new pesticides)', 'Seed availability, quality and long lead times', 'Propagation, seed viability, cross-contamination and crop rotation', 'Differences in legislation between countries and limited auditor availability', 'Historic sourcing issues in some regions (e.g. Xinjiang)'],
+    'Import/Border':            ['Groupage'],
     'Distribution':             ['Changes in distribution or shipping routes'],
     'Retail':                   ['Price reduction pressure'],
     'Consumer':                 ['Changing consumer demand']
@@ -1688,11 +1689,13 @@ var KNOWN_RISKS = {
     'Retail/Food Service':      [{t:'Relabelling'}]
   },
   fruit_veg: {
-    'Farm/Orchard':             [{t:'Fertiliser fraud'},{t:'Seed substitution and false documentation'}],
-    'Packing & Processing':     [{t:'Water added to increase weight'},{t:'Adulteration, dilution or substitution'}],
-    'Import/Border':            [{t:'Misrepresentation of origin and organic status'},{t:'Fake test certificates (including AI-generated)'},{t:'Illicit or excess volumes'}],
-    'Distribution':             [{t:'Origin and organic claims misrepresented by brokers and wholesalers'},{t:'Tampering and hygiene in contracted transport'}],
-    'Retail':                   [{t:'Misrepresentation of origin or organic status'}]
+    'Farm/Orchard':             [{t:'Fertiliser fraud'},{t:'Seed substitution and false documentation'},{t:'Variety fraud'},{t:'Origin fraud'},{t:'Certification fraud'},{t:'Record fraud'},{t:'Class claims'}],
+    'Harvest, Collection & Collation': [{t:'Adulteration'},{t:'Stock switching'},{t:'Substitution'}],
+    'Packing & Processing':     [{t:'Water added to increase weight'},{t:'Adulteration, dilution or substitution'},{t:'Labelling fraud'},{t:'Document or record fraud'},{t:'Undeclared processing'},{t:'Claims'}],
+    'Cold Storage':             [{t:'Substitution'},{t:'Mislabelling'},{t:'Record fraud'},{t:'Illegal treatments'}],
+    'Import/Border':            [{t:'Misrepresentation of origin, organic status and variety'},{t:'Fake certificates (including AI-generated)'},{t:'Illicit or excess volumes'},{t:'Trans-shipping'}],
+    'Distribution':             [{t:'Origin and organic claims misrepresented by brokers and wholesalers'},{t:'Tampering and hygiene in contracted transport'},{t:'Stock switching'}],
+    'Retail':                   [{t:'Misrepresentation of origin, organic status or variety'}]
   },
   cereals: {
     'Arable Farm':              [{t:'Exploitation of small farmers'}],
@@ -1976,7 +1979,7 @@ var SUPPLY_CHAIN = {
   honey:         ['Beekeeper / Apiary','Collection & Transport','Bulk Processor','Exporter','Shipping & Border','Blender / Packer','Distribution','Customer'],
   herbs_spices:  ['Growing Region','Harvest & Drying','Milling & Blending','Packaging & Labelling','Import/Border','Warehouse','Distribution','Retail','Consumer'],
   cereals:       ['Arable Farm','Harvest & Storage','Grain Store','Milling & Processing','Packaging & Labelling','Import/Border','Distribution','Retail','Consumer'],
-  fruit_veg:     ['Farm/Orchard','Harvest','Packing & Processing','Cold Storage','Import/Border','Distribution','Retail','Consumer'],
+  fruit_veg:     ['Farm/Orchard','Harvest, Collection & Collation','Packing & Processing','Cold Storage','Import/Border','Distribution','Retail','Consumer'],
   dairy:         ['Dairy Farm','Collection & Transport','Pasteurisation/UHT','Separation & Processing','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail','Consumer'],
   cocoa:         ['Farm/Plantation','Fermentation & Drying','Export Collection','Import/Border','Grinding & Processing','Chocolate Manufacture','Packaging & Labelling','Warehouse','Distribution','Retail','Consumer'],
   nuts:          ['Orchard','Harvest, Hulling & Drying','Processing & Sorting','Packaging & Labelling','Import/Border','Warehouse','Distribution','Retail','Consumer'],
@@ -1989,6 +1992,7 @@ var SUPPLY_CHAIN = {
 // 0 = first zone, 1 = second… Labels below; a category can have its own labels.
 var SUPPLY_ZONE_LABELS = {
   _default: ['Production', 'Processing & packing', 'Import, storage & distribution', 'Retail & consumer'],
+  fruit_veg: ['Production', 'Processing & packing', 'Import, storage & distribution', 'Customer'],
   cocoa:    ['Production & import', 'Processing & packing', 'Storage & distribution', 'Retail & consumer'],
   // Honey is processed in bulk before export and blended/packed after import, so two zones appear twice
   honey:    ['Production', 'Processing & packing', 'Import, storage & distribution', 'Processing & packing', 'Import, storage & distribution', 'Retail & consumer']
