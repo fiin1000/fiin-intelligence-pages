@@ -1526,7 +1526,7 @@ var WHOLE_CHAIN = {
   },
   cereals: {
     vulnerabilities: ['Price volatility', 'Geopolitics, sanctions and trade policy'],
-    risks: ['Adulteration, dilution or substitution', 'Misrepresentation of origin', 'Mislabelling']
+    risks: ['Adulteration, dilution or substitution', 'Misrepresentation of origin', 'Mislabelling', 'Document fraud (e.g. certificates, assurance documents, import paperwork)', 'Misrepresentation of credence attributes (e.g. sustainability, ethical trade, organic, TASCC and farm assurance)']
   },
   fruit_veg: {
     vulnerabilities: ['Climate and extreme weather (including El Niño)', 'Geopolitics, sanctions and trade policy', 'Demand shifts and trends (long-term shocks and short-term trends)', 'Change of ownership and pricing', 'Provenance premium (e.g. Spanish)', 'Cost pressure', 'Methods of testing and interpretation of results'],
@@ -1675,9 +1675,11 @@ var KNOWN_RISKS = {
     'Consumer':                  [{t:'Allergens'},{t:'Food safety'}]
   },
   cereals: {
-    'Arable Farm':               [{t:'Exploitation of small farmers'}],
-    'Milling & Processing':      [{t:'Adulteration, dilution or substitution (e.g. bulking, contamination)'}],
-    'Packaging & Labelling':     [{t:'Misrepresentation of origin'},{t:'Mislabelling'}]
+    'Agronomic Input Suppliers': [{t:'Counterfeit fertilisers and pesticides'},{t:'Seed variety misrepresentation'}],
+    'Arable Farm':              [{t:'Exploitation of small farmers'},{t:'Upgrading (lower grade sold as higher)'}],
+    'Harvest & Grain Store':    [{t:'Misrepresentation of origin'},{t:'Upgrading (lower grade sold as higher)'},{t:'Mycotoxin results misrepresented'}],
+    'Milling & Processing':     [{t:'Adulteration, dilution or substitution (e.g. blending, bulking, dilution with low-cost ingredients, contamination)'},{t:'Fortification fraud'}],
+    'Packaging & Labelling':    [{t:'Misrepresentation of origin'},{t:'Mislabelling'}]
   },
   fruit_veg: {
     'Farm/Orchard & Harvest':    [{t:'Fertiliser fraud'},{t:'Seed substitution'},{t:'Misrepresentation of credence attributes (e.g. variety, class, organic)'}],
@@ -1985,7 +1987,7 @@ var SUPPLY_CHAIN = {
   fish_shellfish:['Farm/Fishing Vessel','Landing & Grading','Slaughter & Gutting','Filleting & Processing','Smoking/Further Processing','Packaging & Labelling','Import/Border','Cold Storage','Distribution','Retail/Food Service','Consumer'],
   honey:         ['Beekeeper / Apiary','Collection, Collation & Transport','Bulk Processor','Exporter','Shipping & Border','Blender / Packer','Distribution','Customer'],
   herbs_spices:  ['Agronomic Input Suppliers','Growing Region','Harvest & Drying','Milling & Blending','Packaging & Labelling','Import/Border','Warehouse','Distribution','Retail/Food Service','Consumer'],
-  cereals:       ['Arable Farm','Harvest & Grain Store','Milling & Processing','Packaging & Labelling','Import/Border','Distribution','Retail/Food Service','Consumer'],
+  cereals:       ['Agronomic Input Suppliers','Arable Farm','Harvest & Grain Store','Milling & Processing','Packaging & Labelling','Import/Border','Distribution','Retail/Food Service','Consumer'],
   fruit_veg:     ['Farm/Orchard & Harvest','Collection & Collation','Packing & Processing','Cold Storage','Import/Border','Distribution','Retail/Food Service','Consumer'],
   dairy:         ['Dairy Farm','Collection & Transport','Pasteurisation/UHT','Separation & Processing','Packaging & Labelling','Import/Border','Cold Storage','Distribution','Retail/Food Service','Consumer'],
   cocoa:         ['Farm/Plantation','Fermentation & Drying','Export Collection','Import/Border','Grinding & Processing','Chocolate Manufacture','Packaging & Labelling','Warehouse','Distribution','Retail/Food Service','Consumer'],
@@ -2009,7 +2011,7 @@ var SUPPLY_ZONES = {
   fish_shellfish: [0,0,1,1,1,1,2,2,2,3,3],
   honey:          [0,0,1,2,2,3,4,5],
   herbs_spices:   [0,0,0,1,1,2,2,2,3,3],
-  cereals:        [0,0,1,1,2,2,3,3],
+  cereals:        [0,0,0,1,1,2,2,3,3],
   fruit_veg:      [0,0,1,2,2,2,3,3],
   dairy:          [0,0,1,1,1,2,2,2,3,3],
   cocoa:          [0,0,0,0,1,1,1,2,2,3,3],
