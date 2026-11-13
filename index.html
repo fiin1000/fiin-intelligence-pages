@@ -1080,7 +1080,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
         <div class="tsg-card">
           <div class="tsg-header">
             <div class="tsg-header-left">
-              <span class="tsg-badge" id="tsg-commodity-name">TSG Quarterly Recommendations</span>
+              <span class="tsg-badge" id="tsg-commodity-name">TSG Quarterly Recommendations Q3 2026</span>
             </div>
           </div>
           <div id="tsg-content"></div>
@@ -3102,7 +3102,7 @@ function buildSnapshotCsvRows(cat, now) {
   rows.push(['For fiin member use only. Evidence of horizon scanning.']);
 
   // 1. TSG recommendations
-  section(1, 'TSG quarterly recommendations');
+  section(1, 'TSG quarterly recommendations ' + TSG_QUARTER);
   var tsg = TSG_GUIDANCE[cat] || [];
   rows.push(['#', 'Recommendation']);
   if (tsg.length) tsg.forEach(function(t, i){ rows.push([i + 1, vaStrip(t)]); });
@@ -3531,7 +3531,7 @@ function render() {
 
   // Commodity header
   document.getElementById('com-name').textContent    = c.label;
-  document.getElementById('tsg-commodity-name').textContent = 'TSG Quarterly Recommendations & Information — ' + c.label;
+  document.getElementById('tsg-commodity-name').textContent = 'TSG Quarterly Recommendations ' + TSG_QUARTER + ' & Information — ' + c.label;
   document.getElementById('rasff-com').textContent   = c.label.toLowerCase();
   var intelProdEl = document.getElementById('intel-prod-label');
   if (intelProdEl) intelProdEl.textContent = curProd;
@@ -3834,6 +3834,8 @@ function loadData() {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TSG QUARTERLY RECOMMENDATIONS
+// The quarter the current recommendations cover: shown after the section title. Update when the TSG issues new ones.
+var TSG_QUARTER = 'Q3 2026';
 // Update bullets each quarter — add/edit entries per commodity key below.
 // Each string in the array becomes one bullet point.
 // ─────────────────────────────────────────────────────────────────────────────
