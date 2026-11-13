@@ -1492,12 +1492,6 @@ var COMM = {
 // Drivers and pressures (climate, disease, labour, costs, policy, trade) from the TSG conference maps, placed at the closest stage.
 // Format: { category: { stage: ['vulnerability', ...] } }. Stages not listed show 'None recorded yet'.
 var VULNERABILITIES_DEFAULT = [];
-// Impacts per stage (e.g. on consumers), shown below known risks only where listed.
-var KNOWN_IMPACTS = {
-  herbs_spices: {
-    'Consumer':                 ['Allergens', 'Food safety']
-  }
-};
 var KNOWN_VULNERABILITIES = {
   poultry: {
     'Rearing Farm':             ['Feed supply chain (soy, vitamins, fortification)', 'Disease control measures (e.g. housing orders) affecting supply', 'Extreme weather and heat'],
@@ -1527,7 +1521,8 @@ var KNOWN_VULNERABILITIES = {
     'Import/Border':            ['Trade restrictions, sanctions and price volatility'],
     'Warehouse':                ['Security', 'Poor storage conditions'],
     'Distribution':             ['Fuel and transport costs', 'Poor conditions in transit', 'Security'],
-    'Retail':                   ['Anything that drives demand']
+    'Retail':                   ['Anything that drives demand'],
+    'Consumer':                 ['Allergens', 'Food safety']
   },
   dairy: {
     'Dairy Farm':               ['Animal disease and shortages', 'Feed availability and fewer farms'],
@@ -2068,7 +2063,6 @@ function renderSupplyChain() {
     try { risks = JSON.parse((el.getAttribute('data-risks') || '[]').replace(/&#39;/g,"'")); } catch(e2) {}
     var node = el.getAttribute('data-node');
     var vulns = ((KNOWN_VULNERABILITIES[k] || {})[node]) || VULNERABILITIES_DEFAULT;
-    var impacts = ((KNOWN_IMPACTS[k] || {})[node]) || [];
     showTip(el, '<div class="sc-tip-node-title">' + node + '</div>' +
       '<div class="sc-tip-section-head">Vulnerabilities</div>' +
       (vulns.length ? vulns.map(function(v) { return '<div class="sc-tip-risk">' + v + '</div>'; }).join('')
@@ -2076,7 +2070,6 @@ function renderSupplyChain() {
       '<div class="sc-tip-section-head">Known risks</div>' +
       (risks.length ? risks.map(function(r) { return '<div class="sc-tip-risk">' + (r.t || '') + '</div>'; }).join('')
                     : '<div class="sc-tip-risk sc-tip-none">None recorded yet</div>') +
-      (impacts.length ? '<div class="sc-tip-section-head">Impacts</div>' + impacts.map(function(v) { return '<div class="sc-tip-risk">' + v + '</div>'; }).join('') : '') +
       '<div class="sc-tip-footer">fiin TSG</div>');
   });
   // Zones: the RASFF alerts placed there
