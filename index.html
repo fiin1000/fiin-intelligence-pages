@@ -2427,9 +2427,10 @@ function renderKeyCountries() {
     pd.rows.slice(0, 10).forEach(function(r){ top10[kpcCountryKey(r.country)] = true; });
   }
   var worldHtml = world ? kpcRows(world)
-    : '<div class="kpc-empty">' + (!PRODUCTION_CSV_URL ? 'World production figures are not connected yet. They will come from FAOSTAT through a \u201cproduction\u201d tab in the fiin data sheet.'
+    : '<div class="kpc-empty">' + (!PRODUCTION_CSV_URL ? 'World production figures are not connected yet. They will come from ' + (isFish ? 'FAO FishStat' : 'FAOSTAT') + ' through a \u201cproduction\u201d tab in the fiin data sheet.'
         : !productionLoaded ? 'Loading&hellip;' : 'No FAOSTAT production figures for ' + escHtml(prod) + ' yet.') + '</div>';
-  var worldSrc = '<b>Source:</b> FAOSTAT (UN Food and Agriculture Organization)' +
+  var isFish = (pd && /fishstat/i.test(pd.source)) || cur === 'fish_shellfish';
+  var worldSrc = '<b>Source:</b> ' + (isFish ? 'FAO FishStat (UN Food and Agriculture Organization), wild catch and farmed' : 'FAOSTAT (UN Food and Agriculture Organization)') +
     (pd && pd.year ? ' \u00b7 ' + escHtml(pd.year) + ' production' : '') +
     (pd && (pd.note || pd.item) ? '<br><b>Measure:</b> ' + escHtml(pd.note || pd.item) : '') +
     '<br><b>Last updated:</b> ' + (pd && pd.updated ? escHtml(pd.updated) : '\u2014');
