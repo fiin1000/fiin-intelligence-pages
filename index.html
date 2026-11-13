@@ -1031,6 +1031,36 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
 #pw-btn:hover { background: #a0d94a; }
 #pw-err { font-size: 11px; color: #ff8080; margin-top: 10px;
   min-height: 16px; }
+
+/* ── Decluttered layout (agreed 13 Nov 2026) ───────────────────────────────────────────── */
+/* one heading style: plain sentence-case titles */
+.tsg-badge, .res-badge, .res-badge-ext { background:none !important; color:var(--ink) !important; font-family:inherit; font-size:13px; font-weight:600; text-transform:none; letter-spacing:0; padding:0; border-radius:0; }
+.tsg-header, .res-header, .res-header-ext { background:#fff !important; padding:12px 16px 8px; border-bottom:none; }
+/* update frequency: small grey text after the title */
+.freq-tag, .freq-tag.on-btn, .freq-tag.on-dark { border:none !important; background:none !important; padding:0 !important; margin:0 !important; font-family:inherit; font-size:11px; font-weight:400; color:var(--muted); letter-spacing:0; }
+.freq-tag.on-dark { color:var(--lime); }
+.freq-tag.on-btn { color:inherit; opacity:.8; display:block; }
+.sc-title .freq-tag { margin-left:8px !important; }
+.risk-badge::before, .intel-meta::before { content:'\00b7\00a0'; }
+/* monospace only for numbers, not for labels and sources */
+.kpc-src, .intel-meta, .risk-badge { font-family:inherit !important; letter-spacing:0 !important; }
+.risk-badge { background:none; color:var(--muted); font-weight:400; padding:0; }
+.kpc-src { margin-bottom:6px; }
+.pv-info { color:var(--muted); cursor:help; font-size:12px; }
+.sc-sub { margin-bottom:2px; }
+/* fiin testing panel: slim while it is example data */
+/* whole supply chain: light green arrow, so it reads as part of the map rather than a header */
+.sc-whole { background:#D5E8C1; color:var(--ink); }
+.sc-whole-name { color:var(--pine); border-right-color:rgba(45,95,45,.25); }
+.sc-whole-lbl { color:var(--pine); }
+.sc-whole-txt { color:var(--ink); }
+/* clearer break between the recommendations/resources row and the supply chain map */
+.tsg-resources-row { margin-bottom:0; }
+#sc-section { margin-top:30px !important; position:relative; }
+#sc-section::before { content:''; position:absolute; left:0; right:0; top:-16px; border-top:1px solid var(--border); }
+/* flatter product section: no outer box around the cards */
+.product-section { background:none; border:none; padding:0; }
+.product-section .card { background:#fff; }
 </style>
 </head>
 <body>
@@ -1106,7 +1136,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
       <button type="button" class="print-btn" id="csv-btn" onclick="downloadCsv()" title="This category’s TSG recommendations, RASFF alerts, fiin member data, price risk signals and news, in sections">Download CSV</button>
       <button type="button" class="print-btn" onclick="printSnapshot()">Print / save as PDF</button>
       <button type="button" class="print-btn help-btn" id="help-open">How to read this page</button>
-      <div class="com-meta-value" id="feed-status">RASFF: daily &nbsp;·&nbsp; News: daily &nbsp;·&nbsp; Prices: monthly (HMRC imports) &nbsp;·&nbsp; fiin data: quarterly</div>
+      <div class="com-meta-value" id="feed-status" style="display:none">RASFF: daily &nbsp;·&nbsp; News: daily &nbsp;·&nbsp; Prices: monthly (HMRC imports) &nbsp;·&nbsp; fiin data: quarterly</div>
     </div>
   </div>
 
@@ -1121,9 +1151,9 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
         <div class="tsg-card">
           <div class="tsg-header">
             <div class="tsg-header-left">
-              <span class="tsg-badge" id="tsg-commodity-name">TSG Quarterly Recommendations Q3 2026</span>
+              <span class="tsg-badge" id="tsg-commodity-name">TSG quarterly recommendations Q3 2026</span>
             </div>
-            <span class="freq-tag" title="How often this section is updated">↻ Updated quarterly</span>
+            <span class="freq-tag" title="How often this section is updated">Updated quarterly</span>
           </div>
           <div id="tsg-content"></div>
 
@@ -1145,7 +1175,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
       <div class="res-card" id="res-ext-panel">
         <div class="res-header res-header-ext">
           <div class="res-header-left">
-            <span class="res-badge res-badge-ext" id="res-ext-title">External Resources</span>
+            <span class="res-badge res-badge-ext" id="res-ext-title">External resources</span>
           </div>
         </div>
         <div class="res-body" id="res-ext-body">
@@ -1158,7 +1188,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
 
     <!-- Supply chain map + Indicators -->
     <div class="card sc-section" id="sc-section" style="margin-top:14px">
-      <div class="sc-title">Supply chain map — where alerts and authenticity concerns most likely relate <span class="freq-tag" title="How often this section is updated">↻ RASFF daily · fiin data quarterly · risks reviewed by the TSG</span></div>
+      <div class="sc-title">Supply chain map — where alerts and authenticity concerns most likely relate <span class="freq-tag" title="How often this section is updated">RASFF daily · fiin data quarterly · risks reviewed by the TSG</span></div>
       <div class="sc-sub" id="sc-sub"></div>
       <div class="sc-map-row">
       <div class="sc-map" id="sc-map"></div>
@@ -1166,7 +1196,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
         <div class="rasff-link-row" id="rasff-link-row">
           <span id="rasff-com" style="display:none"></span>
           <button type="button" class="rasff-box rasff-open" id="rasff-open" title="Alerts for this category from the last 6 months, filtered to those relating to potential fraud">
-            <span class="rasff-box-title">RASFF alerts relating to fraud</span><span class="freq-tag on-btn" title="How often this section is updated">↻ Updated daily</span><span class="rasff-box-sub" id="rasff-open-sub">Loading…</span>
+            <span class="rasff-box-title">RASFF alerts relating to fraud</span><span class="freq-tag on-btn" title="How often this section is updated">Updated daily</span><span class="rasff-box-sub" id="rasff-open-sub">Loading…</span>
           </button>
           <a class="rasff-box rasff-box-ext" id="rasff-portal-link" href="https://webgate.ec.europa.eu/rasff-window/screen/search" target="_blank" rel="noopener" title="Every RASFF notification, on the European Commission’s site">
             <span class="rasff-box-title">Whole RASFF Window ↗</span><span class="rasff-box-sub">All alerts, unfiltered</span>
@@ -1201,7 +1231,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
     <dialog class="rasff-dialog" id="rasff-dialog" aria-labelledby="rasff-dialog-title">
       <div class="rasff-list-head">
         <span class="rasff-list-title" id="rasff-dialog-title">RASFF alerts relating to potential fraud &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="rasff-dialog-com" style="color:var(--forest)"></span></span>
-        <span class="rasff-list-meta"><span class="freq-tag" title="How often this section is updated">↻ Updated daily</span> <span id="rasff-count"></span></span>
+        <span class="rasff-list-meta"><span class="freq-tag" title="How often this section is updated">Updated daily</span> <span id="rasff-count"></span></span>
         <button type="button" class="rasff-close" id="rasff-close" aria-label="Close">✕</button>
       </div>
       <div class="rasff-dialog-body" id="rasff-body"></div>
@@ -1212,7 +1242,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
     <div class="card rasff-list-card" id="eu-card" style="margin-top:14px;padding:0;display:none">
       <div class="rasff-list-head">
         <span class="rasff-list-title">EU fraud suspicions &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="eu-month" style="color:var(--forest)"></span></span>
-        <span class="rasff-list-meta"><span class="freq-tag" title="How often this section is updated">↻ Monthly report</span> <span id="eu-count"></span></span>
+        <span class="rasff-list-meta"><span class="freq-tag" title="How often this section is updated">Monthly report</span> <span id="eu-count"></span></span>
       </div>
       <div id="eu-body"></div>
       <div class="rasff-list-foot" id="eu-foot"></div>
@@ -1224,7 +1254,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
           <div class="tp-head-left">
             <span class="tp-head-title">fiin member testing data</span>
             <span class="tp-soon">Example data</span>
-            <span class="freq-tag on-dark" title="How often this section is updated">↻ Updated quarterly</span>
+            <span class="freq-tag on-dark" title="How often this section is updated">Updated quarterly</span>
           </div>
           <span class="tp-period" id="testing-period">Not real results · real member data to follow</span>
         </div>
@@ -1278,7 +1308,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
           <div class="card risk-card" id="risk-card" style="margin-bottom:14px;">
             <div class="card-title">
               <span>Price risk signals (imports) &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="risk-prod" style="color:var(--forest)"></span></span>
-              <span><span class="freq-tag" title="How often this section is updated">↻ Updated monthly · about 2 months behind</span> <span class="risk-badge">UK IMPORTS · HMRC</span></span>
+              <span><span class="freq-tag" title="How often this section is updated">Updated monthly · about 2 months behind</span> <span class="risk-badge">UK IMPORTS · HMRC</span></span>
             </div>
             <div class="card-sub" id="risk-sub"></div>
             <div class="risk-lights" id="risk-lights"></div>
@@ -1302,7 +1332,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
           <div class="card intel-section" id="intel-section" style="height:100%">
             <div class="intel-head">
               <span class="intel-title" style="font-size:13px;font-weight:600;color:var(--ink)">Market news &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="intel-prod-label" style="color:var(--forest)"></span></span>
-              <span><span class="freq-tag" title="How often this section is updated">↻ Updated daily</span> <span class="intel-meta" id="intel-meta">Loading&hellip;</span></span>
+              <span><span class="freq-tag" title="How often this section is updated">Updated daily</span> <span class="intel-meta" id="intel-meta">Loading&hellip;</span></span>
             </div>
             <div class="intel-items" id="intel-items">
               <div class="intel-empty">Loading intelligence&hellip;</div>
@@ -2094,8 +2124,8 @@ function rasffZoneLabel(cat, node) {
 }
 
 // ── Render supply chain map ───────────────────────────────────────────────────
-var SC_SUB_TEXT = 'Shows RASFF alerts and fiin data that could indicate potential fraud, grouped by the part of the supply chain they most likely relate to. ' +
-  'Hover a stage for vulnerabilities and known risks, determined by the TSG, or click View on a zone for its RASFF alerts and fiin data. Those that apply across the whole chain are listed below the map.';
+var SC_SUB_TEXT = 'Hover a stage for its vulnerabilities and known risks; click View for a zone\u2019s RASFF alerts and fiin data. ' +
+  '<span class="pv-info" tabindex="0" title="RASFF alerts and fiin data that could indicate potential fraud are grouped by the part of the supply chain they most likely relate to. Vulnerabilities and known risks are determined by the TSG. Those that apply across the whole chain are in the green arrow below the map.">\u24d8</span>';
 function renderSupplyChain() {
   var mapEl = document.getElementById('sc-map');
   var nodes = SUPPLY_CHAIN[scKey(cur)] || [];
@@ -2453,10 +2483,10 @@ function renderKeyCountries() {
     : '<div class="kpc-empty">' + (!PRODUCTION_CSV_URL ? 'World production figures are not connected yet. They will come from ' + (isFish ? 'FAO FishStat' : 'FAOSTAT') + ' through a \u201cproduction\u201d tab in the fiin data sheet.'
         : !productionLoaded ? 'Loading&hellip;' : 'No FAOSTAT production figures for ' + escHtml(prod) + ' yet.') + '</div>';
   var isFish = (pd && /fishstat/i.test(pd.source)) || cur === 'fish_shellfish';
-  var worldSrc = '<b>Source:</b> ' + (isFish ? 'FAO FishStat (UN Food and Agriculture Organization), wild catch and farmed' : 'FAOSTAT (UN Food and Agriculture Organization)') +
+  var worldSrc = '' + (isFish ? 'FAO FishStat (UN Food and Agriculture Organization), wild catch and farmed' : 'FAOSTAT (UN Food and Agriculture Organization)') +
     (pd && pd.year ? ' \u00b7 ' + escHtml(pd.year) + ' production' : '') +
-    (pd && (pd.note || pd.item) ? '<br><b>Measure:</b> ' + escHtml(pd.note || pd.item) : '') +
-    '<br><b>Last updated:</b> ' + (pd && pd.updated ? escHtml(pd.updated) : '\u2014');
+    (pd && (pd.note || pd.item) ? ' \u00b7 ' + escHtml(pd.note || pd.item) : '') +
+    (pd && pd.updated ? ' \u00b7 updated ' + escHtml(pd.updated) : '');
 
   // UK suppliers: share of UK import value, last 12 months of HMRC data
   var hit = tradeFor(prod), t = hit ? hit.t : null, uk = null, ukSrc;
@@ -2466,10 +2496,10 @@ function renderKeyCountries() {
       .map(function(o){ return { name: o, share: tradeSum(t, o, M).v / tot * 100 }; })
       .filter(function(r){ return r.share > 0; })
       .sort(function(a, b){ return b.share - a.share; }).slice(0, 5);
-    ukSrc = '<b>Source:</b> HMRC UK customs data \u00b7 share of import value, ' + fmtMonth(M[0]) + ' \u2013 ' + fmtMonth(M[M.length - 1]) +
-      '<br><b>Last updated:</b> ' + (t.updated ? escHtml(t.updated) : '\u2014');
+    ukSrc = 'HMRC UK customs data \u00b7 share of import value, ' + fmtMonth(M[0]) + ' \u2013 ' + fmtMonth(M[M.length - 1]) +
+      (t.updated ? ' \u00b7 updated ' + escHtml(t.updated) : '');
   } else {
-    ukSrc = '<b>Source:</b> HMRC UK customs data<br><b>Last updated:</b> \u2014';
+    ukSrc = 'HMRC UK customs data';
   }
   var flagged = [];
   var flagFn = world ? function(r){ var f = !top10[kpcCountryKey(r.name)]; if (f) flagged.push(r.name); return f; } : null;
@@ -2479,8 +2509,8 @@ function renderKeyCountries() {
 
   var noun = (t && t.noun) || prod.toLowerCase();
   el.innerHTML =
-    '<div class="kpc-head"><div class="kpc-title">Key producing countries &nbsp;<span style="color:var(--muted);font-weight:400">\u2014</span>&nbsp; <b>' + escHtml(prod) + '</b></div><span class="freq-tag" title="How often this section is updated">↻ World figures yearly · UK figures monthly</span></div>' +
-    '<div class="kpc-sub">Where ' + escHtml(noun) + ' is produced worldwide, next to where the UK buys it from. A large UK supplier that is not a large producer can point to re-export, blending or origin risk.</div>' +
+    '<div class="kpc-head"><div class="kpc-title">Key producing countries &nbsp;<span style="color:var(--muted);font-weight:400">\u2014</span>&nbsp; <b>' + escHtml(prod) + '</b></div><span class="freq-tag" title="How often this section is updated">World figures yearly · UK figures monthly</span></div>' +
+    '<div class="kpc-sub">Where it is produced, and where the UK buys it from. <span class="pv-info" tabindex="0" title="Where ' + escHtml(noun) + ' is produced worldwide, next to where the UK buys it from. A large UK supplier that is not a large producer can point to re-export, blending or origin risk.">\u24d8</span></div>' +
     '<div class="kpc-cols">' +
       '<div class="kpc-col"><h4>Top producers worldwide</h4><div class="kpc-src">' + worldSrc + '</div>' + worldHtml + '</div>' +
       '<div class="kpc-col uk"><h4>Top suppliers to the UK</h4><div class="kpc-src">' + ukSrc + '</div>' + ukHtml + '</div>' +
@@ -3667,7 +3697,7 @@ function render() {
 
   // Commodity header
   document.getElementById('com-name').textContent    = c.label;
-  document.getElementById('tsg-commodity-name').textContent = 'TSG Quarterly Recommendations ' + TSG_QUARTER + ' & Information — ' + c.label;
+  document.getElementById('tsg-commodity-name').textContent = 'TSG quarterly recommendations ' + TSG_QUARTER;
   document.getElementById('rasff-com').textContent   = c.label.toLowerCase();
   var intelProdEl = document.getElementById('intel-prod-label');
   if (intelProdEl) intelProdEl.textContent = curProd;
@@ -4173,7 +4203,7 @@ function renderResources() {
 
   var label = COMM[cur] ? COMM[cur].label : cur;
   var RES_LABELS = {oils:'Vegetable Oils',poultry:'Poultry',red_meat:'Red Meat',fish_shellfish:'Fish & Shellfish',honey:'Honey',herbs_spices:'Herbs & Spices',bakery_cereals:'Bakery & Cereals',fruit_veg:'Fruit & Vegetables',dairy:'Dairy Products',cocoa:'Cocoa',nuts_snacks:'Nuts, Seeds & Snacks',eggs:'Egg & Egg Products',drinks:'Drinks'};
-  titleEl.textContent = 'fiin ' + (RES_LABELS[cur] || label) + ' Resources';
+  titleEl.textContent = 'fiin resources';
 
   // Remove old file rows (keep placeholder and upload btn if present)
   bodyEl.querySelectorAll('.res-file').forEach(function(el){ el.remove(); });
