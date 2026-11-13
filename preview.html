@@ -1040,21 +1040,26 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
 .tsg-header, .res-header, .res-header-ext { background:#fff !important; padding:12px 16px 8px; border-bottom:none; }
 /* update frequency: small grey text after the title */
 .freq-tag, .freq-tag.on-btn, .freq-tag.on-dark { border:none !important; background:none !important; padding:0 !important; margin:0 !important; font-family:inherit; font-size:11px; font-weight:400; color:var(--muted); letter-spacing:0; }
-.freq-tag.on-dark { color:var(--sage); }
+.freq-tag.on-dark { color:var(--lime); }
 .freq-tag.on-btn { color:inherit; opacity:.8; display:block; }
 .sc-title .freq-tag { margin-left:8px !important; }
 .risk-badge::before, .intel-meta::before { content:'\00b7\00a0'; }
 /* monospace only for numbers, not for labels and sources */
-.kpc-src, .intel-meta, .tp-period, .tp-soon, .risk-badge { font-family:inherit !important; letter-spacing:0 !important; }
-.tp-soon { color:var(--lime); border:none; padding:0; }
+.kpc-src, .intel-meta, .risk-badge { font-family:inherit !important; letter-spacing:0 !important; }
 .risk-badge { background:none; color:var(--muted); font-weight:400; padding:0; }
 .kpc-src { margin-bottom:6px; }
 .pv-info { color:var(--muted); cursor:help; font-size:12px; }
 .sc-sub { margin-bottom:2px; }
 /* fiin testing panel: slim while it is example data */
-.tp-panel.pv-collapsed > :not(.tp-head) { display:none; }
-.pv-toggle { margin-left:8px; font:inherit; font-size:11px; color:var(--lime); background:none; border:1px solid rgba(141,198,63,.5); border-radius:4px; padding:1px 8px; cursor:pointer; }
-.pv-toggle:hover { background:rgba(141,198,63,.15); }
+/* whole supply chain: light green arrow, so it reads as part of the map rather than a header */
+.sc-whole { background:#D5E8C1; color:var(--ink); }
+.sc-whole-name { color:var(--pine); border-right-color:rgba(45,95,45,.25); }
+.sc-whole-lbl { color:var(--pine); }
+.sc-whole-txt { color:var(--ink); }
+/* clearer break between the recommendations/resources row and the supply chain map */
+.tsg-resources-row { margin-bottom:0; }
+#sc-section { margin-top:30px !important; position:relative; }
+#sc-section::before { content:''; position:absolute; left:0; right:0; top:-16px; border-top:1px solid var(--border); }
 /* flatter product section: no outer box around the cards */
 .product-section { background:none; border:none; padding:0; }
 .product-section .card { background:#fff; }
@@ -1247,14 +1252,14 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
     </div>
 
     <div style="margin-top:14px">
-      <div class="tp-panel pv-collapsed" id="tp-panel">
+      <div class="tp-panel">
         <div class="tp-head">
           <div class="tp-head-left">
             <span class="tp-head-title">fiin member testing data</span>
             <span class="tp-soon">Example data</span>
             <span class="freq-tag on-dark" title="How often this section is updated">Updated quarterly</span>
           </div>
-          <span class="tp-period" id="testing-period">Real member results to follow &nbsp;<button type="button" class="pv-toggle" id="tp-toggle" aria-expanded="false">Show example ▾</button></span>
+          <span class="tp-period" id="testing-period">Not real results · real member data to follow</span>
         </div>
         <div class="tp-kpis">
           <div class="tp-kpi"><div class="tp-kpi-label">Items Tested</div><div class="tp-kpi-value">—</div><div class="tp-kpi-sub">awaiting data</div></div>
@@ -4370,18 +4375,6 @@ setInterval(function() {
   loadData();
 }, REFRESH_INTERVAL_MINUTES * 60 * 1000);
 
-// Preview: the fiin testing panel stays slim while it holds example data (set to false when real data is connected)
-var FIIN_TESTING_IS_EXAMPLE = true;
-(function() {
-  var panel = document.getElementById('tp-panel'), btn = document.getElementById('tp-toggle');
-  if (!panel || !btn) return;
-  if (!FIIN_TESTING_IS_EXAMPLE) { panel.classList.remove('pv-collapsed'); btn.style.display = 'none'; return; }
-  btn.addEventListener('click', function() {
-    var open = panel.classList.toggle('pv-collapsed') === false;
-    btn.textContent = open ? 'Hide example \u25b4' : 'Show example \u25be';
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-  });
-})();
 // ── fiin testing data placeholder chart ──────────────────────────────────────
 (function() {
   var ctx = document.getElementById('testingChart');
