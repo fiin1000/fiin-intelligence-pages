@@ -2477,9 +2477,7 @@ function renderKeyCountries() {
     '<div class="kpc-cols">' +
       '<div class="kpc-col"><h4>Top producers worldwide</h4><div class="kpc-src">' + worldSrc + '</div>' + worldHtml + '</div>' +
       '<div class="kpc-col uk"><h4>Top suppliers to the UK</h4><div class="kpc-src">' + ukSrc + '</div>' + ukHtml + '</div>' +
-    '</div>' +
-    (flagged.length ? '<div class="kpc-note"><b>Worth a look:</b> ' + flagged.map(escHtml).join(flagged.length > 2 ? ', ' : ' and ').replace(/, ([^,]*)$/, ' and $1') +
-      (flagged.length > 1 ? ' are' : ' is') + ' among the top UK suppliers but not among the top 10 producers worldwide, so supplies may be re-exported or blended from elsewhere. Origin claims may need extra checks.</div>' : '');
+    '</div>';
 }
 
 // Thresholds — kept here so fiin's technical group can tune them
