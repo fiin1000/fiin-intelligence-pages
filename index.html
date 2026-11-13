@@ -3957,7 +3957,7 @@ function loadData() {
   if (PRODUCTION_CSV_URL) {
     fetch(PRODUCTION_CSV_URL)
       .then(function(r){ return r.text(); })
-      .then(function(txt) { loadProductionCsv(txt); productionLoaded = true; renderKeyCountries(); })
+      .then(function(txt) { loadProductionCsv(txt); productionLoaded = true; rebuildProductDropdown(); renderKeyCountries(); })
       .catch(function(e){ console.error('Production data fetch error:', e); productionLoaded = true; renderKeyCountries(); });
   }
 
@@ -4333,8 +4333,10 @@ function rebuildProductDropdown() {
   Object.keys(COMM[cur].products).forEach(function(p) {
     var opt = document.createElement('option');
     var hasRisk = !!tradeFor(p);
+    var hasProd = !!(productionData[p] && productionData[p].rows.length);
+    var tags = [hasRisk ? 'price signals' : '', hasProd ? 'production' : ''].filter(Boolean);
     opt.value = p;
-    opt.textContent = hasRisk ? '\u25CF ' + p + '  (price signals)' : p;
+    opt.textContent = tags.length ? '\u25CF ' + p + '  (' + tags.join(' \u00b7 ') + ')' : p;
     if (p === curProd) opt.selected = true;
     sel.appendChild(opt);
   });
