@@ -43,7 +43,7 @@ body {
   box-shadow: 0 2px 8px rgba(0,0,0,.18);
 }
 .header-inner {
-  max-width: 1280px;
+  max-width: 1440px;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -57,7 +57,7 @@ body {
 .header-meta { font-size: 11px; color: var(--sage); font-family: 'DM Mono', monospace; }
 
 /* ── LAYOUT ── */
-.page { max-width: 1280px; margin: 0 auto; padding: 10px 28px 48px; }
+.page { max-width: 1440px; margin: 0 auto; padding: 10px 28px 48px; }
 
 /* ── SETUP NOTICE ── */
 .setup-notice {
@@ -916,10 +916,12 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
 .tp-footer{padding:7px 14px;background:var(--mist);border-top:1px solid var(--border);font-size:10px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 
 /* ── TSG + RESOURCES ROW ── */
-.tsg-resources-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
-@media(max-width:860px){ .tsg-resources-row { grid-template-columns: 1fr; } }
+/* TSG recommendations | fiin resources | external resources, side by side */
+.tsg-resources-row { display: grid; grid-template-columns: minmax(0,1.35fr) minmax(0,1fr) minmax(0,1fr); gap: 14px; margin-bottom: 18px; align-items: stretch; }
+@media(max-width:1100px){ .tsg-resources-row { grid-template-columns: 1fr 1fr; } .tsg-resources-row .tsg-section { grid-column: 1 / -1; } }
+@media(max-width:700px){ .tsg-resources-row { grid-template-columns: 1fr; } }
 .tsg-resources-row .tsg-section { margin-bottom: 0; }
-.tsg-resources-row .tsg-card { display: flex; flex-direction: column; }
+.tsg-resources-row .tsg-card { display: flex; flex-direction: column; height: 100%; }
 #tsg-content { position: relative; }
 #tsg-content.clamped { max-height: 190px; overflow: hidden; }
 #tsg-content.clamped::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 48px; background: linear-gradient(rgba(255,255,255,0), #fff); pointer-events: none; }
@@ -934,7 +936,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
 .res-card { background: white; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; height: 100%; }
 .res-header { display: flex; align-items: center; justify-content: space-between; padding: 13px 18px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, #f0f5e8, #e8f2dd); }
 .res-header-left { display: flex; align-items: center; gap: 10px; }
-.res-header-ext { border-top: 1px solid var(--border); background: #F4F6F2; }
+.res-header-ext { background: #F4F6F2; }
 .res-badge-ext { background: var(--sage, #5F6F57); }
 .tp-dash { font-weight: 600; color: var(--pine); text-decoration: none; white-space: nowrap; }
 .tp-dash:hover { text-decoration: underline; }
@@ -1117,6 +1119,9 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
           <div class="res-placeholder" id="res-placeholder">No resources uploaded yet for this commodity.</div>
 
         </div>
+      </div>
+
+      <div class="res-card" id="res-ext-panel">
         <div class="res-header res-header-ext">
           <div class="res-header-left">
             <span class="res-badge res-badge-ext" id="res-ext-title">External Resources</span>
