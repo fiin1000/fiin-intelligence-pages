@@ -1596,7 +1596,7 @@ var KNOWN_VULNERABILITIES = {
     'Laying Farm':              ['Avian influenza affecting supply and demand', 'Lack of vet inspection of chicks', 'Farm certification and economic viability of farms', 'Animal welfare standards', 'Price volatility (feed, energy)', 'Climate change and environmental legislation']
   },
   fruit_veg: {
-    'Farm/Orchard':             ['Input supply and pesticide rules (fertilisers, pesticides, including new pesticides)', 'Seed availability, quality and long lead times', 'Propagation, seed viability, cross-contamination and crop rotation', 'Differences in legislation between countries and limited auditor availability', 'Historic sourcing issues in some regions (e.g. Xinjiang)'],
+    'Farm/Orchard & Harvest':   ['Input supply and pesticide rules (fertilisers, pesticides, including new pesticides)', 'Seed availability, quality and long lead times', 'Propagation, seed viability, cross-contamination and crop rotation', 'Differences in legislation between countries and limited auditor availability', 'Historic sourcing issues in some regions (e.g. Xinjiang)'],
     'Import/Border':            ['Groupage'],
     'Distribution':             ['Changes in distribution or shipping routes'],
     'Retail':                   ['Price reduction pressure'],
@@ -1689,8 +1689,8 @@ var KNOWN_RISKS = {
     'Retail/Food Service':      [{t:'Relabelling'}]
   },
   fruit_veg: {
-    'Farm/Orchard':             [{t:'Fertiliser fraud'},{t:'Seed substitution and false documentation'},{t:'Variety fraud'},{t:'Origin fraud'},{t:'Certification fraud'},{t:'Record fraud'},{t:'Class claims'}],
-    'Harvest, Collection & Collation': [{t:'Adulteration'},{t:'Stock switching'},{t:'Substitution'}],
+    'Farm/Orchard & Harvest':   [{t:'Fertiliser fraud'},{t:'Seed substitution and false documentation'},{t:'Variety fraud'},{t:'Origin fraud'},{t:'Certification fraud'},{t:'Record fraud'},{t:'Class claims'}],
+    'Collection & Collation': [{t:'Adulteration'},{t:'Stock switching'},{t:'Substitution'}],
     'Packing & Processing':     [{t:'Water added to increase weight'},{t:'Adulteration, dilution or substitution'},{t:'Labelling fraud'},{t:'Document or record fraud'},{t:'Undeclared processing'},{t:'Claims'}],
     'Cold Storage':             [{t:'Substitution'},{t:'Mislabelling'},{t:'Record fraud'},{t:'Illegal treatments'}],
     'Import/Border':            [{t:'Misrepresentation of origin, organic status and variety'},{t:'Fake certificates (including AI-generated)'},{t:'Illicit or excess volumes'},{t:'Trans-shipping'}],
@@ -1979,7 +1979,7 @@ var SUPPLY_CHAIN = {
   honey:         ['Beekeeper / Apiary','Collection & Transport','Bulk Processor','Exporter','Shipping & Border','Blender / Packer','Distribution','Customer'],
   herbs_spices:  ['Growing Region','Harvest & Drying','Milling & Blending','Packaging & Labelling','Import/Border','Warehouse','Distribution','Retail','Consumer'],
   cereals:       ['Arable Farm','Harvest & Storage','Grain Store','Milling & Processing','Packaging & Labelling','Import/Border','Distribution','Retail','Consumer'],
-  fruit_veg:     ['Farm/Orchard','Harvest, Collection & Collation','Packing & Processing','Cold Storage','Import/Border','Distribution','Retail','Consumer'],
+  fruit_veg:     ['Farm/Orchard & Harvest','Collection & Collation','Packing & Processing','Cold Storage','Import/Border','Distribution','Retail','Consumer'],
   dairy:         ['Dairy Farm','Collection & Transport','Pasteurisation/UHT','Separation & Processing','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail','Consumer'],
   cocoa:         ['Farm/Plantation','Fermentation & Drying','Export Collection','Import/Border','Grinding & Processing','Chocolate Manufacture','Packaging & Labelling','Warehouse','Distribution','Retail','Consumer'],
   nuts:          ['Orchard','Harvest, Hulling & Drying','Processing & Sorting','Packaging & Labelling','Import/Border','Warehouse','Distribution','Retail','Consumer'],
@@ -2827,12 +2827,18 @@ function parseRasffCsv(txt) {
       'Blending': 'Blender / Packer', 'Packaging & Labelling': 'Blender / Packer', 'Import/Border': 'Shipping & Border',
       'Warehouse': 'Distribution', 'Retail': 'Customer', 'Consumer': 'Customer'
     };
+    // Stages renamed or merged after the TSG workshop (Nov 2026): older sheet rows still point to the old names
+    var RENAMED_STAGES = {
+      'Farm/Orchard': 'Farm/Orchard & Harvest', 'Harvest': 'Farm/Orchard & Harvest',
+      'Harvest & Hulling': 'Harvest, Hulling & Drying', 'Drying': 'Harvest, Hulling & Drying'
+    };
 
     var out = rows.map(function(r) {
       var rawCommodity = (r[0]||'').trim();
       var normCommodity = SHEET_ALIASES[rawCommodity.toLowerCase()] || rawCommodity;
       var node = (r[8]||r[7]||'').trim();
       if (normCommodity.toLowerCase() === 'honey and royal jelly' && HONEY_OLD_STAGES[node]) node = HONEY_OLD_STAGES[node];
+      if (RENAMED_STAGES[node]) node = RENAMED_STAGES[node];
       return {
         commodity: normCommodity,
         title:     (r[1]||'').trim(),
