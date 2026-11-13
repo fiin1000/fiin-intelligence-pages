@@ -1321,7 +1321,7 @@ var EU_FRAUD_CSV_URL = null;
 // Live vulnerability-assessment export: publish the Sheet's "va_export" tab as CSV and paste the link here
 var VA_EXPORT_CSV_URL = null;
 // Key producing countries: publish the Sheet's "production" tab as CSV and paste the link here.
-// Columns: product, country, tonnes, year, source, updated. Add a row with country "World" for the world total.
+// Columns: product, country, tonnes, year, source, updated, fao_item, note (filled by production_fetch.gs in the Sheet; a "World" row gives the world total).
 var PRODUCTION_CSV_URL = null;
 var TRADE_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR68kbziTvBGmuCrsqLB8m_MbCKs6JrSidcoLtiybXwZHkyvaGwCtslyJtPeiN5pJCyMAbE-LydRyO1/pub?gid=56413450&single=true&output=csv';
 // var FRAUD_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/YOUR_PUBLISHED_ID/pub?gid=YOUR_GID&single=true&output=csv';
@@ -2385,9 +2385,10 @@ function loadProductionCsv(txt) {
     var k = {}; Object.keys(r).forEach(function(h){ k[h.toLowerCase().trim()] = r[h]; });
     var p = (k.product || '').trim(), c = (k.country || '').trim(), t = parseFloat(String(k.tonnes || '').replace(/[^0-9.]/g, ''));
     if (!p || !c || !(t > 0)) return;
-    var d = productionData[p] || (productionData[p] = { rows: [], world: 0, year: '', source: '', updated: '' });
+    var d = productionData[p] || (productionData[p] = { rows: [], world: 0, year: '', source: '', updated: '', item: '', note: '' });
     if (/^world$/i.test(c)) d.world = t; else d.rows.push({ country: c, t: t });
     if (k.year) d.year = k.year; if (k.source) d.source = k.source; if (k.updated) d.updated = k.updated;
+    if (k.fao_item) d.item = k.fao_item; if (k.note) d.note = k.note;
   });
   Object.keys(productionData).forEach(function(p) {
     var d = productionData[p];
@@ -2430,6 +2431,7 @@ function renderKeyCountries() {
         : !productionLoaded ? 'Loading&hellip;' : 'No FAOSTAT production figures for ' + escHtml(prod) + ' yet.') + '</div>';
   var worldSrc = '<b>Source:</b> FAOSTAT (UN Food and Agriculture Organization)' +
     (pd && pd.year ? ' \u00b7 ' + escHtml(pd.year) + ' production' : '') +
+    (pd && (pd.note || pd.item) ? '<br><b>Measure:</b> ' + escHtml(pd.note || pd.item) : '') +
     '<br><b>Last updated:</b> ' + (pd && pd.updated ? escHtml(pd.updated) : '\u2014');
 
   // UK suppliers: share of UK import value, last 12 months of HMRC data
