@@ -688,6 +688,25 @@ tr:hover td { background: var(--mist); }
 .sc-map-many .sc-zone { min-width: 0; }
 .sc-map-many .sc-zone-counts { margin-left: 0; }
 .sc-unplaced-link { margin-top: 8px; }
+/* Key producing countries panel */
+.kpc-head { display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.kpc-title { font-size:13px; font-weight:600; color:var(--ink); }
+.kpc-title b { color:var(--forest); font-weight:600; }
+.kpc-sub { font-size:11px; color:var(--muted); margin:4px 0 12px; }
+.kpc-cols { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+.kpc-col h4 { margin:0 0 3px; font-size:12px; color:var(--forest); }
+.kpc-src { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); margin-bottom:8px; line-height:1.5; }
+.kpc-src b { color:var(--ink); font-weight:500; }
+.kpc-row { display:grid; grid-template-columns:18px minmax(110px,220px) 1fr 40px; align-items:center; gap:8px; font-size:12px; padding:3px 0; }
+.kpc-rank { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); }
+.kpc-bar { height:8px; border-radius:4px; background:var(--mist); overflow:hidden; }
+.kpc-bar span { display:block; height:100%; background:var(--pine); border-radius:4px; }
+.kpc-col.uk .kpc-bar span { background:var(--blue); }
+.kpc-pct { text-align:right; font-family:'DM Mono',monospace; font-size:11px; }
+.kpc-flag { display:inline-block; margin-left:5px; font-size:9px; font-weight:700; color:var(--alert-a); background:var(--alert-a-bg); border:1px solid #EBCB98; border-radius:3px; padding:0 4px; vertical-align:1px; white-space:nowrap; }
+.kpc-empty { font-size:11px; color:var(--muted); font-style:italic; padding:6px 0; line-height:1.5; }
+.kpc-note { margin-top:12px; padding:8px 10px; border-radius:6px; background:var(--alert-a-bg); color:var(--alert-a); font-size:11px; line-height:1.5; }
+@media (max-width:760px) { .kpc-cols { grid-template-columns:1fr; } }
 /* Whole supply chain panel: vulnerabilities and known risks that apply across the chain */
 .sc-whole { margin-top: 10px; background: #1a2a1a; color: white; border-radius: 8px; padding: 7px 12px; font-size: 11px; line-height: 1.5; }
 .sc-whole-row { display: flex; gap: 8px; }
@@ -1222,6 +1241,8 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
     </div>
 
     <div class="product-section">
+      <!-- Key producing countries: world producers (FAOSTAT) next to UK suppliers (HMRC) -->
+      <div class="card kpc-card" id="kpc-card" style="margin-bottom:14px"></div>
       <div class="product-section-header">
         <span class="product-section-title">Product</span>
         <select id="prod-select" class="cat-select" style="font-size:13px;border-width:1.5px;border-radius:5px;padding:5px 28px 5px 10px;min-width:180px"></select>
@@ -1299,6 +1320,9 @@ var FRAUD_CSV_URL = null;
 var EU_FRAUD_CSV_URL = null;
 // Live vulnerability-assessment export: publish the Sheet's "va_export" tab as CSV and paste the link here
 var VA_EXPORT_CSV_URL = null;
+// Key producing countries: publish the Sheet's "production" tab as CSV and paste the link here.
+// Columns: product, country, tonnes, year, source, updated. Add a row with country "World" for the world total.
+var PRODUCTION_CSV_URL = null;
 var TRADE_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR68kbziTvBGmuCrsqLB8m_MbCKs6JrSidcoLtiybXwZHkyvaGwCtslyJtPeiN5pJCyMAbE-LydRyO1/pub?gid=56413450&single=true&output=csv';
 // var FRAUD_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/YOUR_PUBLISHED_ID/pub?gid=YOUR_GID&single=true&output=csv';
 
@@ -2350,6 +2374,94 @@ function nounPlural(n) {
   return /s$/i.test(n) ? n : n + 's';
 }
 function possessive(name) { return /s$/i.test(name) ? name + '\u2019' : name + '\u2019s'; }
+
+// ── Key producing countries ──────────────────────────────────────────────────
+// World producers (FAOSTAT, via the Sheet's "production" tab) next to the UK's suppliers (HMRC, same data as the price card).
+var productionData = {}, productionLoaded = false;
+function loadProductionCsv(txt) {
+  var rows = parseCSVAsObjects(txt);
+  productionData = {};
+  rows.forEach(function(r) {
+    var k = {}; Object.keys(r).forEach(function(h){ k[h.toLowerCase().trim()] = r[h]; });
+    var p = (k.product || '').trim(), c = (k.country || '').trim(), t = parseFloat(String(k.tonnes || '').replace(/[^0-9.]/g, ''));
+    if (!p || !c || !(t > 0)) return;
+    var d = productionData[p] || (productionData[p] = { rows: [], world: 0, year: '', source: '', updated: '' });
+    if (/^world$/i.test(c)) d.world = t; else d.rows.push({ country: c, t: t });
+    if (k.year) d.year = k.year; if (k.source) d.source = k.source; if (k.updated) d.updated = k.updated;
+  });
+  Object.keys(productionData).forEach(function(p) {
+    var d = productionData[p];
+    d.rows.sort(function(a, b){ return b.t - a.t; });
+    if (!d.world) d.world = d.rows.reduce(function(n, r){ return n + r.t; }, 0);
+  });
+}
+// Country names differ between FAO and HMRC (e.g. "China, mainland", "Türkiye", "Viet Nam")
+function kpcCountryKey(n) {
+  n = String(n || '').toLowerCase().replace(/\(.*?\)/g, '').replace(/,.*$/, '').replace(/^the /, '').trim();
+  var alias = { 'türkiye': 'turkey', 'turkiye': 'turkey', 'viet nam': 'vietnam', 'russian federation': 'russia',
+    'united states of america': 'united states', 'usa': 'united states', 'republic of korea': 'south korea', 'korea': 'south korea',
+    'united republic of tanzania': 'tanzania', 'iran islamic republic of': 'iran', 'cote d\u2019ivoire': "cote d'ivoire", "côte d'ivoire": "cote d'ivoire",
+    'czechia': 'czech republic', 'united kingdom of great britain and northern ireland': 'united kingdom' };
+  return alias[n] || n;
+}
+function kpcRows(list, flagFn) {
+  var top = list.length ? list[0].share : 1;
+  return list.map(function(r, i) {
+    return '<div class="kpc-row"><span class="kpc-rank">' + (i + 1) + '</span><span>' + escHtml(r.name) + (flagFn && flagFn(r) ? '<span class="kpc-flag" title="Not among the top 10 producers worldwide">NOT A TOP PRODUCER</span>' : '') + '</span>' +
+      '<span class="kpc-bar"><span style="width:' + Math.max(2, Math.round(r.share / top * 100)) + '%"></span></span>' +
+      '<span class="kpc-pct">' + (r.share < 1 ? '<1' : Math.round(r.share)) + '%</span></div>';
+  }).join('');
+}
+function renderKeyCountries() {
+  var el = document.getElementById('kpc-card');
+  if (!el) return;
+  var prod = typeof curProd !== 'undefined' ? curProd : null;
+  if (!prod) { el.style.display = 'none'; return; }
+  el.style.display = '';
+
+  // World producers
+  var pd = productionData[prod], world = null, top10 = {};
+  if (pd && pd.rows.length) {
+    world = pd.rows.slice(0, 5).map(function(r){ return { name: r.country.replace(/\s*\(.*?\)/g, '').replace(/, mainland$/i, ''), share: r.t / pd.world * 100 }; });
+    pd.rows.slice(0, 10).forEach(function(r){ top10[kpcCountryKey(r.country)] = true; });
+  }
+  var worldHtml = world ? kpcRows(world)
+    : '<div class="kpc-empty">' + (!PRODUCTION_CSV_URL ? 'World production figures are not connected yet. They will come from FAOSTAT through a \u201cproduction\u201d tab in the fiin data sheet.'
+        : !productionLoaded ? 'Loading&hellip;' : 'No FAOSTAT production figures for ' + escHtml(prod) + ' yet.') + '</div>';
+  var worldSrc = '<b>Source:</b> FAOSTAT (UN Food and Agriculture Organization)' +
+    (pd && pd.year ? ' \u00b7 ' + escHtml(pd.year) + ' production' : '') +
+    '<br><b>Last updated:</b> ' + (pd && pd.updated ? escHtml(pd.updated) : '\u2014');
+
+  // UK suppliers: share of UK import value, last 12 months of HMRC data
+  var hit = tradeFor(prod), t = hit ? hit.t : null, uk = null, ukSrc;
+  if (t) {
+    var M = t.months.slice(-12), tot = tradeSum(t, null, M).v;
+    uk = Object.keys(t.origins).filter(function(o){ return o !== OTHER_ORIGINS; })
+      .map(function(o){ return { name: o, share: tradeSum(t, o, M).v / tot * 100 }; })
+      .filter(function(r){ return r.share > 0; })
+      .sort(function(a, b){ return b.share - a.share; }).slice(0, 5);
+    ukSrc = '<b>Source:</b> HMRC UK customs data \u00b7 share of import value, ' + fmtMonth(M[0]) + ' \u2013 ' + fmtMonth(M[M.length - 1]) +
+      '<br><b>Last updated:</b> ' + (t.updated ? escHtml(t.updated) : '\u2014');
+  } else {
+    ukSrc = '<b>Source:</b> HMRC UK customs data<br><b>Last updated:</b> \u2014';
+  }
+  var flagged = [];
+  var flagFn = world ? function(r){ var f = !top10[kpcCountryKey(r.name)]; if (f) flagged.push(r.name); return f; } : null;
+  var ukHtml = uk && uk.length ? kpcRows(uk, flagFn)
+    : '<div class="kpc-empty">' + (!TRADE_CSV_URL ? 'UK import figures are not connected yet.' : !tradeLoaded ? 'Loading&hellip;'
+        : 'No HMRC import data for ' + escHtml(prod) + '.' + (TRADE_NOT_COVERED[prod] ? ' ' + escHtml(TRADE_NOT_COVERED[prod]) : '')) + '</div>';
+
+  var noun = (t && t.noun) || prod.toLowerCase();
+  el.innerHTML =
+    '<div class="kpc-head"><div class="kpc-title">Key producing countries &nbsp;<span style="color:var(--muted);font-weight:400">\u2014</span>&nbsp; <b>' + escHtml(prod) + '</b></div></div>' +
+    '<div class="kpc-sub">Where ' + escHtml(noun) + ' is produced worldwide, next to where the UK buys it from. A large UK supplier that is not a large producer can point to re-export, blending or origin risk.</div>' +
+    '<div class="kpc-cols">' +
+      '<div class="kpc-col"><h4>Top producers worldwide</h4><div class="kpc-src">' + worldSrc + '</div>' + worldHtml + '</div>' +
+      '<div class="kpc-col uk"><h4>Top suppliers to the UK</h4><div class="kpc-src">' + ukSrc + '</div>' + ukHtml + '</div>' +
+    '</div>' +
+    (flagged.length ? '<div class="kpc-note"><b>Worth a look:</b> ' + flagged.map(escHtml).join(flagged.length > 2 ? ', ' : ' and ').replace(/, ([^,]*)$/, ' and $1') +
+      (flagged.length > 1 ? ' are' : ' is') + ' among the top UK suppliers but not among the top 10 producers worldwide, so supplies may be re-exported or blended from elsewhere. Origin claims may need extra checks.</div>' : '');
+}
 
 // Thresholds — kept here so fiin's technical group can tune them
 var RISK = {
@@ -3553,6 +3665,7 @@ function render() {
 
   // Price risk signals (HMRC)
   try { renderTradeRisk(); } catch (e) { console.error('Price risk card error:', e); }
+  try { renderKeyCountries(); } catch (e) { console.error('Key countries error:', e); }
 
   // EU fraud suspicions
   try { renderEuFraud(); } catch (e) { console.error('EU fraud error:', e); }
@@ -3784,7 +3897,14 @@ function loadData() {
     fetch(TRADE_CSV_URL)
       .then(function(r){ return r.text(); })
       .then(function(txt) { loadTradeCsv(txt); tradeLoaded = true; rebuildProductDropdown(); render(); renderFeedStatus(); })
-      .catch(function(e){ console.error('Trade data fetch error:', e); tradeLoaded = true; renderTradeRisk(); });
+      .catch(function(e){ console.error('Trade data fetch error:', e); tradeLoaded = true; renderTradeRisk(); renderKeyCountries(); });
+  }
+
+  if (PRODUCTION_CSV_URL) {
+    fetch(PRODUCTION_CSV_URL)
+      .then(function(r){ return r.text(); })
+      .then(function(txt) { loadProductionCsv(txt); productionLoaded = true; renderKeyCountries(); })
+      .catch(function(e){ console.error('Production data fetch error:', e); productionLoaded = true; renderKeyCountries(); });
   }
 
   if (FRAUD_CSV_URL) {
