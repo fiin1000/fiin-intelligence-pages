@@ -688,6 +688,13 @@ tr:hover td { background: var(--mist); }
 .sc-map-many .sc-zone { min-width: 0; }
 .sc-map-many .sc-zone-counts { margin-left: 0; }
 .sc-unplaced-link { margin-top: 8px; }
+/* How often each section updates (members asked during the workshop) */
+.freq-tag { display:inline-block; font-family:'DM Mono',monospace; font-size:10px; font-weight:500; letter-spacing:.02em; text-transform:none; color:var(--pine); background:#fff; border:1px solid var(--border); border-radius:10px; padding:1px 8px; white-space:nowrap; vertical-align:1px; }
+.freq-tag.on-dark { color:var(--lime); background:transparent; border-color:rgba(255,255,255,.25); }
+.freq-tag.on-btn { color:inherit; background:rgba(255,255,255,.15); border-color:rgba(255,255,255,.35); margin-left:6px; }
+.sc-title .freq-tag, .card-title .freq-tag, .intel-head .freq-tag { margin-left:8px; font-weight:500; }
+.tsg-header, .res-header, .intel-head, .card-title { flex-wrap:wrap; row-gap:6px; column-gap:8px; }
+.intel-head > span:first-child { white-space:nowrap; }
 /* Key producing countries panel */
 .kpc-head { display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; }
 .kpc-title { font-size:13px; font-weight:600; color:var(--ink); }
@@ -1103,6 +1110,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
             <div class="tsg-header-left">
               <span class="tsg-badge" id="tsg-commodity-name">TSG Quarterly Recommendations Q3 2026</span>
             </div>
+            <span class="freq-tag" title="How often this section is updated">↻ Updated quarterly</span>
           </div>
           <div id="tsg-content"></div>
 
@@ -1114,6 +1122,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
           <div class="res-header-left">
             <span class="res-badge" id="res-title">fiin Resources</span>
           </div>
+          <span class="freq-tag" title="How often this section is updated">↻ Added as published</span>
         </div>
         <div class="res-body" id="res-body">
           <div class="res-placeholder" id="res-placeholder">No resources uploaded yet for this commodity.</div>
@@ -1126,6 +1135,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
           <div class="res-header-left">
             <span class="res-badge res-badge-ext" id="res-ext-title">External Resources</span>
           </div>
+          <span class="freq-tag" title="How often this section is updated">↻ Added as published</span>
         </div>
         <div class="res-body" id="res-ext-body">
           <div class="res-placeholder" id="res-ext-placeholder">No external resources yet for this commodity.</div>
@@ -1137,7 +1147,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
 
     <!-- Supply chain map + Indicators -->
     <div class="card sc-section" id="sc-section" style="margin-top:14px">
-      <div class="sc-title">Supply chain map — where alerts and authenticity concerns most likely relate</div>
+      <div class="sc-title">Supply chain map — where alerts and authenticity concerns most likely relate <span class="freq-tag" title="How often this section is updated">↻ RASFF daily · fiin data quarterly · risks reviewed by the TSG</span></div>
       <div class="sc-sub" id="sc-sub"></div>
       <div class="sc-map" id="sc-map"></div>
       <div class="sc-unplaced-link" id="sc-unplaced" style="display:none"></div>
@@ -1174,7 +1184,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
     <div class="rasff-link-row" id="rasff-link-row">
       <span id="rasff-com" style="display:none"></span>
       <button type="button" class="rasff-box rasff-open" id="rasff-open" title="Alerts for this category from the last 6 months, filtered to those relating to potential fraud">
-        <span class="rasff-box-title">RASFF alerts relating to fraud</span><span class="rasff-box-sub" id="rasff-open-sub">Loading…</span>
+        <span class="rasff-box-title">RASFF alerts relating to fraud<span class="freq-tag on-btn" title="How often this section is updated">↻ Updated daily</span></span><span class="rasff-box-sub" id="rasff-open-sub">Loading…</span>
       </button>
       <a class="rasff-box rasff-box-ext" id="rasff-portal-link" href="https://webgate.ec.europa.eu/rasff-window/screen/search" target="_blank" rel="noopener" title="Every RASFF notification, on the European Commission’s site">
         <span class="rasff-box-title">Whole RASFF Window ↗</span><span class="rasff-box-sub">All alerts, unfiltered</span>
@@ -1184,7 +1194,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
     <dialog class="rasff-dialog" id="rasff-dialog" aria-labelledby="rasff-dialog-title">
       <div class="rasff-list-head">
         <span class="rasff-list-title" id="rasff-dialog-title">RASFF alerts relating to potential fraud &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="rasff-dialog-com" style="color:var(--forest)"></span></span>
-        <span class="rasff-list-meta"><span id="rasff-count"></span></span>
+        <span class="rasff-list-meta"><span class="freq-tag" title="How often this section is updated">↻ Updated daily</span> <span id="rasff-count"></span></span>
         <button type="button" class="rasff-close" id="rasff-close" aria-label="Close">✕</button>
       </div>
       <div class="rasff-dialog-body" id="rasff-body"></div>
@@ -1195,7 +1205,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
     <div class="card rasff-list-card" id="eu-card" style="margin-top:14px;padding:0;display:none">
       <div class="rasff-list-head">
         <span class="rasff-list-title">EU fraud suspicions &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="eu-month" style="color:var(--forest)"></span></span>
-        <span class="rasff-list-meta" id="eu-count"></span>
+        <span class="rasff-list-meta"><span class="freq-tag" title="How often this section is updated">↻ Monthly report</span> <span id="eu-count"></span></span>
       </div>
       <div id="eu-body"></div>
       <div class="rasff-list-foot" id="eu-foot"></div>
@@ -1207,6 +1217,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
           <div class="tp-head-left">
             <span class="tp-head-title">fiin member testing data</span>
             <span class="tp-soon">Example data</span>
+            <span class="freq-tag on-dark" title="How often this section is updated">↻ Updated quarterly</span>
           </div>
           <span class="tp-period" id="testing-period">Not real results · real member data to follow</span>
         </div>
@@ -1260,7 +1271,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
           <div class="card risk-card" id="risk-card" style="margin-bottom:14px;">
             <div class="card-title">
               <span>Price risk signals (imports) &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="risk-prod" style="color:var(--forest)"></span></span>
-              <span class="risk-badge">UK IMPORTS · HMRC</span>
+              <span><span class="freq-tag" title="How often this section is updated">↻ Updated monthly · about 2 months behind</span> <span class="risk-badge">UK IMPORTS · HMRC</span></span>
             </div>
             <div class="card-sub" id="risk-sub"></div>
             <div class="risk-lights" id="risk-lights"></div>
@@ -1284,7 +1295,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
           <div class="card intel-section" id="intel-section" style="height:100%">
             <div class="intel-head">
               <span class="intel-title" style="font-size:13px;font-weight:600;color:var(--ink)">Market news &nbsp;<span style="color:var(--muted);font-weight:400">—</span>&nbsp; <span id="intel-prod-label" style="color:var(--forest)"></span></span>
-              <span class="intel-meta" id="intel-meta">Loading&hellip;</span>
+              <span><span class="freq-tag" title="How often this section is updated">↻ Updated daily</span> <span class="intel-meta" id="intel-meta">Loading&hellip;</span></span>
             </div>
             <div class="intel-items" id="intel-items">
               <div class="intel-empty">Loading intelligence&hellip;</div>
@@ -2461,7 +2472,7 @@ function renderKeyCountries() {
 
   var noun = (t && t.noun) || prod.toLowerCase();
   el.innerHTML =
-    '<div class="kpc-head"><div class="kpc-title">Key producing countries &nbsp;<span style="color:var(--muted);font-weight:400">\u2014</span>&nbsp; <b>' + escHtml(prod) + '</b></div></div>' +
+    '<div class="kpc-head"><div class="kpc-title">Key producing countries &nbsp;<span style="color:var(--muted);font-weight:400">\u2014</span>&nbsp; <b>' + escHtml(prod) + '</b></div><span class="freq-tag" title="How often this section is updated">↻ World figures yearly · UK figures monthly</span></div>' +
     '<div class="kpc-sub">Where ' + escHtml(noun) + ' is produced worldwide, next to where the UK buys it from. A large UK supplier that is not a large producer can point to re-export, blending or origin risk.</div>' +
     '<div class="kpc-cols">' +
       '<div class="kpc-col"><h4>Top producers worldwide</h4><div class="kpc-src">' + worldSrc + '</div>' + worldHtml + '</div>' +
