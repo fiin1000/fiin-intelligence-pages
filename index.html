@@ -1567,6 +1567,7 @@ var KNOWN_VULNERABILITIES = {
   },
   honey: {
     'Beekeeper / Apiary':       ['Weather and climate change', 'Poor crops and water scarcity', 'Shortages (e.g. South American honey, Manuka)'],
+    'Collection, Collation & Transport': ['Co-operative collection points', 'Local collectors'],
     'Shipping & Border':        ['Regulation (SPS)'],
     'Blender / Packer':         ['Restrictions on blends'],
     'Distribution':             ['Transport costs']
@@ -1648,13 +1649,13 @@ var KNOWN_RISKS = {
   },
   // Honey: TSG Honey guide, "Stages, records and vulnerability points" table (principal authenticity vulnerabilities per stage).
   honey: {
-    'Beekeeper / Apiary':       [{t:'Premature harvest'},{t:'Unsupported floral, organic, raw, local or origin claims'},{t:'Feed-related questions'}],
-    'Collection & Transport':   [{t:'Loss of beekeeper linkage'},{t:'Mixing'},{t:'Incorrect origin or floral declarations'}],
-    'Bulk Processor':           [{t:'Undeclared processing'},{t:'Mixing'},{t:'Excessive heat'},{t:'Artificial moisture reduction questions'},{t:'Marker removal'}],
-    'Exporter':                 [{t:'Relabelling'},{t:'Trans-shipping'},{t:'Document fraud'},{t:'Undisclosed intermediaries'}],
-    'Shipping & Border':        [{t:'Sample mismatch'},{t:'Incomplete origin evidence'},{t:'Breaks in chain of custody'}],
+    'Beekeeper / Apiary':       [{t:'Premature harvest'},{t:'Unsupported floral, organic, local or origin claims'},{t:'Feed-related questions'},{t:'Vet drugs and pesticides'},{t:'Document or record fraud'}],
+    'Collection, Collation & Transport': [{t:'Loss of beekeeper linkage'},{t:'Mixing'},{t:'Incorrect origin or floral declarations'},{t:'Adulteration'},{t:'Substitution'}],
+    'Bulk Processor':           [{t:'Undeclared processing'},{t:'Mixing'},{t:'Excessive heat'},{t:'Excessive moisture reduction questions'},{t:'Marker removal'},{t:'Document or record fraud'},{t:'Filtration'},{t:'Adulteration'},{t:'Substitution'}],
+    'Exporter':                 [{t:'Relabelling'},{t:'Trans-shipping'},{t:'Document fraud'},{t:'Undisclosed intermediaries'},{t:'Stock switching'}],
+    'Shipping & Border':        [{t:'Sample mismatch'},{t:'Incomplete origin evidence'},{t:'Breaks in chain of custody'},{t:'Stock switching (origin, grade, organic)'}],
     'Blender / Packer':         [{t:'Syrup addition'},{t:'Undeclared origin mixing'},{t:'Claim misrepresentation'},{t:'Marker removal'},{t:'Packaging errors'}],
-    'Distribution':             [{t:'Batch mix-ups'},{t:'Deterioration'}],
+    'Distribution':             [{t:'Batch mix-ups'},{t:'Deterioration'},{t:'Temperature abuse'}],
     'Customer':                 [{t:'Incomplete downstream traceability'}]
   },
   herbs_spices: {
@@ -1976,7 +1977,7 @@ var SUPPLY_CHAIN = {
   poultry:       ['Rearing Farm','Slaughter & Evisceration','Cutting & Processing','Further Processing','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
   red_meat:      ['Farm/Ranch','Slaughter & Dressing','Cutting & Deboning','Processing & Manufacture','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
   fish_shellfish:['Farm/Fishing Vessel','Landing & Grading','Slaughter & Gutting','Filleting & Processing','Smoking/Further Processing','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
-  honey:         ['Beekeeper / Apiary','Collection & Transport','Bulk Processor','Exporter','Shipping & Border','Blender / Packer','Distribution','Customer'],
+  honey:         ['Beekeeper / Apiary','Collection, Collation & Transport','Bulk Processor','Exporter','Shipping & Border','Blender / Packer','Distribution','Customer'],
   herbs_spices:  ['Growing Region','Harvest & Drying','Milling & Blending','Packaging & Labelling','Import/Border','Warehouse','Distribution','Retail','Consumer'],
   cereals:       ['Arable Farm','Harvest & Storage','Grain Store','Milling & Processing','Packaging & Labelling','Import/Border','Distribution','Retail','Consumer'],
   fruit_veg:     ['Farm/Orchard & Harvest','Collection & Collation','Packing & Processing','Cold Storage','Import/Border','Distribution','Retail','Consumer'],
@@ -1994,7 +1995,7 @@ var SUPPLY_ZONE_LABELS = {
   _default: ['Production', 'Processing & packing', 'Import, storage & distribution', 'Customer'],
   cocoa:    ['Production & import', 'Processing & packing', 'Storage & distribution', 'Customer'],
   // Honey is processed in bulk before export and blended/packed after import, so two zones appear twice
-  honey:    ['Production', 'Processing & packing', 'Import, storage & distribution', 'Processing & packing', 'Import, storage & distribution', 'Customer']
+  honey:    ['Production', 'Processing & packing', 'Export & import', 'Processing & packing', 'Storage & distribution', 'Customer']
 };
 var SUPPLY_ZONES = {
   poultry:        [0,1,1,1,1,2,2,2,3,3],
@@ -2824,7 +2825,7 @@ function parseRasffCsv(txt) {
     var HONEY_OLD_STAGES = {
       'Apiary/Hive': 'Beekeeper / Apiary', 'Extraction & Filtering': 'Bulk Processor', 'Heat Treatment': 'Bulk Processor',
       'Blending': 'Blender / Packer', 'Packaging & Labelling': 'Blender / Packer', 'Import/Border': 'Shipping & Border',
-      'Warehouse': 'Distribution', 'Retail': 'Customer', 'Consumer': 'Customer'
+      'Warehouse': 'Distribution', 'Retail': 'Customer', 'Consumer': 'Customer', 'Collection & Transport': 'Collection, Collation & Transport'
     };
     // Stages renamed or merged after the TSG workshop (Nov 2026): older sheet rows still point to the old names
     var RENAMED_STAGES = {
