@@ -689,16 +689,13 @@ tr:hover td { background: var(--mist); }
 .sc-map-many .sc-zone-counts { margin-left: 0; }
 .sc-unplaced-link { margin-top: 8px; }
 /* Whole supply chain panel: vulnerabilities and known risks that apply across the chain */
-.sc-whole { margin-top: 14px; background: #1a2a1a; color: white; border-radius: 10px; overflow: hidden; line-height: 1.55; }
-.sc-whole-title { font-weight: 600; font-size: 12px; color: var(--lime); padding: 10px 14px 8px; border-bottom: 1px solid rgba(255,255,255,.1); }
-.sc-whole-title span { color: rgba(255,255,255,.55); font-weight: 400; }
-.sc-whole-cols { display: grid; grid-template-columns: 1fr 1fr; }
-.sc-whole-col { padding-bottom: 8px; }
-.sc-whole-col + .sc-whole-col { border-left: 1px solid rgba(255,255,255,.1); }
-.sc-whole .sc-tip-section-head { padding: 9px 14px 4px; }
-.sc-whole .sc-tip-risk { font-size: 11px; padding: 3px 14px; }
-.sc-whole .sc-tip-footer { padding: 6px 14px 9px; }
-@media (max-width: 700px) { .sc-whole-cols { grid-template-columns: 1fr; } .sc-whole-col + .sc-whole-col { border-left: none; border-top: 1px solid rgba(255,255,255,.1); } }
+.sc-whole { margin-top: 10px; background: #1a2a1a; color: white; border-radius: 8px; padding: 7px 12px; font-size: 11px; line-height: 1.5; }
+.sc-whole-row { display: flex; gap: 8px; }
+.sc-whole-row + .sc-whole-row { margin-top: 3px; }
+.sc-whole-lbl { flex: 0 0 auto; width: 205px; font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--lime); padding-top: 1px; }
+.sc-whole-txt { flex: 1; color: rgba(255,255,255,.88); }
+.sc-whole-none { font-style: italic; opacity: .6; }
+@media (max-width: 700px) { .sc-whole-row { flex-direction: column; gap: 0; } .sc-whole-lbl { width: auto; } }
 .sc-unplaced-link button { background: none; border: none; padding: 0; font: inherit; font-size: 11px; font-weight: 500; color: var(--pine); cursor: pointer; }
 .sc-unplaced-link button:hover { text-decoration: underline; }
 #unplaced-body { padding: 10px 16px; font-size: 12px; }
@@ -2118,15 +2115,11 @@ function renderSupplyChain() {
   if (wEl) {
     var wc = WHOLE_CHAIN[k] || { vulnerabilities: [], risks: [] };
     var wList = function(arr) {
-      return arr.length ? arr.map(function(x) { return '<div class="sc-tip-risk">' + escHtml(x) + '</div>'; }).join('')
-                        : '<div class="sc-tip-risk sc-tip-none">None recorded yet</div>';
+      return arr.length ? escHtml(arr.join(', ')) : '<span class="sc-whole-none">None recorded yet</span>';
     };
-    wEl.innerHTML = '<div class="sc-whole-title">Whole supply chain <span>\u2014 ' + escHtml(COMM[cur].label) + ' \u00b7 applies across every stage</span></div>' +
-      '<div class="sc-whole-cols">' +
-        '<div class="sc-whole-col"><div class="sc-tip-section-head">Vulnerabilities</div>' + wList(wc.vulnerabilities) + '</div>' +
-        '<div class="sc-whole-col"><div class="sc-tip-section-head">Known risks</div>' + wList(wc.risks) + '</div>' +
-      '</div>' +
-      '<div class="sc-tip-footer">fiin TSG</div>';
+    wEl.innerHTML =
+      '<div class="sc-whole-row"><span class="sc-whole-lbl">Whole chain \u00b7 Vulnerabilities</span><span class="sc-whole-txt">' + wList(wc.vulnerabilities) + '</span></div>' +
+      '<div class="sc-whole-row"><span class="sc-whole-lbl">Whole chain \u00b7 Known risks</span><span class="sc-whole-txt">' + wList(wc.risks) + '</span></div>';
   }
 
   // Attach mouse events for floating tooltip — shows Known Risks + Indicators
