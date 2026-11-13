@@ -688,6 +688,17 @@ tr:hover td { background: var(--mist); }
 .sc-map-many .sc-zone { min-width: 0; }
 .sc-map-many .sc-zone-counts { margin-left: 0; }
 .sc-unplaced-link { margin-top: 8px; }
+/* Whole supply chain panel: vulnerabilities and known risks that apply across the chain */
+.sc-whole { margin-top: 14px; background: #1a2a1a; color: white; border-radius: 10px; overflow: hidden; line-height: 1.55; }
+.sc-whole-title { font-weight: 600; font-size: 12px; color: var(--lime); padding: 10px 14px 8px; border-bottom: 1px solid rgba(255,255,255,.1); }
+.sc-whole-title span { color: rgba(255,255,255,.55); font-weight: 400; }
+.sc-whole-cols { display: grid; grid-template-columns: 1fr 1fr; }
+.sc-whole-col { padding-bottom: 8px; }
+.sc-whole-col + .sc-whole-col { border-left: 1px solid rgba(255,255,255,.1); }
+.sc-whole .sc-tip-section-head { padding: 9px 14px 4px; }
+.sc-whole .sc-tip-risk { font-size: 11px; padding: 3px 14px; }
+.sc-whole .sc-tip-footer { padding: 6px 14px 9px; }
+@media (max-width: 700px) { .sc-whole-cols { grid-template-columns: 1fr; } .sc-whole-col + .sc-whole-col { border-left: none; border-top: 1px solid rgba(255,255,255,.1); } }
 .sc-unplaced-link button { background: none; border: none; padding: 0; font: inherit; font-size: 11px; font-weight: 500; color: var(--pine); cursor: pointer; }
 .sc-unplaced-link button:hover { text-decoration: underline; }
 #unplaced-body { padding: 10px 16px; font-size: 12px; }
@@ -1109,6 +1120,7 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
       <div class="sc-sub" id="sc-sub"></div>
       <div class="sc-map" id="sc-map"></div>
       <div class="sc-unplaced-link" id="sc-unplaced" style="display:none"></div>
+      <div class="sc-whole" id="sc-whole"></div>
       <dialog class="rasff-dialog" id="zone-dialog" aria-labelledby="zone-title">
         <div class="rasff-list-head">
           <span class="rasff-list-title" id="zone-title"></span>
@@ -1492,6 +1504,54 @@ var COMM = {
 // Drivers and pressures (climate, disease, labour, costs, policy, trade) from the TSG conference maps, placed at the closest stage.
 // Format: { category: { stage: ['vulnerability', ...] } }. Stages not listed show 'None recorded yet'.
 var VULNERABILITIES_DEFAULT = [];
+// Whole supply chain: vulnerabilities (drivers) and known risks that apply across the chain rather than to one stage.
+// From the whole-chain box on each TSG conference supply chain map (mitigations not included).
+var WHOLE_CHAIN = {
+  poultry: {
+    vulnerabilities: ['Extreme weather / heat', 'Welfare standards compliance, e.g. free-range, organic', 'Documentation, e.g. ABP, agents and brokers, country of origin claims', 'Artificial intelligence (document fraud)', 'Confidence in testing for origin and chemicals, and in reference databases', 'Complex supply chains', 'Meat content and nitrogen factors', 'Further processing recipe changes'],
+    risks: ['False welfare or origin claims', 'Substitution (breed)', 'Certification fraud']
+  },
+  red_meat: {
+    vulnerabilities: ['Decline in herd sizes', 'Energy prices', 'Fertiliser', 'Price', 'Animal disease', 'Vet residues', 'AMR', 'Climate / water availability', 'Extreme weather', 'Crop yield failure (palm, soy)', 'GM', 'Carbon / greenwashing', 'Legislative framework and agricultural diversity', 'SPS', 'Current and future trade deals', 'Political instability', 'Labour', 'Documents', 'SMEs', 'Difficulty verifying welfare and some origins by testing'],
+    risks: ['Certification / claims', 'Misrepresentation of origin, age, breed, welfare or organic status', 'Misrepresentation of a business for fake orders', 'Substitution', 'Misrepresentation of a lower-priced cut', 'Misrepresentation of meat content', 'Whole muscle vs reformed', 'MSM/MRM going into the supply chain', 'Water addition', 'Shelf-life extension', 'Relabelling / sell-off']
+  },
+  fish_shellfish: {
+    vulnerabilities: [],
+    risks: ['Country of origin misrepresentation', 'Speciation (species substitution)']
+  },
+  honey: {
+    vulnerabilities: ['South American shortages (Brazil, Argentina, Central America)', 'Shortage of Manuka', 'Poor crop', 'Weather / climate deviation', 'Climate change / pollution', 'Water scarcity', 'Transport costs', 'Regulation (SPS)', 'Restriction of blends', 'Margin of error on testing', 'Limits on defence (no evidence)'],
+    risks: ['Misrepresentation of origin', 'Misrepresentation of premium honeys', 'Addition of sugar syrup']
+  },
+  herbs_spices: {
+    vulnerabilities: ['Price', 'Weather', 'Availability', 'Geopolitics', 'Lack of governance / regulation', 'Lack of understanding of regulations', 'Grading / cost-value tiering'],
+    risks: ['Dilution / bulking', 'Upgrading', 'Document / labelling fraud']
+  },
+  cereals: {
+    vulnerabilities: ['Price volatility', 'Geopolitics', 'Complex transport route'],
+    risks: ['Substitution', 'Misrepresentation of origin', 'Mislabelling', 'Contamination / bulking']
+  },
+  fruit_veg: {
+    vulnerabilities: ['Climate change', 'El Niño', 'Geopolitics', 'Customer demand', 'Demand / supply trends (long-term shock vs short-term trends)', 'Excess volume', 'Illicit volume', 'Change of ownership / pricing', 'Provenance premium, e.g. Spanish', 'Inflation / cost pressures', 'Insecticides', 'Methods of testing and interpretation of results'],
+    risks: ['Adulteration / dilution / substitution', 'Mislabelling / counterfeit', 'Misrepresentation of origin, organic or sustainability claims', 'Malicious contamination / tampering', 'Using AI to fake test certificates']
+  },
+  dairy: {
+    vulnerabilities: ['Cross-border activity', 'Chemical content', 'Labour shortages', 'Fuel shortages', 'Maturation of product'],
+    risks: ['Adulteration / substitution', 'Multi-species milk', 'Reworking of cheaper cheese', 'Document fraud', 'Misrepresentation of claims', 'Theft']
+  },
+  eggs: {
+    vulnerabilities: ['Avian influenza (supply / demand)', 'Climate change', 'Price volatility (feed, energy)', 'Environmental legislation', 'Animal welfare'],
+    risks: ['Country of origin fraud', 'Shelf-life extension', 'Waste mismanagement']
+  },
+  nuts: {
+    vulnerabilities: ['Geopolitics', 'Climate challenges and single harvests', 'Higher temperatures (spoilage risk, less availability)', 'Natural disasters (less predictable)', 'Transport challenges from natural disasters, e.g. flooding', 'Labour shortages', 'Increasing supply chain costs', 'Cost reduction pressure, e.g. heat treatment', 'Processes pushed back down the chain, e.g. heat treatment (enough visibility?)', 'Reduced processing capability', 'Increased demand for powders / pastes', 'Rapid changes of supplier / outsourcing', 'New adulterants', 'Traceability', 'Lack of data, insights and understanding'],
+    risks: ['Document fraud (certification, origin, grading)', 'Falsified results (pesticides, authenticity testing, heat treatment)', 'Adulteration of powders / pastes']
+  },
+  oils: {
+    vulnerabilities: ['Extreme weather', 'Crop failures', 'Water scarcity', 'Shortages', 'Growing demand', 'Trade sanctions', 'Organised crime', 'Illegal labour / labour availability', 'Vulnerability / asymmetry', 'Grade / type of oil (from processing)', 'New adulterants', 'Cyber security'],
+    risks: ['Adulteration / substitution with lower-grade oils', 'Country of origin fraud', 'Documentation fraud / AI']
+  }
+};
 var KNOWN_VULNERABILITIES = {
   poultry: {
     'Rearing Farm':             ['Feed supply chain (soy, vitamins, fortification)', 'Disease control measures (e.g. housing orders) affecting supply', 'Extreme weather and heat'],
@@ -1969,7 +2029,7 @@ function rasffZoneLabel(cat, node) {
 
 // ── Render supply chain map ───────────────────────────────────────────────────
 var SC_SUB_TEXT = 'Shows RASFF alerts and fiin data that could indicate potential fraud, grouped by the part of the supply chain they most likely relate to. ' +
-  'Hover a stage for vulnerabilities and known risks, determined by the TSG, or click View on a zone for its RASFF alerts and fiin data.';
+  'Hover a stage for vulnerabilities and known risks, determined by the TSG, or click View on a zone for its RASFF alerts and fiin data. Those that apply across the whole chain are listed below the map.';
 function renderSupplyChain() {
   var mapEl = document.getElementById('sc-map');
   var nodes = SUPPLY_CHAIN[scKey(cur)] || [];
@@ -2052,6 +2112,22 @@ function renderSupplyChain() {
       }).join('');
   }
 
+
+  // Whole supply chain panel below the map
+  var wEl = document.getElementById('sc-whole');
+  if (wEl) {
+    var wc = WHOLE_CHAIN[k] || { vulnerabilities: [], risks: [] };
+    var wList = function(arr) {
+      return arr.length ? arr.map(function(x) { return '<div class="sc-tip-risk">' + escHtml(x) + '</div>'; }).join('')
+                        : '<div class="sc-tip-risk sc-tip-none">None recorded yet</div>';
+    };
+    wEl.innerHTML = '<div class="sc-whole-title">Whole supply chain <span>\u2014 ' + escHtml(COMM[cur].label) + ' \u00b7 applies across every stage</span></div>' +
+      '<div class="sc-whole-cols">' +
+        '<div class="sc-whole-col"><div class="sc-tip-section-head">Vulnerabilities</div>' + wList(wc.vulnerabilities) + '</div>' +
+        '<div class="sc-whole-col"><div class="sc-tip-section-head">Known risks</div>' + wList(wc.risks) + '</div>' +
+      '</div>' +
+      '<div class="sc-tip-footer">fiin TSG</div>';
+  }
 
   // Attach mouse events for floating tooltip — shows Known Risks + Indicators
   var tip = document.getElementById('sc-float-tip');
