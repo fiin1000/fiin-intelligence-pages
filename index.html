@@ -1585,8 +1585,7 @@ var KNOWN_VULNERABILITIES = {
     'Retail/Food Service':       ['Demand shifts and trends']
   },
   cereals: {
-    'Arable Farm':               ['Climate and extreme weather (drought, heat, water scarcity)', 'Crop failure or poor harvest', 'Policy and subsidy changes', 'Fertiliser supply and shifting growing regions', 'Demand for premium claims (origin, organic, regenerative, heritage varieties)', 'Many small farmers and varieties', 'Plant disease'],
-    'Harvest & Grain Store':     ['Labour availability and skills', 'Cost pressure (fuel)'],
+    'Arable Farm, Harvest & Storage': ['Climate and extreme weather (drought, heat, water scarcity)', 'Crop failure or poor harvest', 'Policy and subsidy changes', 'Fertiliser supply and shifting growing regions', 'Demand for premium claims (origin, organic, regenerative, heritage varieties)', 'Many small farmers and varieties', 'Plant disease', 'Labour availability and skills', 'Cost pressure (fuel)'],
     'Milling & Processing':      ['Cost pressure (fortification, cost reduction)', 'Testing limits'],
     'Import/Border':             ['Complex transport routes and disruption', 'Geopolitics, sanctions and trade policy', 'Price volatility']
   },
@@ -1676,8 +1675,8 @@ var KNOWN_RISKS = {
   },
   cereals: {
     'Agronomic Input Suppliers': [{t:'Counterfeit fertilisers and pesticides'},{t:'Seed variety misrepresentation'}],
-    'Arable Farm':              [{t:'Exploitation of small farmers'},{t:'Upgrading (lower grade sold as higher)'}],
-    'Harvest & Grain Store':    [{t:'Misrepresentation of origin'},{t:'Upgrading (lower grade sold as higher)'},{t:'Mycotoxin results misrepresented'}],
+    'Arable Farm, Harvest & Storage': [{t:'Exploitation of small farmers'},{t:'Upgrading (lower grade sold as higher)'}],
+    'Grain Store':              [{t:'Misrepresentation of origin'},{t:'Upgrading (lower grade sold as higher)'},{t:'Mycotoxin results misrepresented'}],
     'Milling & Processing':     [{t:'Adulteration, dilution or substitution (e.g. blending, bulking, dilution with low-cost ingredients, contamination)'},{t:'Fortification fraud'}],
     'Packaging & Labelling':    [{t:'Misrepresentation of origin'},{t:'Mislabelling'}]
   },
@@ -1987,7 +1986,7 @@ var SUPPLY_CHAIN = {
   fish_shellfish:['Farm/Fishing Vessel','Landing & Grading','Slaughter & Gutting','Filleting & Processing','Smoking/Further Processing','Packaging & Labelling','Import/Border','Cold Storage','Distribution','Retail/Food Service','Consumer'],
   honey:         ['Beekeeper / Apiary','Collection, Collation & Transport','Bulk Processor','Exporter','Shipping & Border','Blender / Packer','Distribution','Customer'],
   herbs_spices:  ['Agronomic Input Suppliers','Growing Region','Harvest & Drying','Milling & Blending','Packaging & Labelling','Import/Border','Warehouse','Distribution','Retail/Food Service','Consumer'],
-  cereals:       ['Agronomic Input Suppliers','Arable Farm','Harvest & Grain Store','Milling & Processing','Packaging & Labelling','Import/Border','Distribution','Retail/Food Service','Consumer'],
+  cereals:       ['Agronomic Input Suppliers','Arable Farm, Harvest & Storage','Grain Store','Milling & Processing','Packaging & Labelling','Import/Border','Distribution','Retail/Food Service','Consumer'],
   fruit_veg:     ['Farm/Orchard & Harvest','Collection & Collation','Packing & Processing','Cold Storage','Import/Border','Distribution','Retail/Food Service','Consumer'],
   dairy:         ['Dairy Farm','Collection & Transport','Pasteurisation/UHT','Separation & Processing','Packaging & Labelling','Import/Border','Cold Storage','Distribution','Retail/Food Service','Consumer'],
   cocoa:         ['Farm/Plantation','Fermentation & Drying','Export Collection','Import/Border','Grinding & Processing','Chocolate Manufacture','Packaging & Labelling','Warehouse','Distribution','Retail/Food Service','Consumer'],
@@ -2840,7 +2839,7 @@ function parseRasffCsv(txt) {
       'Farm/Orchard': 'Farm/Orchard & Harvest', 'Harvest': 'Farm/Orchard & Harvest',
       'Cutting & Processing': 'Cutting & Deboning', 'Further Processing': 'Processing & Manufacture',
       'Harvest & Hulling': 'Harvest, Hulling & Drying',
-      'Retail': 'Retail/Food Service', 'Import & Trade': 'Import/Border', 'Harvest & Storage': 'Harvest & Grain Store', 'Grain Store': 'Harvest & Grain Store', 'Drying': 'Harvest, Hulling & Drying'
+      'Retail': 'Retail/Food Service', 'Import & Trade': 'Import/Border', 'Arable Farm': 'Arable Farm, Harvest & Storage', 'Harvest & Storage': 'Arable Farm, Harvest & Storage', 'Harvest & Grain Store': 'Grain Store', 'Drying': 'Harvest, Hulling & Drying'
     };
 
     var out = rows.map(function(r) {
