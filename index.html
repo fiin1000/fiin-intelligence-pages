@@ -1509,8 +1509,8 @@ var WHOLE_CHAIN = {
     risks: ['False welfare or origin claims', 'Substitution (breed)', 'Certification fraud']
   },
   red_meat: {
-    vulnerabilities: ['Decline in herd sizes', 'Energy prices', 'Fertiliser', 'Price', 'Animal disease', 'Vet residues', 'AMR', 'Climate / water availability', 'Extreme weather', 'Crop yield failure (palm, soy)', 'GM', 'Carbon / greenwashing', 'Legislative framework and agricultural diversity', 'SPS', 'Current and future trade deals', 'Political instability', 'Labour', 'Documents', 'SMEs', 'Difficulty verifying welfare and some origins by testing'],
-    risks: ['Certification / claims', 'Misrepresentation of origin, age, breed, welfare or organic status', 'Misrepresentation of a business for fake orders', 'Substitution', 'Misrepresentation of a lower-priced cut', 'Misrepresentation of meat content', 'Whole muscle vs reformed', 'MSM/MRM going into the supply chain', 'Water addition', 'Shelf-life extension', 'Relabelling / sell-off']
+    vulnerabilities: ['Decline in herd sizes', 'Energy prices', 'Fertiliser', 'Price', 'Animal disease', 'Vet residues', 'AMR', 'Climate / water availability', 'Extreme weather', 'Crop yield failure (palm, soy)', 'GM', 'Carbon / greenwashing', 'Legislative framework and agricultural diversity', 'SPS', 'Current and future trade deals', 'Political instability', 'Labour (skills and availability)', 'Overhead costs', 'Artificial intelligence', 'Certification', 'Claims (e.g. farm assurance, GM / soy, fresh or previously frozen, animal welfare, organic, production method, nutrition, species / breed, country of origin)', 'Documents', 'SMEs', 'Difficulty verifying welfare and some origins by testing'],
+    risks: ['Deliberate adulteration', 'Document fraud', 'Certification / claims', 'Misrepresentation of origin, age, breed, welfare or organic status', 'Misrepresentation of a business for fake orders', 'Substitution', 'Misrepresentation of a lower-priced cut', 'Misrepresentation of meat content', 'Whole muscle vs reformed', 'MSM/MRM going into the supply chain', 'Water addition', 'Shelf-life extension', 'Relabelling / sell-off']
   },
   fish_shellfish: {
     vulnerabilities: ['Availability', 'Price volatility', 'Climate change', 'Geopolitics', 'Human rights'],
@@ -1556,8 +1556,8 @@ var KNOWN_VULNERABILITIES = {
     'Import/Border':            ['Low-cost imports (e.g. South America)']
   },
   red_meat: {
-    'Farm/Ranch':               ['Declining herd and flock sizes', 'Climate, drought and water availability', 'Animal disease', 'Input costs and labour (fertiliser, vet medicines, skills)', 'Feed crop failures (e.g. soy, palm)'],
-    'Import/Border':            ['Changing import controls and trade deals', 'Political instability', 'Deforestation-linked supply']
+    'Farm/Ranch':               ['Declining herd and flock sizes', 'Climate, drought and water availability', 'Animal disease and movement restrictions', 'Feed crop failures (e.g. soy, palm)', 'AMR'],
+    'Import/Border':            ['Changing import controls and trade deals', 'Political instability']
   },
   fish_shellfish: {
     'Farm/Fishing Vessel':      ['Stock migration, quota and pricing', 'Certification', 'Catch area', 'Animal welfare'],
@@ -1630,12 +1630,16 @@ var KNOWN_RISKS = {
     'Consumer':                 [{t:'Consumer complaint fraud'}]
   },
   red_meat: {
-    'Farm/Ranch':               [{t:'Eartag or animal ID fraud'},{t:'Counterfeit vet medicines or fertiliser'},{t:'Theft'},{t:'Heavy metals'},{t:'Vet residues and AMR'},{t:'Production method claims and loss of traceability'}],
-    'Slaughter & Dressing':     [{t:'Animal by-products (ABP) diverted, or by-product labelling and documentation'},{t:'By-products misrepresented (e.g. collagen in health supplements)'}],
+    'Farm/Ranch':               [{t:'Eartag or animal ID fraud'},{t:'Counterfeit vet medicines or fertiliser'},{t:'Theft'},{t:'Heavy metals'},{t:'Vet residues'},{t:'Production method claims and loss of traceability'},{t:'Feed supply claims (e.g. organic)'}],
+    'Slaughter & Dressing':     [{t:'Animal by-products (ABP) diverted, or by-product labelling and documentation'},{t:'Unapproved premises'}],
     'Cutting & Deboning':       [{t:'Lower-priced cuts misrepresented'}],
-    'Processing & Manufacture': [{t:'Mechanically separated or recovered meat (MSM/MRM)'},{t:'Water addition and misrepresented meat content (e.g. reformed sold as whole muscle)'},{t:'Substitution'}],
+    'Processing & Manufacture': [{t:'Mechanically separated or recovered meat (MSM/MRM)'},{t:'Water addition and misrepresented meat content (e.g. reformed sold as whole muscle)'},{t:'Species substitution'}],
     'Packaging & Labelling':    [{t:'Misrepresentation of origin, age, breed, welfare or organic status'},{t:'Shelf-life extension, relabelling or sell-off'}],
-    'Import/Border':            [{t:'Country of origin misrepresentation'},{t:'Falsified export documents'}]
+    'Cold Storage':             [{t:'Theft'},{t:'Mislabelling'}],
+    'Distribution':             [{t:'Theft'}],
+    'Import/Border':            [{t:'Country of origin misrepresentation'},{t:'Falsified export documents'}],
+    'Retail/Food Service':      [{t:'Species substitution'}],
+    'Consumer':                 [{t:'Consumer complaint fraud'}]
   },
   fish_shellfish: {
     'Farm/Fishing Vessel':      [{t:'Flag status and illegal, unreported or unregulated (IUU) fishing'},{t:'Cleaning/chemicals'},{t:'Illegal inputs'}],
