@@ -1505,220 +1505,220 @@ var VULNERABILITIES_DEFAULT = [];
 // From the whole-chain box on each TSG conference supply chain map (mitigations not included).
 var WHOLE_CHAIN = {
   poultry: {
-    vulnerabilities: ['Extreme weather / heat', 'Welfare standards compliance, e.g. free-range, organic', 'Documentation, e.g. ABP, agents and brokers, country of origin claims', 'Artificial intelligence', 'Confidence in testing for origin and chemicals, and in reference databases', 'Complex supply chains', 'Meat content and nitrogen factors', 'Further processing recipe changes', 'Labour (skills and availability)', 'Overhead costs', 'Certification', 'Claims (e.g. farm assurance, GM / soy, fresh or previously frozen, animal welfare, organic, production method, nutrition, species / breed, country of origin)'],
-    risks: ['Deliberate adulteration', 'Document fraud', 'False welfare or origin claims', 'Substitution (breed)', 'Certification fraud']
+    vulnerabilities: ['Welfare standards compliance (e.g. free-range, organic)', 'Agents and brokers in the chain', 'Artificial intelligence', 'Confidence in testing for origin and chemicals, and in reference databases', 'Complex supply chains', 'Meat content and nitrogen factors', 'Further processing recipe changes', 'Labour availability and skills', 'Cost pressure', 'Certification', 'Premium claims (e.g. farm assurance, GM / soy, fresh or previously frozen, animal welfare, organic, production method, nutrition, species / breed, country of origin)'],
+    risks: ['Adulteration, dilution or substitution', 'Breed substitution', 'Misrepresentation of origin', 'Misrepresentation of credence attributes (e.g. welfare, production method)', 'Document fraud (e.g. certificates, export documents, including AI-generated)', 'Theft']
   },
   red_meat: {
-    vulnerabilities: ['Decline in herd sizes', 'Energy prices', 'Fertiliser', 'Price', 'Animal disease', 'Vet residues', 'AMR', 'Climate / water availability', 'Extreme weather', 'Crop yield failure (palm, soy)', 'GM', 'Carbon / greenwashing', 'Legislative framework and agricultural diversity', 'SPS', 'Current and future trade deals', 'Political instability', 'Labour (skills and availability)', 'Overhead costs', 'Artificial intelligence', 'Certification', 'Claims (e.g. farm assurance, GM / soy, fresh or previously frozen, animal welfare, organic, production method, nutrition, species / breed, country of origin)', 'SMEs', 'Difficulty verifying welfare and some origins by testing'],
-    risks: ['Deliberate adulteration', 'Document fraud', 'Misrepresentation of origin, age, breed, welfare or organic status', 'Misrepresentation of a business for fake orders', 'Substitution', 'Misrepresentation of a lower-priced cut', 'Misrepresentation of meat content', 'Whole muscle vs reformed', 'MSM/MRM going into the supply chain', 'Water addition', 'Shelf-life extension', 'Relabelling / sell-off']
+    vulnerabilities: ['Cost pressure (energy, fertiliser, overheads)', 'Price volatility', 'GM status of feed', 'Carbon and greenwashing claims', 'Legislative framework and agricultural diversity', 'Sanitary and phytosanitary (SPS) rules', 'Geopolitics, sanctions and trade policy', 'Labour availability and skills', 'Artificial intelligence', 'Certification', 'Premium claims (e.g. farm assurance, GM / soy, fresh or previously frozen, animal welfare, organic, production method, nutrition, species / breed, country of origin)', 'Many small businesses (SMEs) in the chain', 'Difficulty verifying welfare and some origins by testing'],
+    risks: ['Adulteration, dilution or substitution', 'Species substitution', 'Misrepresentation of origin', 'Misrepresentation of credence attributes (e.g. age, breed, welfare, organic)', 'Document fraud (e.g. certificates, export documents, including AI-generated)', 'Misrepresentation of a business for fake orders', 'Theft']
   },
   fish_shellfish: {
-    vulnerabilities: ['Availability', 'Price volatility', 'Climate change', 'Geopolitics', 'Human rights'],
-    risks: ['Country of origin misrepresentation', 'Speciation (species substitution)', 'Misrepresentation of catch, production method or origin']
+    vulnerabilities: ['Supply shortages or oversupply', 'Price volatility', 'Climate and extreme weather (drought, heat, water scarcity)', 'Geopolitics, sanctions and trade policy', 'Human rights'],
+    risks: ['Misrepresentation of origin', 'Species substitution', 'Misrepresentation of credence attributes (e.g. catch method, production method)']
   },
   honey: {
-    vulnerabilities: ['South American shortages (Brazil, Argentina, Central America)', 'Shortage of Manuka', 'Poor crop', 'Weather / climate deviation', 'Climate change / pollution', 'Water scarcity', 'Transport costs', 'Regulation (SPS)', 'Restriction of blends', 'Margin of error on testing', 'Limits on defence (no evidence)'],
-    risks: ['Misrepresentation of origin', 'Misrepresentation of premium honeys', 'Addition of sugar syrup']
+    vulnerabilities: ['Supply shortages or oversupply (e.g. South American honey, Manuka)', 'Margin of error on testing', 'Limits on defence (no evidence)'],
+    risks: ['Adulteration, dilution or substitution (e.g. sugar syrup)', 'Misrepresentation of origin', 'Misrepresentation of credence attributes (e.g. Manuka and other premium honeys, floral source)', 'Document fraud (e.g. records, export documents)']
   },
   herbs_spices: {
-    vulnerabilities: ['Price', 'Weather', 'Availability', 'Geopolitics', 'Lack of governance / regulation', 'Lack of understanding of regulations', 'Grading / cost-value tiering'],
-    risks: ['Dilution / bulking', 'Upgrading', 'Document / labelling fraud']
+    vulnerabilities: ['Price volatility', 'Supply shortages or oversupply', 'Geopolitics, sanctions and trade policy', 'Lack of governance and regulation', 'Lack of understanding of regulations', 'Grading and value tiers that reward upgrading'],
+    risks: ['Adulteration, dilution or substitution', 'Upgrading (lower grade sold as higher)', 'Document fraud (e.g. labels, certificates)']
   },
   cereals: {
-    vulnerabilities: ['Price volatility', 'Geopolitics', 'Complex transport route'],
-    risks: ['Substitution', 'Misrepresentation of origin', 'Mislabelling', 'Contamination / bulking']
+    vulnerabilities: ['Price volatility', 'Geopolitics, sanctions and trade policy'],
+    risks: ['Adulteration, dilution or substitution', 'Misrepresentation of origin', 'Mislabelling']
   },
   fruit_veg: {
-    vulnerabilities: ['Climate change', 'El Niño', 'Geopolitics', 'Customer demand', 'Demand / supply trends (long-term shock vs short-term trends)', 'Excess volume', 'Illicit volume', 'Change of ownership / pricing', 'Provenance premium, e.g. Spanish', 'Inflation / cost pressures', 'Insecticides', 'Methods of testing and interpretation of results'],
-    risks: ['Document fraud', 'Adulteration / dilution / substitution', 'Mislabelling / counterfeit', 'Misrepresentation of origin, organic or sustainability claims', 'Malicious contamination / tampering', 'Using AI to fake test certificates']
+    vulnerabilities: ['Climate and extreme weather (including El Niño)', 'Geopolitics, sanctions and trade policy', 'Demand shifts and trends (long-term shocks and short-term trends)', 'Change of ownership and pricing', 'Provenance premium (e.g. Spanish)', 'Cost pressure', 'Methods of testing and interpretation of results'],
+    risks: ['Document fraud (e.g. certificates, test results, records, including AI-generated)', 'Adulteration, dilution or substitution', 'Mislabelling or counterfeit', 'Misrepresentation of origin', 'Misrepresentation of credence attributes (e.g. organic, sustainability, variety)', 'Malicious tampering']
   },
   dairy: {
-    vulnerabilities: ['Cross-border activity', 'Chemical content', 'Labour shortages', 'Fuel shortages', 'Maturation of product'],
-    risks: ['Adulteration / substitution', 'Multi-species milk', 'Reworking of cheaper cheese', 'Document fraud', 'Misrepresentation of claims', 'Theft']
+    vulnerabilities: ['Chemical content', 'Labour availability and skills'],
+    risks: ['Adulteration, dilution or substitution', 'Document fraud (e.g. certificates, import documents)', 'Misrepresentation of credence attributes (e.g. maturation, origin, organic)']
   },
-  eggs: {
-    vulnerabilities: ['Avian influenza (supply / demand)', 'Climate change', 'Price volatility (feed, energy)', 'Environmental legislation', 'Animal welfare'],
-    risks: ['Country of origin fraud', 'Shelf-life extension', 'Waste mismanagement']
+  cocoa: {
+    vulnerabilities: [],
+    risks: []
   },
   nuts: {
-    vulnerabilities: ['Geopolitics', 'Climate challenges and single harvests', 'Higher temperatures (spoilage risk, less availability)', 'Natural disasters (less predictable)', 'Transport challenges from natural disasters, e.g. flooding', 'Labour shortages', 'Increasing supply chain costs', 'Cost reduction pressure, e.g. heat treatment', 'Processes pushed back down the chain, e.g. heat treatment (enough visibility?)', 'Reduced processing capability', 'Increased demand for powders / pastes', 'Rapid changes of supplier / outsourcing', 'New adulterants', 'Traceability', 'Lack of data, insights and understanding'],
-    risks: ['Document fraud (certification, origin, grading)', 'Falsified results (pesticides, authenticity testing, heat treatment)', 'Adulteration of powders / pastes']
+    vulnerabilities: ['Geopolitics, sanctions and trade policy', 'Climate and extreme weather (single harvests, higher temperatures)', 'Labour availability and skills', 'Cost pressure', 'Reduced processing capability', 'Rapid changes of supplier or outsourcing', 'New adulterants emerging', 'Limited traceability', 'Lack of data, insights and understanding'],
+    risks: ['Document fraud (e.g. certificates, test results)', 'Adulteration, dilution or substitution', 'Extension (bulking)']
+  },
+  eggs: {
+    vulnerabilities: ['Avian influenza (supply and demand)', 'Price volatility (feed, energy)'],
+    risks: ['Misrepresentation of origin', 'Shelf-life extension', 'Waste mismanagement']
   },
   oils: {
-    vulnerabilities: ['Extreme weather', 'Crop failures', 'Water scarcity', 'Shortages', 'Growing demand', 'Trade sanctions', 'Organised crime', 'Illegal labour / labour availability', 'Vulnerability / asymmetry', 'Grade / type of oil (from processing)', 'New adulterants', 'Cyber security'],
-    risks: ['Adulteration / substitution with lower-grade oils', 'Country of origin fraud', 'Documentation fraud / AI']
+    vulnerabilities: ['Organised crime', 'Information asymmetry between buyers and sellers', 'New adulterants emerging', 'Cyber security'],
+    risks: ['Adulteration, dilution or substitution', 'Misrepresentation of origin', 'Misrepresentation of credence attributes (e.g. variety, organic, PDO)', 'Extension (bulking)', 'Document fraud (e.g. certificates, including AI-generated)']
   }
 };
 var KNOWN_VULNERABILITIES = {
   poultry: {
-    'Rearing Farm':             ['Feed supply chain (soy, vitamins, fortification)', 'Disease control measures (e.g. housing orders) affecting supply', 'Climate, drought, extreme weather and heat', 'AMR']
+    'Rearing Farm':              ['Feed supply chain (soy, vitamins, fortification)', 'Disease control measures (e.g. housing orders) affecting supply', 'Climate and extreme weather (drought, heat, water scarcity)', 'Antimicrobial resistance (AMR)']
   },
   red_meat: {
-    'Farm/Ranch':               ['Declining herd and flock sizes', 'Climate, drought and water availability', 'Animal disease and movement restrictions', 'Feed crop failures (e.g. soy, palm)', 'AMR'],
-    'Import/Border':            ['Changing import controls and trade deals', 'Political instability']
+    'Farm/Ranch':                ['Declining herd and flock sizes', 'Climate and extreme weather (drought, heat, water scarcity)', 'Animal disease and movement restrictions', 'Feed crop failures (e.g. soy, palm)', 'Antimicrobial resistance (AMR)', 'Loss of traceability'],
+    'Import/Border':             ['Geopolitics, sanctions and trade policy']
   },
   fish_shellfish: {
-    'Farm/Fishing Vessel':      ['Stock migration, quota and pricing', 'Certification', 'Catch area', 'Animal welfare'],
-    'Filleting & Processing':   ['Certification, training, site security and supplier approval'],
-    'Smoking/Further Processing':['Certification, supplier approval and test results'],
-    'Distribution':             ['Transport security (driver, vehicle, open packs)']
+    'Farm/Fishing Vessel':       ['Stock migration, quota and pricing', 'Certification', 'Catch area', 'Animal welfare'],
+    'Filleting & Processing':    ['Certification, training, site security and supplier approval', 'Format received (e.g. skinless) makes species harder to confirm'],
+    'Smoking/Further Processing': ['Certification, supplier approval and test results', 'Offcuts not visibly identifiable (species, origin, traceability)'],
+    'Distribution':              ['Security (site and transport, e.g. driver, vehicle, open packs)']
   },
   honey: {
-    'Beekeeper / Apiary':       ['Weather and climate change', 'Poor crops and water scarcity', 'Shortages (e.g. South American honey, Manuka)'],
-    'Collection, Collation & Transport': ['Co-operative collection points', 'Local collectors'],
-    'Shipping & Border':        ['Regulation (SPS)'],
-    'Blender / Packer':         ['Restrictions on blends'],
-    'Distribution':             ['Transport costs']
+    'Beekeeper / Apiary':        ['Climate and extreme weather (drought, heat, water scarcity)', 'Crop failure or poor harvest', 'Pollution'],
+    'Collection, Collation & Transport': ['Co-operative collection points', 'Local collectors', 'Loss of beekeeper linkage'],
+    'Shipping & Border':         ['Sanitary and phytosanitary (SPS) rules', 'Incomplete origin evidence', 'Breaks in chain of custody'],
+    'Blender / Packer':          ['Restrictions on blends'],
+    'Distribution':              ['Cost pressure (transport)'],
+    'Customer':                  ['Incomplete downstream traceability']
   },
   herbs_spices: {
-    'Growing Region':           ['Crop failure, water scarcity and extreme weather', 'Sanctions', 'Seed shortages and growing demand'],
-    'Harvest & Drying':         ['Labour shortages'],
-    'Milling & Blending':       ['Cost reduction pressure'],
-    'Import/Border':            ['Trade restrictions, sanctions and price volatility'],
-    'Warehouse':                ['Security', 'Poor storage conditions'],
-    'Distribution':             ['Fuel and transport costs', 'Poor conditions in transit', 'Security'],
-    'Retail':                   ['Anything that drives demand']
-  },
-  dairy: {
-    'Dairy Farm':               ['Animal disease and shortages', 'Feed availability and fewer farms'],
-    'Separation & Processing':  ['Long supply chains and blind spots for other ingredients'],
-    'Distribution':             ['Fuel shortages']
-  },
-  nuts: {
-    'Orchard':                  ['Supply shortages or oversupply from annual harvests and crop failures', 'Pests, disease, water availability and weather', 'Natural disasters', 'Country of origin pressures and shifting sourcing'],
-    'Processing & Sorting':     ['Processes such as heat treatment moved down the chain with less visibility', 'Cost reduction pressure (e.g. heat treatment)', 'Rising demand for powders and pastes'],
-    'Warehouse':                ['Security', 'Poor conditions'],
-    'Distribution':             ['Transport disruption from natural disasters (e.g. flooding)', 'Security', 'Poor conditions'],
-    'Retail':                   ['Detection limits in finished products (e.g. origin of pistachio in a chocolate bar)', 'Sudden demand from viral trends']
-  },
-  eggs: {
-    'Laying Farm':              ['Avian influenza affecting supply and demand', 'Lack of vet inspection of chicks', 'Farm certification and economic viability of farms', 'Animal welfare standards', 'Price volatility (feed, energy)', 'Climate change and environmental legislation']
-  },
-  fruit_veg: {
-    'Farm/Orchard & Harvest':   ['Input supply and pesticide rules (fertilisers, pesticides, including new pesticides)', 'Seed availability, quality and long lead times', 'Propagation, seed viability, cross-contamination and crop rotation', 'Differences in legislation between countries and limited auditor availability', 'Historic sourcing issues in some regions (e.g. Xinjiang)'],
-    'Import/Border':            ['Groupage'],
-    'Distribution':             ['Changes in distribution or shipping routes'],
-    'Retail':                   ['Price reduction pressure'],
-    'Consumer':                 ['Changing consumer demand']
+    'Growing Region':            ['Climate and extreme weather (drought, heat, water scarcity)', 'Crop failure or poor harvest', 'Seed shortages', 'Demand shifts and trends'],
+    'Harvest & Drying':          ['Labour availability and skills'],
+    'Milling & Blending':        ['Cost pressure'],
+    'Import/Border':             ['Geopolitics, sanctions and trade policy', 'Price volatility'],
+    'Warehouse':                 ['Security (site and transport)', 'Poor storage or transport conditions'],
+    'Distribution':              ['Cost pressure (fuel and transport)', 'Poor storage or transport conditions', 'Security (site and transport)'],
+    'Retail/Food Service':       ['Demand shifts and trends']
   },
   cereals: {
-    'Arable Farm':              ['Crop failure, water scarcity and extreme weather', 'Policy and subsidy changes', 'Fertiliser supply and shifting growing regions', 'Demand for premium claims (origin, organic, regenerative, heritage varieties)', 'Many small farmers and varieties; disease'],
-    'Harvest & Storage':        ['Labour shortages and fuel costs'],
-    'Milling & Processing':     ['Fortification costs, testing limits and cost reduction pressure'],
-    'Import/Border':            ['Complex transport routes and disruption', 'Geopolitics and price volatility']
+    'Arable Farm':               ['Climate and extreme weather (drought, heat, water scarcity)', 'Crop failure or poor harvest', 'Policy and subsidy changes', 'Fertiliser supply and shifting growing regions', 'Demand for premium claims (origin, organic, regenerative, heritage varieties)', 'Many small farmers and varieties', 'Plant disease'],
+    'Harvest & Grain Store':     ['Labour availability and skills', 'Cost pressure (fuel)'],
+    'Milling & Processing':      ['Cost pressure (fortification, cost reduction)', 'Testing limits'],
+    'Import/Border':             ['Complex transport routes and disruption', 'Geopolitics, sanctions and trade policy', 'Price volatility']
+  },
+  fruit_veg: {
+    'Farm/Orchard & Harvest':    ['Input supply and pesticide rules (fertilisers, pesticides, including new pesticides)', 'Seed availability, quality and long lead times', 'Propagation, seed viability, cross-contamination and crop rotation', 'Differences in legislation between countries and limited auditor availability', 'Historic sourcing issues in some regions (e.g. Xinjiang)'],
+    'Import/Border':             ['Groupage'],
+    'Distribution':              ['Changes in distribution or shipping routes'],
+    'Retail/Food Service':       ['Cost pressure (retail price reduction)'],
+    'Consumer':                  ['Demand shifts and trends']
+  },
+  dairy: {
+    'Dairy Farm':                ['Animal disease and shortages', 'Feed availability and fewer farms'],
+    'Separation & Processing':   ['Long supply chains and blind spots for other ingredients'],
+    'Import/Border':             ['Cross-border activity'],
+    'Distribution':              ['Fuel shortages']
+  },
+  nuts: {
+    'Orchard':                   ['Supply shortages or oversupply (annual harvests)', 'Crop failure or poor harvest', 'Climate and extreme weather (drought, heat, water scarcity)', 'Plant pests and disease', 'Natural disasters', 'Country of origin pressures and shifting sourcing'],
+    'Processing & Sorting':      ['Processes such as heat treatment moved down the chain with less visibility', 'Cost pressure (e.g. heat treatment)', 'Demand shifts and trends (powders and pastes)'],
+    'Warehouse':                 ['Security (site and transport)', 'Poor storage or transport conditions'],
+    'Distribution':              ['Transport disruption from natural disasters (e.g. flooding)', 'Security (site and transport)', 'Poor storage or transport conditions'],
+    'Retail/Food Service':       ['Detection limits in finished products (e.g. origin of pistachio in a chocolate bar)', 'Demand shifts and trends (sudden demand from viral trends)']
+  },
+  eggs: {
+    'Laying Farm':               ['Avian influenza affecting supply and demand', 'Lack of vet inspection of chicks', 'Farm certification and economic viability of farms', 'Animal welfare standards', 'Price volatility (feed, energy)', 'Climate and extreme weather (drought, heat, water scarcity)', 'Environmental legislation', 'Good agricultural practice']
   },
   oils: {
-    'Farm/Plantation':          ['Premium attached to PDO, origin and variety', 'Crop failure, water scarcity and extreme weather', 'Shortages and growing demand'],
-    'Harvesting':               ['Harvest method (hand or machine)', 'Labour availability and illegal labour'],
-    'Bulk Storage':             ['Security', 'Poor conditions'],
-    'Import & Trade':           ['Trade sanctions', 'Security'],
-    'Retail/Food Service':      ['Trends']
-  },
+    'Farm/Plantation':           ['Premium attached to PDO, origin and variety', 'Climate and extreme weather (drought, heat, water scarcity)', 'Crop failure or poor harvest', 'Supply shortages or oversupply', 'Demand shifts and trends'],
+    'Harvesting':                ['Harvest method (hand or machine)', 'Labour availability and skills', 'Illegal labour'],
+    'Bulk Storage':              ['Security (site and transport)', 'Poor storage or transport conditions'],
+    'Import/Border':             ['Geopolitics, sanctions and trade policy', 'Security (site and transport)'],
+    'Retail/Food Service':       ['Demand shifts and trends']
+  }
 };
 
 var KNOWN_RISKS = {
-  // Known risks: food fraud risks from the TSG conference maps (members' own notes, placed at the closest stage). Honey: TSG Honey guide.
+  // Known risks: food fraud risks from the TSG conference maps and Nov 2026 workshop, in the TSG's standard terms (harmonised 13 Nov 2026).
   poultry: {
-    'Rearing Farm':             [{t:'Feed dilution or substitution'},{t:'Production method claims'},{t:'Theft'},{t:'Heavy metals'},{t:'Vet residues'}],
-    'Slaughter & Evisceration': [{t:'Animal by-products (ABP) and waste diverted into the food chain'}],
-    'Cutting & Deboning':       [{t:'Incorrect use of mechanically separated or recovered meat (MSM/MRM)'}],
-    'Processing & Manufacture': [{t:'Mechanically separated or recovered meat (MSM/MRM)'},{t:'Meat content and recipe changes'},{t:'Species substitution'},{t:'Water addition'}],
-    'Packaging & Labelling':    [{t:'False welfare or origin claims (e.g. free-range, organic)'},{t:'Breed substitution'}],
-    'Cold Storage':             [{t:'Theft'},{t:'Mislabelling'}],
-    'Distribution':             [{t:'Theft'}],
-    'Import/Border':            [{t:'Country of origin misrepresentation'},{t:'Falsified export documents'}],
-    'Retail/Food Service':      [{t:'Species substitution'}],
-    'Consumer':                 [{t:'Consumer complaint fraud'}]
+    'Rearing Farm':              [{t:'Feed dilution or substitution'},{t:'Misrepresentation of credence attributes (e.g. production method, welfare)'},{t:'Heavy metals'},{t:'Vet residues'}],
+    'Slaughter & Evisceration':  [{t:'Animal by-products (ABP) and waste diverted into the food chain'}],
+    'Cutting & Deboning':        [{t:'Undeclared or incorrect use of MSM/MRM'}],
+    'Processing & Manufacture':  [{t:'Undeclared or incorrect use of MSM/MRM'},{t:'Misrepresented meat content and recipe changes'},{t:'Species substitution'},{t:'Water addition'}],
+    'Packaging & Labelling':     [{t:'Misrepresentation of credence attributes (e.g. free-range, organic, welfare)'},{t:'Misrepresentation of origin'},{t:'Breed substitution'}],
+    'Import/Border':             [{t:'Misrepresentation of origin'},{t:'Document fraud (e.g. export documents)'}],
+    'Cold Storage':              [{t:'Mislabelling'}],
+    'Retail/Food Service':       [{t:'Species substitution'}],
+    'Consumer':                  [{t:'Consumer complaint fraud'}]
   },
   red_meat: {
-    'Farm/Ranch':               [{t:'Eartag or animal ID fraud'},{t:'Counterfeit vet medicines or fertiliser'},{t:'Theft'},{t:'Heavy metals'},{t:'Vet residues'},{t:'Production method claims and loss of traceability'},{t:'Feed supply claims (e.g. organic)'}],
-    'Slaughter & Dressing':     [{t:'Animal by-products (ABP) diverted, or by-product labelling and documentation'},{t:'Unapproved premises'}],
-    'Cutting & Deboning':       [{t:'Lower-priced cuts misrepresented'}],
-    'Processing & Manufacture': [{t:'Mechanically separated or recovered meat (MSM/MRM)'},{t:'Water addition and misrepresented meat content (e.g. reformed sold as whole muscle)'},{t:'Species substitution'}],
-    'Packaging & Labelling':    [{t:'Misrepresentation of origin, age, breed, welfare or organic status'},{t:'Shelf-life extension, relabelling or sell-off'}],
-    'Cold Storage':             [{t:'Theft'},{t:'Mislabelling'}],
-    'Distribution':             [{t:'Theft'}],
-    'Import/Border':            [{t:'Country of origin misrepresentation'},{t:'Falsified export documents'}],
-    'Retail/Food Service':      [{t:'Species substitution'}],
-    'Consumer':                 [{t:'Consumer complaint fraud'}]
+    'Farm/Ranch':                [{t:'Eartag or animal ID fraud'},{t:'Counterfeit vet medicines or fertiliser'},{t:'Heavy metals'},{t:'Vet residues'},{t:'Misrepresentation of credence attributes (e.g. production method, organic feed)'}],
+    'Slaughter & Dressing':      [{t:'Animal by-products (ABP) and waste diverted into the food chain'},{t:'Unapproved premises'}],
+    'Cutting & Deboning':        [{t:'Lower-priced cuts misrepresented'}],
+    'Processing & Manufacture':  [{t:'Undeclared or incorrect use of MSM/MRM'},{t:'Water addition'},{t:'Misrepresented meat content (e.g. reformed sold as whole muscle)'},{t:'Species substitution'}],
+    'Packaging & Labelling':     [{t:'Misrepresentation of credence attributes (e.g. age, breed, welfare, organic)'},{t:'Misrepresentation of origin'},{t:'Shelf-life extension'},{t:'Relabelling (e.g. sell-off stock)'}],
+    'Import/Border':             [{t:'Misrepresentation of origin'},{t:'Document fraud (e.g. export documents)'}],
+    'Cold Storage':              [{t:'Mislabelling'}],
+    'Retail/Food Service':       [{t:'Species substitution'}],
+    'Consumer':                  [{t:'Consumer complaint fraud'}]
   },
   fish_shellfish: {
-    'Farm/Fishing Vessel':      [{t:'Flag status and illegal, unreported or unregulated (IUU) fishing'},{t:'Cleaning/chemicals'},{t:'Illegal inputs'}],
-    'Landing & Grading':        [{t:'Catch origin and weight misdeclared'},{t:'By-catch and undersized fish (MLS)'},{t:'Country, labelling, pack format and price at first sale'},{t:'Species substitution'}],
-    'Filleting & Processing':   [{t:'Fish content and added water or phosphates'},{t:'Whitening or downgraded meat'},{t:'Format received (e.g. skinless) makes species harder to confirm'},{t:'Species substitution'},{t:'Double frozen'}],
-    'Smoking/Further Processing':[{t:'Offcuts not visibly identifiable (species, origin, traceability)'},{t:'Added water'},{t:'Misrepresentation of named smoking materials (e.g. cherrywood)'}],
-    'Packaging & Labelling':    [{t:'Country of origin misrepresentation'},{t:'Species misdescription'},{t:'Misrepresentation of catch method or production method'}],
-    'Cold Storage':             [{t:'Relabelling'}],
-    'Import/Border':            [{t:'Accuracy of documentation'}],
-    'Retail/Food Service':      [{t:'Misrepresentation of catch or production method'},{t:'Species substitution or adulteration'}]
+    'Farm/Fishing Vessel':       [{t:'Flag status and illegal, unreported or unregulated (IUU) fishing'},{t:'Cleaning chemicals'},{t:'Illegal inputs'}],
+    'Landing & Grading':         [{t:'Catch origin and weight misdeclared'},{t:'By-catch and undersized fish (MLS)'},{t:'Misdeclaration at first sale (origin, labelling, pack format, price)'}],
+    'Filleting & Processing':    [{t:'Water addition (including phosphates) and misrepresented fish content'},{t:'Whitening or downgraded meat'},{t:'Species substitution'},{t:'Double frozen'}],
+    'Smoking/Further Processing': [{t:'Water addition'},{t:'Misrepresentation of named smoking materials (e.g. cherrywood)'}],
+    'Packaging & Labelling':     [{t:'Misrepresentation of origin'},{t:'Misrepresentation of credence attributes (e.g. catch method, production method)'}],
+    'Import/Border':             [{t:'Document fraud (e.g. catch certificates, import documents)'}],
+    'Cold Storage':              [{t:'Relabelling'}],
+    'Retail/Food Service':       [{t:'Misrepresentation of credence attributes (e.g. catch method, production method)'}]
   },
-  // Honey: TSG Honey guide, "Stages, records and vulnerability points" table (principal authenticity vulnerabilities per stage).
   honey: {
-    'Beekeeper / Apiary':       [{t:'Premature harvest'},{t:'Unsupported floral, organic, local or origin claims'},{t:'Feed-related questions'},{t:'Vet drugs and pesticides'},{t:'Document or record fraud'}],
-    'Collection, Collation & Transport': [{t:'Loss of beekeeper linkage'},{t:'Mixing'},{t:'Incorrect origin or floral declarations'},{t:'Adulteration'},{t:'Substitution'}],
-    'Bulk Processor':           [{t:'Undeclared processing'},{t:'Mixing'},{t:'Excessive heat'},{t:'Excessive moisture reduction questions'},{t:'Marker removal'},{t:'Document or record fraud'},{t:'Filtration'},{t:'Adulteration'},{t:'Substitution'}],
-    'Exporter':                 [{t:'Relabelling'},{t:'Trans-shipping'},{t:'Document fraud'},{t:'Undisclosed intermediaries'},{t:'Stock switching'}],
-    'Shipping & Border':        [{t:'Sample mismatch'},{t:'Incomplete origin evidence'},{t:'Breaks in chain of custody'},{t:'Stock switching (origin, grade, organic)'}],
-    'Blender / Packer':         [{t:'Syrup addition'},{t:'Undeclared origin mixing'},{t:'Claim misrepresentation'},{t:'Marker removal'},{t:'Packaging errors'}],
-    'Distribution':             [{t:'Batch mix-ups'},{t:'Deterioration'},{t:'Temperature abuse'}],
-    'Customer':                 [{t:'Incomplete downstream traceability'}]
+    'Beekeeper / Apiary':        [{t:'Premature harvest'},{t:'Misrepresentation of credence attributes (e.g. floral source, organic, local)'},{t:'Undeclared feeding (e.g. sugar syrup)'},{t:'Vet drugs and pesticides'}],
+    'Collection, Collation & Transport': [{t:'Undeclared mixing'},{t:'Misrepresentation of origin'},{t:'Adulteration, dilution or substitution'}],
+    'Bulk Processor':            [{t:'Undeclared processing'},{t:'Undeclared mixing'},{t:'Excessive heat'},{t:'Artificial or excessive moisture reduction'},{t:'Marker removal'},{t:'Filtration'},{t:'Adulteration, dilution or substitution'}],
+    'Exporter':                  [{t:'Relabelling'},{t:'Trans-shipping'},{t:'Undisclosed intermediaries'},{t:'Stock switching'}],
+    'Shipping & Border':         [{t:'Sample mismatch'},{t:'Stock switching (origin, grade, organic)'}],
+    'Blender / Packer':          [{t:'Syrup addition'},{t:'Undeclared origin mixing'},{t:'Misrepresentation of credence attributes (e.g. floral source, Manuka grade, organic)'},{t:'Marker removal'},{t:'Packaging errors'}],
+    'Distribution':              [{t:'Batch mix-ups'},{t:'Deterioration'},{t:'Temperature abuse'}]
   },
   herbs_spices: {
-    'Agronomic Input Suppliers': [{t:'Counterfeit fertilisers and pesticides'},{t:'Seeds: varietal misrepresentation'}],
-    'Growing Region':           [{t:'Single origin claims'},{t:'Organic claims'}],
-    'Harvest & Drying':         [{t:'Dilution or bulking'},{t:'Mycotoxins and extraneous matter (quality)'}],
-    'Milling & Blending':       [{t:'Substitution or adulteration'},{t:'Grading and upgrading (lower grade sold as higher)'},{t:'Irradiation'},{t:'Re-use of waste'}],
-    'Packaging & Labelling':    [{t:'Document or labelling fraud'},{t:'Origin claims'},{t:'Organic claims'},{t:'Upgrading'}],
-    'Import/Border':            [{t:'Documentation fraud'},{t:'Import documents and certificates'}],
-    'Consumer':                 [{t:'Allergens'},{t:'Food safety'}]
-  },
-  dairy: {
-    'Dairy Farm':               [{t:'Multi-species milk (e.g. buffalo and cow)'},{t:'Waste control'},{t:'Antibiotic use'},{t:'Country of origin claims'}],
-    'Separation & Processing':  [{t:'Adulteration or substitution'},{t:'Reworking of cheaper cheese'},{t:'Maturation claims (length of time required)'}],
-    'Packaging & Labelling':    [{t:'Misrepresentation of claims'}],
-    'Distribution':             [{t:'Theft'}],
-    'Import/Border':            [{t:'Document fraud and cross-border activity'}]
-  },
-  nuts: {
-    'Orchard':                  [{t:'Claims / standards'}],
-    'Harvest, Hulling & Drying': [{t:'Quality'},{t:'Dilution or bulking'},{t:'Substitution (extension)'}],
-    'Processing & Sorting':     [{t:'Adulteration or re-use of waste'},{t:'Adulteration of powders and pastes, including new adulterants'},{t:'Extension (whole, piece, powder, paste)'}],
-    'Packaging & Labelling':    [{t:'Document or labelling fraud'},{t:'Origin claims'},{t:'Upgrading'}],
-    'Import/Border':            [{t:'Document fraud (certification, origin, grading)'},{t:'Falsified test results (pesticides, authenticity, heat treatment)'}],
-    'Consumer':                 [{t:'Allergens'},{t:'Food safety'}]
-  },
-  eggs: {
-    'Laying Farm':              [{t:'Use of non-compliant feed'},{t:'Compliance with free-range certification'},{t:'Correct vaccination'},{t:'Good agricultural practice'}],
-    'Grading & Washing':        [{t:'Stamping and access to stamps'}],
-    'Packing':                  [{t:'Dilution of liquid egg'},{t:'Bulking and misrepresented farm assurance in dried egg'},{t:'Shelf-life extension'},{t:'Country of origin misrepresentation'}],
-    'Import/Border':            [{t:'Country of origin fraud'}],
-    'Warehouse':                [{t:'Relabelling'}],
-    'Retail/Food Service':      [{t:'Relabelling'}]
-  },
-  fruit_veg: {
-    'Farm/Orchard & Harvest':   [{t:'Fertiliser fraud'},{t:'Seed substitution and false documentation'},{t:'Variety fraud'},{t:'Origin fraud'},{t:'Certification fraud'},{t:'Record fraud'},{t:'Class claims'}],
-    'Collection & Collation': [{t:'Adulteration'},{t:'Stock switching'},{t:'Substitution'}],
-    'Packing & Processing':     [{t:'Water added to increase weight'},{t:'Adulteration, dilution or substitution'},{t:'Labelling fraud'},{t:'Document or record fraud'},{t:'Undeclared processing'},{t:'Claims'}],
-    'Cold Storage':             [{t:'Substitution'},{t:'Mislabelling'},{t:'Record fraud'},{t:'Illegal treatments'}],
-    'Import/Border':            [{t:'Misrepresentation of origin, organic status and variety'},{t:'Fake certificates (including AI-generated)'},{t:'Illicit or excess volumes'},{t:'Trans-shipping'}],
-    'Distribution':             [{t:'Origin and organic claims misrepresented by brokers and wholesalers'},{t:'Tampering and hygiene in contracted transport'},{t:'Stock switching'}],
-    'Retail':                   [{t:'Misrepresentation of origin, organic status or variety'}]
+    'Agronomic Input Suppliers': [{t:'Counterfeit fertilisers and pesticides'},{t:'Seed variety misrepresentation'}],
+    'Growing Region':            [{t:'Misrepresentation of credence attributes (e.g. single origin, organic)'}],
+    'Harvest & Drying':          [{t:'Adulteration, dilution or substitution'},{t:'Mycotoxins and extraneous matter (quality)'}],
+    'Milling & Blending':        [{t:'Adulteration, dilution or substitution'},{t:'Upgrading (lower grade sold as higher)'},{t:'Undeclared irradiation'},{t:'Re-use of waste'}],
+    'Packaging & Labelling':     [{t:'Mislabelling'},{t:'Misrepresentation of origin'},{t:'Misrepresentation of credence attributes (e.g. organic)'},{t:'Upgrading (lower grade sold as higher)'}],
+    'Import/Border':             [{t:'Document fraud (e.g. import documents, certificates)'}],
+    'Consumer':                  [{t:'Allergens'},{t:'Food safety'}]
   },
   cereals: {
-    'Arable Farm':              [{t:'Exploitation of small farmers'}],
-    'Milling & Processing':     [{t:'Bulking, contamination or substitution'}],
-    'Packaging & Labelling':    [{t:'Country of origin fraud and mislabelling'}]
+    'Arable Farm':               [{t:'Exploitation of small farmers'}],
+    'Milling & Processing':      [{t:'Adulteration, dilution or substitution (e.g. bulking, contamination)'}],
+    'Packaging & Labelling':     [{t:'Misrepresentation of origin'},{t:'Mislabelling'}]
+  },
+  fruit_veg: {
+    'Farm/Orchard & Harvest':    [{t:'Fertiliser fraud'},{t:'Seed substitution'},{t:'Misrepresentation of credence attributes (e.g. variety, class, organic)'}],
+    'Collection & Collation':    [{t:'Stock switching'}],
+    'Packing & Processing':      [{t:'Water addition'},{t:'Adulteration, dilution or substitution'},{t:'Mislabelling'},{t:'Undeclared processing'},{t:'Misrepresentation of credence attributes (e.g. variety, class, organic)'}],
+    'Cold Storage':              [{t:'Mislabelling'},{t:'Illegal treatments'}],
+    'Import/Border':             [{t:'Illicit or excess volumes'},{t:'Trans-shipping'}],
+    'Distribution':              [{t:'Credence claims misrepresented by brokers and wholesalers (e.g. organic)'},{t:'Tampering in contracted transport'},{t:'Stock switching'}],
+    'Retail/Food Service':       [{t:'Misrepresentation of credence attributes (e.g. organic, variety)'}]
+  },
+  dairy: {
+    'Dairy Farm':                [{t:'Multi-species milk (e.g. buffalo and cow)'},{t:'Waste control'},{t:'Undeclared antibiotic use'},{t:'Misrepresentation of origin'}],
+    'Separation & Processing':   [{t:'Adulteration, dilution or substitution'},{t:'Reworking of cheaper cheese'},{t:'Misrepresentation of credence attributes (e.g. maturation time)'}],
+    'Packaging & Labelling':     [{t:'Misrepresentation of credence attributes (e.g. maturation, origin, organic)'}],
+    'Import/Border':             [{t:'Document fraud (e.g. import documents)'}],
+    'Distribution':              [{t:'Theft'}]
+  },
+  nuts: {
+    'Orchard':                   [{t:'Misrepresentation of credence attributes (e.g. organic, certification standards)'}],
+    'Harvest, Hulling & Drying': [{t:'Quality'},{t:'Adulteration, dilution or substitution'}],
+    'Processing & Sorting':      [{t:'Re-use of waste'},{t:'Adulteration, dilution or substitution (powders and pastes, including new adulterants)'},{t:'Extension (bulking) of whole, piece, powder or paste'}],
+    'Packaging & Labelling':     [{t:'Mislabelling'},{t:'Misrepresentation of origin'},{t:'Upgrading (lower grade sold as higher)'}],
+    'Import/Border':             [{t:'Document fraud (e.g. certificates, origin, grading)'},{t:'Falsified test results (pesticides, authenticity, heat treatment)'}],
+    'Consumer':                  [{t:'Allergens'},{t:'Food safety'}]
+  },
+  eggs: {
+    'Laying Farm':               [{t:'Use of non-compliant feed'},{t:'False free-range claims'},{t:'Vaccination status misrepresented'}],
+    'Grading & Washing':         [{t:'Stamping and access to stamps'}],
+    'Packing':                   [{t:'Adulteration, dilution or substitution (e.g. liquid and dried egg)'},{t:'Misrepresentation of credence attributes (e.g. farm assurance)'},{t:'Shelf-life extension'},{t:'Misrepresentation of origin'}],
+    'Import/Border':             [{t:'Misrepresentation of origin'}],
+    'Warehouse':                 [{t:'Relabelling'}],
+    'Retail/Food Service':       [{t:'Relabelling'}]
   },
   oils: {
-    'Farm/Plantation':          [{t:'Misrepresentation of credence attributes such as origin, variety, organic'}],
-    'Milling & Pressing':       [{t:'Misrepresentation of credence attributes such as origin, variety, organic'},{t:'Extension'}],
-    'Refining & Grading':       [{t:'Grade or type of oil misrepresented'}],
-    'Blending':                 [{t:'Adulteration or substitution with lower-grade or other oils, including new adulterants'}],
-    'Bottling & Labelling':     [{t:'Country of origin fraud'},{t:'Misrepresentation of credence attributes such as origin, variety, organic'},{t:'Grade (upgrading)'},{t:'Extension'}],
-    'Bulk Storage':             [{t:'Adulteration, dilution or substitution (extension)'}],
-    'Import & Trade':           [{t:'Documentation fraud (including AI-generated documents)'},{t:'Organised crime'},{t:'Certification'},{t:'Import documents and certificates'}],
-    'Consumer':                 [{t:'Allergens'},{t:'Food safety'}]
-  },
+    'Refining & Grading':        [{t:'Upgrading (lower grade or other oil type sold as higher)'}],
+    'Blending':                  [{t:'Adulteration, dilution or substitution (lower-grade or other oils, including new adulterants)'}],
+    'Bottling & Labelling':      [{t:'Upgrading (lower grade sold as higher)'}],
+    'Bulk Storage':              [{t:'Adulteration, dilution or substitution'}],
+    'Import/Border':             [{t:'Document fraud (e.g. certificates, import documents, including AI-generated)'}],
+    'Consumer':                  [{t:'Allergens'},{t:'Food safety'}]
+  }
 };
 
 // ── Dummy fiin data per category ───────────────────────────────────────────────
@@ -1968,7 +1968,7 @@ var FIIN_TESTING = {
       { q:'Q1 2026', node:'Bottling & Labelling', text:'Olive oil with Italian origin claim — isotope and elemental profiling inconsistent with declared Italian provenance.' },
       { q:'Q4 2025', node:'Farm/Plantation', text:'PDO extra virgin olive oil — traceability review could not link the batch to registered PDO producers.' },
       { q:'Q4 2025', node:'Blending', text:'Cold-pressed rapeseed oil — profile indicates a blend with refined rapeseed oil.' },
-      { q:'Q3 2025', node:'Import & Trade', text:'Sunflower oil — origin documentation inconsistent with shipping records; possible transhipment.' },
+      { q:'Q3 2025', node:'Import/Border', text:'Sunflower oil — origin documentation inconsistent with shipping records; possible transhipment.' },
       { q:'Q3 2025', node:'Farm/Plantation', text:'Palm oil declared certified sustainable — supply chain documentation could not verify the certified source.' },
       { q:'Q2 2025', node:'Blending', text:'Avocado oil — composition indicates substantial addition of a cheaper vegetable oil.' }
     ]
@@ -1980,19 +1980,19 @@ var SC_KEYS = { bakery_cereals: 'cereals', nuts_snacks: 'nuts' };
 function scKey(k) { return SC_KEYS[k] || k; }
 
 var SUPPLY_CHAIN = {
-  poultry:       ['Rearing Farm','Slaughter & Evisceration','Cutting & Deboning','Processing & Manufacture','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
-  red_meat:      ['Farm/Ranch','Slaughter & Dressing','Cutting & Deboning','Processing & Manufacture','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
-  fish_shellfish:['Farm/Fishing Vessel','Landing & Grading','Slaughter & Gutting','Filleting & Processing','Smoking/Further Processing','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
+  poultry:       ['Rearing Farm','Slaughter & Evisceration','Cutting & Deboning','Processing & Manufacture','Packaging & Labelling','Import/Border','Cold Storage','Distribution','Retail/Food Service','Consumer'],
+  red_meat:      ['Farm/Ranch','Slaughter & Dressing','Cutting & Deboning','Processing & Manufacture','Packaging & Labelling','Import/Border','Cold Storage','Distribution','Retail/Food Service','Consumer'],
+  fish_shellfish:['Farm/Fishing Vessel','Landing & Grading','Slaughter & Gutting','Filleting & Processing','Smoking/Further Processing','Packaging & Labelling','Import/Border','Cold Storage','Distribution','Retail/Food Service','Consumer'],
   honey:         ['Beekeeper / Apiary','Collection, Collation & Transport','Bulk Processor','Exporter','Shipping & Border','Blender / Packer','Distribution','Customer'],
-  herbs_spices:  ['Agronomic Input Suppliers','Growing Region','Harvest & Drying','Milling & Blending','Packaging & Labelling','Import/Border','Warehouse','Distribution','Retail','Consumer'],
-  cereals:       ['Arable Farm','Harvest & Storage','Grain Store','Milling & Processing','Packaging & Labelling','Import/Border','Distribution','Retail','Consumer'],
-  fruit_veg:     ['Farm/Orchard & Harvest','Collection & Collation','Packing & Processing','Cold Storage','Import/Border','Distribution','Retail','Consumer'],
-  dairy:         ['Dairy Farm','Collection & Transport','Pasteurisation/UHT','Separation & Processing','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail','Consumer'],
-  cocoa:         ['Farm/Plantation','Fermentation & Drying','Export Collection','Import/Border','Grinding & Processing','Chocolate Manufacture','Packaging & Labelling','Warehouse','Distribution','Retail','Consumer'],
-  nuts:          ['Orchard','Harvest, Hulling & Drying','Processing & Sorting','Packaging & Labelling','Import/Border','Warehouse','Distribution','Retail','Consumer'],
+  herbs_spices:  ['Agronomic Input Suppliers','Growing Region','Harvest & Drying','Milling & Blending','Packaging & Labelling','Import/Border','Warehouse','Distribution','Retail/Food Service','Consumer'],
+  cereals:       ['Arable Farm','Harvest & Grain Store','Milling & Processing','Packaging & Labelling','Import/Border','Distribution','Retail/Food Service','Consumer'],
+  fruit_veg:     ['Farm/Orchard & Harvest','Collection & Collation','Packing & Processing','Cold Storage','Import/Border','Distribution','Retail/Food Service','Consumer'],
+  dairy:         ['Dairy Farm','Collection & Transport','Pasteurisation/UHT','Separation & Processing','Packaging & Labelling','Import/Border','Cold Storage','Distribution','Retail/Food Service','Consumer'],
+  cocoa:         ['Farm/Plantation','Fermentation & Drying','Export Collection','Import/Border','Grinding & Processing','Chocolate Manufacture','Packaging & Labelling','Warehouse','Distribution','Retail/Food Service','Consumer'],
+  nuts:          ['Orchard','Harvest, Hulling & Drying','Processing & Sorting','Packaging & Labelling','Import/Border','Warehouse','Distribution','Retail/Food Service','Consumer'],
   eggs:          ['Laying Farm','Grading & Washing','Packing','Import/Border','Warehouse','Distribution','Retail/Food Service','Consumer'],
   drinks:        ['Ingredient Supply','Processing & Blending','Bottling','Packaging & Labelling','Warehouse','Distribution','Import/Border','Retail','Consumer'],
-  oils:          ['Farm/Plantation','Harvesting','Milling & Pressing','Refining & Grading','Blending','Bottling & Labelling','Bulk Storage','Import & Trade','Retail/Food Service','Consumer']
+  oils:          ['Farm/Plantation','Harvesting','Milling & Pressing','Refining & Grading','Blending','Bottling & Labelling','Bulk Storage','Import/Border','Retail/Food Service','Consumer']
 };
 
 // Broad zones used to place RASFF alerts on the map. One number per stage above, in the same order:
@@ -2009,7 +2009,7 @@ var SUPPLY_ZONES = {
   fish_shellfish: [0,0,1,1,1,1,2,2,2,3,3],
   honey:          [0,0,1,2,2,3,4,5],
   herbs_spices:   [0,0,0,1,1,2,2,2,3,3],
-  cereals:        [0,0,0,1,1,2,2,3,3],
+  cereals:        [0,0,1,1,2,2,3,3],
   fruit_veg:      [0,0,1,2,2,2,3,3],
   dairy:          [0,0,1,1,1,2,2,2,3,3],
   cocoa:          [0,0,0,0,1,1,1,2,2,3,3],
@@ -2837,7 +2837,8 @@ function parseRasffCsv(txt) {
     var RENAMED_STAGES = {
       'Farm/Orchard': 'Farm/Orchard & Harvest', 'Harvest': 'Farm/Orchard & Harvest',
       'Cutting & Processing': 'Cutting & Deboning', 'Further Processing': 'Processing & Manufacture',
-      'Harvest & Hulling': 'Harvest, Hulling & Drying', 'Drying': 'Harvest, Hulling & Drying'
+      'Harvest & Hulling': 'Harvest, Hulling & Drying',
+      'Retail': 'Retail/Food Service', 'Import & Trade': 'Import/Border', 'Harvest & Storage': 'Harvest & Grain Store', 'Grain Store': 'Harvest & Grain Store', 'Drying': 'Harvest, Hulling & Drying'
     };
 
     var out = rows.map(function(r) {
