@@ -1505,8 +1505,8 @@ var VULNERABILITIES_DEFAULT = [];
 // From the whole-chain box on each TSG conference supply chain map (mitigations not included).
 var WHOLE_CHAIN = {
   poultry: {
-    vulnerabilities: ['Extreme weather / heat', 'Welfare standards compliance, e.g. free-range, organic', 'Documentation, e.g. ABP, agents and brokers, country of origin claims', 'Artificial intelligence (document fraud)', 'Confidence in testing for origin and chemicals, and in reference databases', 'Complex supply chains', 'Meat content and nitrogen factors', 'Further processing recipe changes'],
-    risks: ['False welfare or origin claims', 'Substitution (breed)', 'Certification fraud']
+    vulnerabilities: ['Extreme weather / heat', 'Welfare standards compliance, e.g. free-range, organic', 'Documentation, e.g. ABP, agents and brokers, country of origin claims', 'Artificial intelligence', 'Confidence in testing for origin and chemicals, and in reference databases', 'Complex supply chains', 'Meat content and nitrogen factors', 'Further processing recipe changes', 'Labour (skills and availability)', 'Overhead costs', 'Certification', 'Claims (e.g. farm assurance, GM / soy, fresh or previously frozen, animal welfare, organic, production method, nutrition, species / breed, country of origin)'],
+    risks: ['Deliberate adulteration', 'Document fraud', 'False welfare or origin claims', 'Substitution (breed)', 'Certification fraud']
   },
   red_meat: {
     vulnerabilities: ['Decline in herd sizes', 'Energy prices', 'Fertiliser', 'Price', 'Animal disease', 'Vet residues', 'AMR', 'Climate / water availability', 'Extreme weather', 'Crop yield failure (palm, soy)', 'GM', 'Carbon / greenwashing', 'Legislative framework and agricultural diversity', 'SPS', 'Current and future trade deals', 'Political instability', 'Labour (skills and availability)', 'Overhead costs', 'Artificial intelligence', 'Certification', 'Claims (e.g. farm assurance, GM / soy, fresh or previously frozen, animal welfare, organic, production method, nutrition, species / breed, country of origin)', 'SMEs', 'Difficulty verifying welfare and some origins by testing'],
@@ -1551,9 +1551,7 @@ var WHOLE_CHAIN = {
 };
 var KNOWN_VULNERABILITIES = {
   poultry: {
-    'Rearing Farm':             ['Feed supply chain (soy, vitamins, fortification)', 'Disease control measures (e.g. housing orders) affecting supply', 'Extreme weather and heat'],
-    'Cutting & Processing':     ['Labour shortages and cost pressure'],
-    'Import/Border':            ['Low-cost imports (e.g. South America)']
+    'Rearing Farm':             ['Feed supply chain (soy, vitamins, fortification)', 'Disease control measures (e.g. housing orders) affecting supply', 'Climate, drought, extreme weather and heat', 'AMR']
   },
   red_meat: {
     'Farm/Ranch':               ['Declining herd and flock sizes', 'Climate, drought and water availability', 'Animal disease and movement restrictions', 'Feed crop failures (e.g. soy, palm)', 'AMR'],
@@ -1621,12 +1619,14 @@ var KNOWN_VULNERABILITIES = {
 var KNOWN_RISKS = {
   // Known risks: food fraud risks from the TSG conference maps (members' own notes, placed at the closest stage). Honey: TSG Honey guide.
   poultry: {
-    'Rearing Farm':             [{t:'Feed dilution or substitution'},{t:'False welfare claims (e.g. stocking density)'}],
+    'Rearing Farm':             [{t:'Feed dilution or substitution'},{t:'Production method claims'},{t:'Theft'},{t:'Heavy metals'},{t:'Vet residues'}],
     'Slaughter & Evisceration': [{t:'Animal by-products (ABP) and waste diverted into the food chain'}],
-    'Cutting & Processing':     [{t:'Mechanically separated or recovered meat (MSM/MRM)'}],
-    'Further Processing':       [{t:'Meat content and recipe changes'}],
+    'Processing & Manufacture': [{t:'Mechanically separated or recovered meat (MSM/MRM)'},{t:'Meat content and recipe changes'},{t:'Species substitution'},{t:'Water addition'}],
     'Packaging & Labelling':    [{t:'False welfare or origin claims (e.g. free-range, organic)'},{t:'Breed substitution'}],
-    'Import/Border':            [{t:'Falsified export documents'}],
+    'Cold Storage':             [{t:'Theft'},{t:'Mislabelling'}],
+    'Distribution':             [{t:'Theft'}],
+    'Import/Border':            [{t:'Country of origin misrepresentation'},{t:'Falsified export documents'}],
+    'Retail/Food Service':      [{t:'Species substitution'}],
     'Consumer':                 [{t:'Consumer complaint fraud'}]
   },
   red_meat: {
@@ -1978,7 +1978,7 @@ var SC_KEYS = { bakery_cereals: 'cereals', nuts_snacks: 'nuts' };
 function scKey(k) { return SC_KEYS[k] || k; }
 
 var SUPPLY_CHAIN = {
-  poultry:       ['Rearing Farm','Slaughter & Evisceration','Cutting & Processing','Further Processing','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
+  poultry:       ['Rearing Farm','Slaughter & Evisceration','Cutting & Deboning','Processing & Manufacture','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
   red_meat:      ['Farm/Ranch','Slaughter & Dressing','Cutting & Deboning','Processing & Manufacture','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
   fish_shellfish:['Farm/Fishing Vessel','Landing & Grading','Slaughter & Gutting','Filleting & Processing','Smoking/Further Processing','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail/Food Service','Consumer'],
   honey:         ['Beekeeper / Apiary','Collection, Collation & Transport','Bulk Processor','Exporter','Shipping & Border','Blender / Packer','Distribution','Customer'],
@@ -2834,6 +2834,7 @@ function parseRasffCsv(txt) {
     // Stages renamed or merged after the TSG workshop (Nov 2026): older sheet rows still point to the old names
     var RENAMED_STAGES = {
       'Farm/Orchard': 'Farm/Orchard & Harvest', 'Harvest': 'Farm/Orchard & Harvest',
+      'Cutting & Processing': 'Cutting & Deboning', 'Further Processing': 'Processing & Manufacture',
       'Harvest & Hulling': 'Harvest, Hulling & Drying', 'Drying': 'Harvest, Hulling & Drying'
     };
 
