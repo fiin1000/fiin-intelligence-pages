@@ -688,6 +688,15 @@ tr:hover td { background: var(--mist); }
 .sc-map-many .sc-zone { min-width: 0; }
 .sc-map-many .sc-zone-counts { margin-left: 0; }
 .sc-unplaced-link { margin-top: 8px; }
+/* RASFF buttons beside the supply chain map */
+.sc-map-row { display:flex; align-items:flex-start; gap:16px; }
+.sc-map-row > .sc-map { flex:0 1 auto; min-width:0; }
+.sc-map-row > .rasff-link-row { flex:0 0 190px; margin:14px 0 0 auto; flex-direction:column; gap:8px; }
+.sc-map-row .rasff-box { flex:none; padding:8px 11px; border-radius:7px; }
+.sc-map-row .rasff-box-title { font-size:12px; line-height:1.3; }
+.sc-map-row .rasff-box-sub { font-size:10.5px; }
+.sc-map-row .freq-tag.on-btn { margin:3px 0 0; }
+@media (max-width: 1100px) { .sc-map-row { flex-wrap:wrap; } .sc-map-row > .rasff-link-row { flex:1 1 100%; flex-direction:row; margin:6px 0 0; } .sc-map-row .rasff-box { flex:1; } }
 /* How often each section updates (members asked during the workshop) */
 .freq-tag { display:inline-block; font-family:'DM Mono',monospace; font-size:10px; font-weight:500; letter-spacing:.02em; text-transform:none; color:var(--pine); background:#fff; border:1px solid var(--border); border-radius:10px; padding:1px 8px; white-space:nowrap; vertical-align:1px; }
 .freq-tag.on-dark { color:var(--lime); background:transparent; border-color:rgba(255,255,255,.25); }
@@ -1149,7 +1158,20 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
     <div class="card sc-section" id="sc-section" style="margin-top:14px">
       <div class="sc-title">Supply chain map — where alerts and authenticity concerns most likely relate <span class="freq-tag" title="How often this section is updated">↻ RASFF daily · fiin data quarterly · risks reviewed by the TSG</span></div>
       <div class="sc-sub" id="sc-sub"></div>
+      <div class="sc-map-row">
       <div class="sc-map" id="sc-map"></div>
+        <!-- RASFF: link to the alerts already collected for this category -->
+        <div class="rasff-link-row" id="rasff-link-row">
+          <span id="rasff-com" style="display:none"></span>
+          <button type="button" class="rasff-box rasff-open" id="rasff-open" title="Alerts for this category from the last 6 months, filtered to those relating to potential fraud">
+            <span class="rasff-box-title">RASFF alerts relating to fraud</span><span class="freq-tag on-btn" title="How often this section is updated">↻ Updated daily</span><span class="rasff-box-sub" id="rasff-open-sub">Loading…</span>
+          </button>
+          <a class="rasff-box rasff-box-ext" id="rasff-portal-link" href="https://webgate.ec.europa.eu/rasff-window/screen/search" target="_blank" rel="noopener" title="Every RASFF notification, on the European Commission’s site">
+            <span class="rasff-box-title">Whole RASFF Window ↗</span><span class="rasff-box-sub">All alerts, unfiltered</span>
+          </a>
+          <span style="display:none"><span id="rasff-badge"></span></span>
+        </div>
+      </div>
       <div class="sc-unplaced-link" id="sc-unplaced" style="display:none"></div>
       <div class="sc-whole" id="sc-whole"></div>
       <dialog class="rasff-dialog" id="zone-dialog" aria-labelledby="zone-title">
@@ -1179,17 +1201,6 @@ a.intel-headline:hover { color: var(--pine); text-decoration: underline; }
         <span class="sc-leg-item"><span class="sc-leg-dot" style="background:#1A5FA5"></span>fiin authenticity concern (example data)</span>
       </div>
 
-    </div>
-    <!-- RASFF: link to the alerts already collected for this category -->
-    <div class="rasff-link-row" id="rasff-link-row">
-      <span id="rasff-com" style="display:none"></span>
-      <button type="button" class="rasff-box rasff-open" id="rasff-open" title="Alerts for this category from the last 6 months, filtered to those relating to potential fraud">
-        <span class="rasff-box-title">RASFF alerts relating to fraud<span class="freq-tag on-btn" title="How often this section is updated">↻ Updated daily</span></span><span class="rasff-box-sub" id="rasff-open-sub">Loading…</span>
-      </button>
-      <a class="rasff-box rasff-box-ext" id="rasff-portal-link" href="https://webgate.ec.europa.eu/rasff-window/screen/search" target="_blank" rel="noopener" title="Every RASFF notification, on the European Commission’s site">
-        <span class="rasff-box-title">Whole RASFF Window ↗</span><span class="rasff-box-sub">All alerts, unfiltered</span>
-      </a>
-      <span style="display:none"><span id="rasff-badge"></span></span>
     </div>
     <dialog class="rasff-dialog" id="rasff-dialog" aria-labelledby="rasff-dialog-title">
       <div class="rasff-list-head">
