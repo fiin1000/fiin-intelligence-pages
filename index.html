@@ -1991,11 +1991,10 @@ var SUPPLY_CHAIN = {
 // Broad zones used to place RASFF alerts on the map. One number per stage above, in the same order:
 // 0 = first zone, 1 = second… Labels below; a category can have its own labels.
 var SUPPLY_ZONE_LABELS = {
-  _default: ['Production', 'Processing & packing', 'Import, storage & distribution', 'Retail & consumer'],
-  fruit_veg: ['Production', 'Processing & packing', 'Import, storage & distribution', 'Customer'],
-  cocoa:    ['Production & import', 'Processing & packing', 'Storage & distribution', 'Retail & consumer'],
+  _default: ['Production', 'Processing & packing', 'Import, storage & distribution', 'Customer'],
+  cocoa:    ['Production & import', 'Processing & packing', 'Storage & distribution', 'Customer'],
   // Honey is processed in bulk before export and blended/packed after import, so two zones appear twice
-  honey:    ['Production', 'Processing & packing', 'Import, storage & distribution', 'Processing & packing', 'Import, storage & distribution', 'Retail & consumer']
+  honey:    ['Production', 'Processing & packing', 'Import, storage & distribution', 'Processing & packing', 'Import, storage & distribution', 'Customer']
 };
 var SUPPLY_ZONES = {
   poultry:        [0,1,1,1,1,2,2,2,3,3],
