@@ -1588,7 +1588,8 @@ var KNOWN_VULNERABILITIES = {
   nuts: {
     'Orchard':                  ['Supply shortages or oversupply from annual harvests and crop failures', 'Pests, disease, water availability and weather', 'Natural disasters', 'Country of origin pressures and shifting sourcing'],
     'Processing & Sorting':     ['Processes such as heat treatment moved down the chain with less visibility', 'Cost reduction pressure (e.g. heat treatment)', 'Rising demand for powders and pastes'],
-    'Distribution':             ['Transport disruption from natural disasters (e.g. flooding)'],
+    'Warehouse':                ['Security', 'Poor conditions'],
+    'Distribution':             ['Transport disruption from natural disasters (e.g. flooding)', 'Security', 'Poor conditions'],
     'Retail':                   ['Detection limits in finished products (e.g. origin of pistachio in a chocolate bar)', 'Sudden demand from viral trends']
   },
   eggs: {
@@ -1669,8 +1670,12 @@ var KNOWN_RISKS = {
     'Import/Border':            [{t:'Document fraud and cross-border activity'}]
   },
   nuts: {
-    'Processing & Sorting':     [{t:'Adulteration or re-use of waste'},{t:'Adulteration of powders and pastes, including new adulterants'}],
-    'Import/Border':            [{t:'Document fraud (certification, origin, grading)'},{t:'Falsified test results (pesticides, authenticity, heat treatment)'}]
+    'Orchard':                  [{t:'Claims / standards'}],
+    'Harvest, Hulling & Drying': [{t:'Quality'},{t:'Dilution or bulking'},{t:'Substitution (extension)'}],
+    'Processing & Sorting':     [{t:'Adulteration or re-use of waste'},{t:'Adulteration of powders and pastes, including new adulterants'},{t:'Extension (whole, piece, powder, paste)'}],
+    'Packaging & Labelling':    [{t:'Document or labelling fraud'},{t:'Origin claims'},{t:'Upgrading'}],
+    'Import/Border':            [{t:'Document fraud (certification, origin, grading)'},{t:'Falsified test results (pesticides, authenticity, heat treatment)'}],
+    'Consumer':                 [{t:'Allergens'},{t:'Food safety'}]
   },
   eggs: {
     'Laying Farm':              [{t:'Use of non-compliant feed'},{t:'Compliance with free-range certification'},{t:'Correct vaccination'},{t:'Good agricultural practice'}],
@@ -1968,7 +1973,7 @@ var SUPPLY_CHAIN = {
   fruit_veg:     ['Farm/Orchard','Harvest','Packing & Processing','Cold Storage','Import/Border','Distribution','Retail','Consumer'],
   dairy:         ['Dairy Farm','Collection & Transport','Pasteurisation/UHT','Separation & Processing','Packaging & Labelling','Cold Storage','Distribution','Import/Border','Retail','Consumer'],
   cocoa:         ['Farm/Plantation','Fermentation & Drying','Export Collection','Import/Border','Grinding & Processing','Chocolate Manufacture','Packaging & Labelling','Warehouse','Distribution','Retail','Consumer'],
-  nuts:          ['Orchard','Harvest & Hulling','Drying','Processing & Sorting','Packaging & Labelling','Import/Border','Warehouse','Distribution','Retail','Consumer'],
+  nuts:          ['Orchard','Harvest, Hulling & Drying','Processing & Sorting','Packaging & Labelling','Import/Border','Warehouse','Distribution','Retail','Consumer'],
   eggs:          ['Laying Farm','Grading & Washing','Packing','Import/Border','Warehouse','Distribution','Retail/Food Service','Consumer'],
   drinks:        ['Ingredient Supply','Processing & Blending','Bottling','Packaging & Labelling','Warehouse','Distribution','Import/Border','Retail','Consumer'],
   oils:          ['Farm/Plantation','Harvesting','Milling & Pressing','Refining & Grading','Blending','Bottling & Labelling','Bulk Storage','Import & Trade','Retail/Food Service','Consumer']
@@ -1992,7 +1997,7 @@ var SUPPLY_ZONES = {
   fruit_veg:      [0,0,1,2,2,2,3,3],
   dairy:          [0,0,1,1,1,2,2,2,3,3],
   cocoa:          [0,0,0,0,1,1,1,2,2,3,3],
-  nuts:           [0,0,0,1,1,2,2,2,3,3],
+  nuts:           [0,0,1,1,2,2,2,3,3],
   eggs:           [0,1,1,2,2,2,3,3],
   drinks:         [0,1,1,1,2,2,2,3,3],
   oils:           [0,0,1,1,1,1,2,2,3,3]
